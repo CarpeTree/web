@@ -1,0 +1,76 @@
+/* Carpe Tree'em Website Styling */
+
+:root {
+    --deep-forest-green: #2C5F2D;
+    --warm-earth-brown: #8B5E3B;
+    --soft-bark-gray: #A9A9A9;
+    --muted-golden-amber: #D4A373;
+    --canopy-mist-blue: #6C8EBF;
+    --text-color: #333333;
+    --background-color: #F5F5F5;
+    --accent-color: var(--muted-golden-amber);
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--deep-forest-green);
+  }
+  
+  button {
+    background-color: var(--warm-earth-brown);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+  }
+  
+  button:hover {
+    background-color: var(--deep-forest-green);
+  }
+  
+  nav {
+    background-color: var(--canopy-mist-blue);
+    padding: 10px;
+  }
+  
+  nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+  }
+  
+  a {
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  .card {
+    background-color: white;
+    border: 1px solid var(--soft-bark-gray);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  footer {
+    background-color: var(--deep-forest-green);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
