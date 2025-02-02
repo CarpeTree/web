@@ -16,22 +16,29 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+            box-sizing: border-box;
         }
 
         .logo {
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex: 1;  /* Take up equal space */
         }
 
         .logo-img {
             height: 50px;
             width: auto;
+            display: block;
+            margin: 0 auto;
         }
 
         .nav-links {
             display: flex;
             gap: 2rem;
             align-items: center;
+            flex: 2;  /* Take up twice the space of logo */
+            justify-content: center;
         }
 
         .dropdown {
@@ -68,13 +75,16 @@
             background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/hero.png');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: white;
-            margin-top: 70px; /* Add margin to account for fixed nav */
+            margin-top: 70px;
+            position: relative;
+            overflow: hidden;
         }
 
         .hero-content {
@@ -164,6 +174,12 @@
             margin: 10px 0;
             border: none;
             border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                background-attachment: scroll;
+            }
         }
     </style>
 </head>
