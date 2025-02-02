@@ -3,252 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request a Quote - Carpe Tree'em</title>
+    <title>Carpe Tree'em - Professional Tree Care Services</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        /* Color Variables for Brand Consistency */
-        :root {
-            --primary-color: #4A7023;  /* Forest Green */
-            --secondary-color: #8F9779; /* Earthy Gray-Green */
-            --accent-color: #C4A484; /* Warm Beige */
-            --text-color: #2F3E1F; /* Deep Earthy Green */
-            --background-color: #F5F3EB; /* Soft Off-White */
-        }
-
-        /* General Page Styling */
-        body {
-            background-color: var(--background-color);
+        nav {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Popup Background Overlay */
-        .overlay {
+            padding: 1rem 2rem;
+            background-color: white;
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .hero {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/hero.png');
+            background-size: cover;
+            background-position: center;
+            height: 80vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
-            visibility: visible;
-            opacity: 1;
+            text-align: center;
+            color: white;
+            margin-top: 70px; /* Add margin to account for fixed nav */
         }
 
-        /* Popup Container */
-        .popup {
-            background: var(--background-color);
+        .hero-content {
+            max-width: 800px;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
-            width: 90%;
-            position: relative;
-            border: 2px solid var(--primary-color);
         }
 
-        /* Close Button */
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            color: var(--text-color);
-            background: none;
-            border: none;
-            cursor: pointer;
+        .hero h1 {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 20px;
         }
 
-        .close-btn:hover {
-            color: black;
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
         }
 
-        /* Fade-In Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .cta-button {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            margin: 10px;
         }
 
-        /* Fade-Out Animation */
-        @keyframes fadeOut {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0; transform: scale(0.95); }
-        }
-
-        /* Hidden State */
-        .hidden {
-            animation: fadeOut 0.3s ease-in;
-            visibility: hidden;
-            opacity: 0;
-        }
-
-        /* Header Section */
-        .popup h2 {
+        .services {
+            padding: 60px 20px;
             text-align: center;
-            color: var(--text-color);
-            font-size: 22px;
         }
 
-        /* Embedded Video */
-        .video-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        iframe {
-            border-radius: 10px;
-            border: 2px solid var(--secondary-color);
-        }
-
-        /* Consultation Options Grid */
-        .consultation-options {
+        .services-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
         }
 
-        @media (min-width: 600px) {
-            .consultation-options {
-                grid-template-columns: 1fr 1fr;
-            }
+
+        .service-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        /* Consultation Boxes */
-        .consultation-box {
-            padding: 15px;
-            border: 2px solid var(--primary-color);
-            border-radius: 8px;
-            background: var(--accent-color);
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .testimonials {
+            background-color: var(--background-color);
+            padding: 60px 20px;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-section {
+            padding: 60px 20px;
             text-align: center;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .consultation-box h3 {
-            color: var(--text-color);
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
-        .consultation-box ul {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: var(--text-color);
-        }
-
-        .consultation-box li {
-            margin-bottom: 5px;
-        }
-
-        /* Buttons */
-        .btn {
-            background: var(--primary-color);
+            background-color: var(--deep-forest-green);
             color: white;
-            padding: 8px 12px;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
         }
-
-        .btn:hover {
-            background: var(--secondary-color);
-        }
-
-        /* Open Button */
-        #openPopup {
-            background: var(--primary-color);
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        #openPopup:hover {
-            background: var(--secondary-color);
-        }
-
     </style>
 </head>
 <body>
-
-    <!-- Open Popup Button -->
-    <button id="openPopup">Request a Quote</button>
-
-    <!-- Popup Overlay -->
-    <div id="quotePopup" class="overlay hidden" tabindex="-1">
-        <div class="popup">
-            
-            <!-- Close Button -->
-            <button id="closePopup" class="close-btn" aria-label="Close popup">&times;</button>
-            
-            <!-- Header Section -->
-            <h2>🌳 REQUEST A TREE CARE CONSULTATION</h2>
-            
-            <!-- Embedded Video -->
-            <div class="video-container">
-                <iframe width="100%" height="200" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" allowfullscreen></iframe>
+    <nav>
+        <div class="logo">
+            <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-img">
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about/">About</a>
+            <div class="dropdown">
+                <a href="/tree-service/">Services</a>
+                <div class="dropdown-content">
+                    <a href="/tree-service/#tree-thinning">Tree Thinning</a>
+                    <a href="/tree-service/#hazard-pruning">Hazard Pruning</a>
+                    <a href="/tree-removal/">Tree Removal</a>
+                    <a href="/tree-service/#stump-grinding">Stump Grinding</a>
+                    <a href="/tree-service/#tree-planting">Tree Planting</a>
+                    <a href="/tree-service/#dynamic-cabling">Dynamic Cabling</a>
+                    <a href="/tree-service/#tree-risk-assessment">Tree Risk Assessment</a>
+                    <a href="/tree-service/#canopy-elevation">Canopy Elevation</a>
+                    <a href="/tree-service/#tree-milling">Tree Milling</a>
+                </div>
             </div>
-            
-            <!-- Consultation Options -->
-            <div class="consultation-options">
-                
-                <!-- Virtual Consultation -->
-                <div class="consultation-box">
-                    <h3>Virtual Tree Consultation</h3>
-                    <ul>
-                        <li>🌳 Save time with an expert video assessment.</li>
-                        <li>🌳 Ideal for minor pruning or health concerns.</li>
-                        <li>🌳 Get unbiased advice without upselling.</li>
-                    </ul>
-                    <button class="btn">BOOK NOW</button>
+            <a href="/blog/">Learning Hub</a>
+            <div class="dropdown">
+                <a href="/request-quote/">Request Quote</a>
+                <div class="dropdown-content">
+                    <a href="/video-quote/">Video Assessment</a>
+                    <a href="/request-quote/">Onsite Assessment</a>
                 </div>
-                
-                <!-- Onsite Consultation -->
-                <div class="consultation-box">
-                    <h3>Onsite Tree Consultation</h3>
-                    <ul>
-                        <li>🌳 Full tree health and risk assessment.</li>
-                        <li>🌳 Best for complex or large-scale projects.</li>
-                        <li>🌳 Science-backed recommendations for longevity.</li>
-                    </ul>
-                    <button class="btn">BOOK NOW</button>
-                </div>
+            </div>
+            <a href="/contact/">Contact</a>
+            <a href="/careers/">Careers</a>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Expert Tree Care Services</h1>
+            <p>Professional arborists dedicated to the health and beauty of your trees</p>
+            <button class="cta-button">Get a Free Quote</button>
+            <button class="cta-button">Learn More</button>
+        </div>
+    </section>
+
+    <section class="services" id="services">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Tree Pruning</h3>
+                <p>Professional pruning to maintain tree health and appearance</p>
+            </div>
+            <div class="service-card">
+                <h3>Tree Removal</h3>
+                <p>Safe and efficient removal of damaged or unwanted trees</p>
+            </div>
+            <div class="service-card">
+                <h3>Tree Health Care</h3>
+                <p>Comprehensive care to ensure long-term tree vitality</p>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+        <h2>What Our Clients Say</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p>"Outstanding service! They took great care of our old oak tree."</p>
+                <h4>- John Smith</h4>
+            </div>
+            <div class="testimonial-card">
+                <p>"Professional, knowledgeable, and efficient team. Highly recommend!"</p>
+                <h4>- Sarah Johnson</h4>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-form">
+            <form>
+                <input type="text" placeholder="Name" required>
+                <input type="email" placeholder="Email" required>
+                <input type="tel" placeholder="Phone">
+                <textarea placeholder="Message" rows="5" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Carpe Tree'em. All rights reserved.</p>
+    </footer>
 
     <script>
-        // Function to Show Popup
-        document.getElementById('openPopup').addEventListener('click', function() {
-            const popup = document.getElementById('quotePopup');
-            popup.classList.remove('hidden');
-            popup.focus(); // Move focus to popup for accessibility
-
-            // Escape Key Closes Popup
-            popup.addEventListener('keydown', function(event) {
-                if (event.key === "Escape") {
-                    closePopup();
-                }
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = document.querySelector(this.getAttribute('href'));
+                section.scrollIntoView({ behavior: 'smooth' });
             });
         });
-
-        // Function to Hide Popup
-        function closePopup() {
-            document.getElementById('quotePopup').classList.add('hidden');
-        }
-
-        // Close Button Event
-        document.getElementById('closePopup').addEventListener('click', closePopup);
     </script>
-
 </body>
 </html>
