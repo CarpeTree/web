@@ -693,6 +693,11 @@
   <!-- Update the navigation menu -->
   <nav>
     <div class="nav-container">
+      <button class="menu-toggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="philosophy.html">Philosophy</a>
@@ -1029,5 +1034,32 @@
         </div>
     </div>
   </div>
+
+  <script>
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      
+      menuToggle.addEventListener('click', function() {
+        navLinks.classList.toggle('active');
+        
+        // Animate hamburger to X
+        this.classList.toggle('active');
+        
+        // Prevent body scrolling when menu is open
+        document.body.classList.toggle('menu-open');
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+          navLinks.classList.remove('active');
+          menuToggle.classList.remove('active');
+          document.body.classList.remove('menu-open');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
