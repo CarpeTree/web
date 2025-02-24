@@ -38,15 +38,67 @@
   }
   
   nav {
-    background-color: var(--canopy-mist-blue);
-    padding: 10px;
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--deep-forest-green);
+    position: fixed;
+    width: 100%;
+    top: 30px;
+    z-index: 1000;
+    padding: 0;
+    text-align: center;
   }
   
-  nav a {
-    color: white;
-    text-decoration: none;
-    margin: 0 15px;
+  .nav-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  
+  .nav-logo {
+    height: 40px;
+    padding: 5px 0;
+  }
+  
+  .nav-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 45px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  
+  .nav-links a {
+    background: var(--background-color);
+    color: var(--deep-forest-green);
+    padding: 0 25px;
+    border-left: 2px solid var(--deep-forest-green);
+    border-right: none;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
     font-weight: bold;
+    letter-spacing: 1px;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nav-links a:last-child {
+    border-right: 2px solid var(--deep-forest-green);
+  }
+  
+  .nav-links a:hover {
+    background: var(--deep-forest-green);
+    color: var(--background-color);
+    transform: translateY(-2px);
+    text-decoration: none;
   }
   
   a {
@@ -72,5 +124,464 @@
     text-align: center;
     padding: 20px;
     margin-top: 20px;
+  }
+  
+  /* Persistent contact header */
+  .contact-header {
+    background-color: var(--deep-forest-green);
+    color: var(--background-color);
+    text-align: center;
+    padding: 5px 20px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1001;
+    font-size: 0.9em;
+    box-sizing: border-box;
+  }
+  
+  .contact-header a {
+    color: #F5F5F5;
+    text-decoration: none;
+    margin: 0 15px;
+    transition: color 0.3s;
+  }
+  
+  .contact-header a:hover {
+    color: var(--muted-golden-amber);
+  }
+  
+  /* Content spacing */
+  .content {
+    margin-top: 200px;
+    max-width: 800px;
+    margin: 200px auto 40px;
+    padding: 0 20px;
+  }
+  
+  /* Responsive design */
+  @media(max-width: 768px) {
+    .nav-container {
+      flex-direction: column;
+      padding: 10px;
+    }
+    
+    .nav-logo {
+      margin: 10px 0;
+    }
+    
+    .nav-links {
+      width: 100%;
+      flex-direction: column;
+    }
+    
+    .content {
+      margin-top: 250px;
+    }
+  }
+  
+  /* Modal/Popup Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 2000; /* Higher than nav */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow-y: auto;
+  }
+  
+  .modal-content {
+    background-color: var(--background-color);
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    border-radius: 8px;
+  }
+  
+  .close-button {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--deep-forest-green);
+    cursor: pointer;
+  }
+  
+  .close-button:hover {
+    color: var(--warm-earth-brown);
+  }
+  
+  /* Quote Button Style */
+  .quote-button {
+    background-color: var(--deep-forest-green);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .quote-button:hover {
+    background-color: var(--warm-earth-brown);
+  }
+  
+  /* Ensure form styles work in modal */
+  .modal .form-container {
+    margin: 20px auto;
+    max-width: 600px;
+  }
+  
+  /* Error message styling */
+  .error-message {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: 4px;
+    display: none;
+  }
+  
+  .general-error {
+    background-color: #ffebee;
+    border: 1px solid #d32f2f;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: block;
+  }
+  
+  /* Form validation visual feedback */
+  .form-group input.error,
+  .form-group select.error {
+    border-color: #d32f2f;
+  }
+  
+  /* Progress bar styling */
+  .progress-bar {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 4px;
+    margin-top: 8px;
+  }
+  
+  .progress {
+    background-color: var(--deep-forest-green);
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease;
+  }
+  
+  /* Services Page Styles */
+  .services-hero {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                url('images/trees-bg.jpg') center/cover;
+    margin-bottom: 2rem;
+  }
+  
+  .services-hero h1 {
+    font-size: 2.5rem;
+    color: #2c5530;
+    margin-bottom: 1rem;
+  }
+  
+  .services-hero p {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  .service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .service-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .service-card h3 {
+    color: #2c5530;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .service-card p {
+    color: #555;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+  
+  .service-link {
+    display: inline-block;
+    color: #2c5530;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .service-link:hover {
+    color: #1a331d;
+  }
+  
+  .cta-section {
+    background-color: #f5f5f5;
+    text-align: center;
+    padding: 4rem 2rem;
+    margin-top: 3rem;
+  }
+  
+  .cta-section h2 {
+    color: #2c5530;
+    margin-bottom: 1rem;
+  }
+  
+  .cta-button {
+    display: inline-block;
+    background-color: #2c5530;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 1.5rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: #1a331d;
+  }
+  
+  /* Individual Service Page Styles */
+  .service-header {
+    background-color: #f5f5f5;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .service-header h1 {
+    color: #2c5530;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .service-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .service-features {
+    margin: 3rem 0;
+  }
+  
+  .service-features h2 {
+    color: #2c5530;
+    margin-bottom: 1.5rem;
+  }
+  
+  .feature-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .feature-list li {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+    position: relative;
+  }
+  
+  .feature-list li::before {
+    content: "•";
+    color: #2c5530;
+    position: absolute;
+    left: 0;
+    font-size: 1.5rem;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .service-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+    
+    .services-hero {
+      padding: 2rem 1rem;
+    }
+    
+    .services-hero h1 {
+      font-size: 2rem;
+    }
+    
+    .service-card {
+      padding: 1.5rem;
+    }
+  }
+  
+  /* Emergency Alert Styles */
+  .emergency-alert {
+    background-color: #fff3cd;
+    border: 2px solid #ffeeba;
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .emergency-alert h3 {
+    color: #856404;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .emergency-alert ol {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .emergency-alert li {
+    color: #533f03;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+  
+  .emergency-alert a {
+    color: #533f03;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  .emergency-alert a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Philosophy Page Blockquote Styles */
+  .philosophy-section blockquote {
+    margin: 2rem 0;
+    padding: 1.5rem 2rem;
+    background: rgba(44, 95, 45, 0.05);
+    border-left: 4px solid var(--deep-forest-green);
+    font-style: italic;
+  }
+  
+  .philosophy-section blockquote p {
+    margin: 0;
+    color: var(--deep-forest-green);
+    font-size: 1.2rem;
+    line-height: 1.6;
+  }
+  
+  /* Assessment Options Styles */
+  .assessment-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .assessment-card {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(44, 95, 45, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .assessment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .assessment-card h3 {
+    color: var(--deep-forest-green);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--deep-forest-green);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+  }
+  
+  .assessment-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+  
+  .assessment-card li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+    line-height: 1.4;
+  }
+  
+  .assessment-card li::before {
+    content: "•";
+    color: var(--deep-forest-green);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+  
+  .eco-note {
+    font-style: italic;
+    color: var(--deep-forest-green);
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .consultation-note {
+    background: rgba(44, 95, 45, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(44, 95, 45, 0.1);
+  }
+  
+  .consultation-note p {
+    margin: 0;
+    line-height: 1.6;
+  }
+  
+  .consultation-note strong {
+    color: var(--deep-forest-green);
+  }
+  
+  @media (max-width: 768px) {
+    .assessment-options {
+      grid-template-columns: 1fr;
+    }
+    
+    .assessment-card {
+      padding: 1.5rem;
+    }
   }
   

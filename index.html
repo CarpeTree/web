@@ -1,290 +1,1033 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carpe Tree'em - Professional Tree Care Services</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background-color: white;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-sizing: border-box;
-        }
+  <!-- Basic meta tags for character encoding and responsive viewport -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carpe Tree'em</title>
+  
+  <!-- Link to external stylesheet containing color variables and base styles -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Internal styles for specific page components -->
+  <style>
+    /* Reset default browser styles and set base typography */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      line-height: 1.6;
+    }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;  /* Take up equal space */
-        }
+    /* Base link styles */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
 
-        .logo-img {
-            height: 50px;
-            width: auto;
-            display: block;
-            margin: 0 auto;
-        }
+    /* Navigation bar styling */
+    nav {
+      /* Fixed navigation at the top of the page */
+      background-color: var(--background-color);
+      border-bottom: 1px solid var(--deep-forest-green);
+      position: fixed;
+      width: 100%;
+      top: 30px; /* Account for contact header */
+      z-index: 1000; /* Ensure nav stays above other content */
+      padding: 15px 0;
+    }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-            flex: 2;  /* Take up twice the space of logo */
-            justify-content: center;
-        }
+    /* Container for nav elements */
+    .nav-container {
+      display: flex;
+      justify-content: space-between; /* Space out logo and links */
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
 
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+    /* Logo container in nav */
+    .nav-logo {
+      height: 40px; /* Match your logo's height */
+      padding: 5px 0;
+    }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            z-index: 1;
-            border-radius: 5px;
-        }
+    /* Logo image sizing */
+    .nav-logo-img {
+      height: 50px;  /* Increased height slightly */
+      width: auto;
+      object-fit: contain;  /* Ensures image maintains aspect ratio */
+    }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+    /* Navigation links container */
+    .nav-links {
+      display: flex;
+      height: 45px;
+      align-items: center;
+    }
 
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
+    /* Navigation link styling */
+    nav a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
 
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
+    nav a:hover {
+      color: var(--deep-forest-green);
+    }
 
-        .hero {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/hero.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            margin-top: 70px;
-            position: relative;
-            overflow: hidden;
-        }
+    /* Hero section with parallax background */
+    .hero {
+      position: relative;
+      height: 80vh;
+      margin-top: 200px;  /* Increased from 90px to 200px */
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+    }
 
-        .hero-content {
-            max-width: 800px;
-            padding: 20px;
-        }
+    .hero-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        .hero h1 {
-            font-size: 3.5rem;
-            color: white;
-            margin-bottom: 20px;
-        }
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 95, 45, 0.7); /* Using deep-forest-green with opacity */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        .hero p {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-        }
+    .hero-content {
+      text-align: center;
+      max-width: 800px;
+    }
 
-        .cta-button {
-            font-size: 1.2rem;
-            padding: 15px 30px;
-            margin: 10px;
-        }
+    .hero-logos {
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
 
-        .services {
-            padding: 60px 20px;
-            text-align: center;
-        }
+    .hero-logo-main {
+      width: 600px;  /* Set width to 600px */
+      height: auto;  /* Height will adjust automatically to maintain proportions */
+      max-width: 100%;  /* Ensures logo doesn't overflow on mobile */
+    }
 
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
+    .hero-logo-secondary {
+      width: 400px;  /* Proportionally smaller than main logo */
+      height: auto;
+      max-width: 100%;  /* Ensures logo doesn't overflow on mobile */
+    }
 
+    .hero-content p {
+      color: var(--text-color);
+      font-size: 1.2em;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
 
-        .service-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
+    .cta-button, 
+    .service-button,
+    button[type="submit"] {
+        background: var(--background-color);
+        color: var(--deep-forest-green);
+        padding: 15px 30px;
+        border: 2px solid var(--deep-forest-green);
+        border-radius: 3px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
 
-        .service-card:hover {
-            transform: translateY(-5px);
-        }
+    .cta-button:hover, 
+    .service-button:hover,
+    button[type="submit"]:hover {
+        background: var(--deep-forest-green);
+        color: var(--background-color);
+        transform: translateY(-2px);
+    }
 
-        .testimonials {
-            background-color: var(--background-color);
-            padding: 60px 20px;
-        }
+    /* Update navigation links to match Tree First */
+    .nav-links a {
+      padding: 0 20px; /* Reduced padding for tighter fit */
+      border-left: 2px solid var(--deep-forest-green);
+      border-right: none;
+      box-sizing: border-box;
+    }
 
-        .testimonial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
+    .nav-links a:first-child {
+      border-left: none;
+    }
 
-        .testimonial-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    /* Content section styling */
+    .content {
+      margin-top: 200px;  /* Add margin to content sections */
+      max-width: 800px;
+      margin: 200px auto 40px;  /* First value is top margin */
+      padding: 0 20px;
+      background-color: transparent;
+    }
 
-        .contact-section {
-            padding: 60px 20px;
-            text-align: center;
-            background-color: var(--deep-forest-green);
-            color: white;
-        }
+    /* Section headings with underline */
+    .content h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--deep-forest-green);
+      display: inline-block;
+      padding-bottom: 5px;
+    }
 
-        .contact-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    /* Services section styling */
+    .services {
+      text-align: center;
+      margin: 200px auto 60px;
+      background-color: transparent;
+      max-width: 1200px;
+      padding: 0 20px;
+    }
 
-        .contact-form input,
-        .contact-form textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-        }
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+      padding: 2rem;
+      background-color: var(--background-color);
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 8px;
+    }
 
-        @media (max-width: 768px) {
-            .hero {
-                background-attachment: scroll;
-            }
-        }
-    </style>
+    .service-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: var(--deep-forest-green);
+      transition: transform 0.3s ease;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .service-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .service-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      color: var(--deep-forest-green);
+      font-size: 2.5em;
+      transition: transform 0.3s ease;
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 50%;
+    }
+
+    .service-item:hover .service-icon {
+      background-color: var(--deep-forest-green);
+      color: var(--background-color);
+      transform: scale(1.1);
+    }
+
+    .service-name {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 1.2em;
+      color: var(--deep-forest-green);
+    }
+
+    @media (max-width: 768px) {
+      .service-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid var(--deep-forest-green);
+      font-size: 0.9em;
+      color: var(--text-color);
+      background-color: transparent;
+    }
+
+    /* Responsive design adjustments */
+    @media(max-width: 768px) {
+      .nav-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .nav-links {
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero {
+        margin-top: 250px;  /* Increased for mobile */
+      }
+      .hero-image {
+        height: 300px;
+      }
+      .hero-content {
+        padding: 40px 20px;
+      }
+      .hero-logo-main {
+        width: 90%;  /* Use percentage on mobile for better scaling */
+      }
+      .hero-logo-secondary {
+        width: 60%;  /* Use percentage on mobile for better scaling */
+      }
+      nav {
+        padding: 10px 0;
+      }
+      .content, .services {
+        margin-top: 250px;  /* Increased for mobile */
+      }
+    }
+
+    /* Quote popup styling */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      overflow-y: auto;
+    }
+
+    .popup {
+      position: relative;
+      background-color: white;
+      max-width: 1000px;
+      width: 90%;
+      margin: 40px auto;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-logo {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin: 0 auto 30px;
+      display: block;
+    }
+
+    .quote-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .quote-option {
+      background: white;
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 8px;
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .quote-option:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .quote-option h3 {
+      color: var(--deep-forest-green);
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--deep-forest-green);
+      padding-bottom: 5px;
+      display: inline-block;
+    }
+
+    .quote-option ul {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+
+    .quote-option li {
+      margin-bottom: 10px;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.4;
+    }
+
+    .quote-option li:before {
+      content: "•";
+      color: var(--deep-forest-green);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .eco-note {
+      font-style: italic;
+      color: var(--deep-forest-green);
+      margin: 15px 0;
+      font-size: 0.9em;
+    }
+
+    .consultation-note {
+      background: rgba(44, 95, 45, 0.05);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 30px;
+      border: 1px solid rgba(44, 95, 45, 0.1);
+    }
+
+    .consultation-note p {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .consultation-note strong {
+      color: var(--deep-forest-green);
+    }
+
+    .close-popup {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--deep-forest-green);
+    }
+
+    @media (max-width: 768px) {
+      .popup {
+        padding: 25px;
+        margin: 20px auto;
+      }
+      
+      .quote-options {
+        grid-template-columns: 1fr;
+      }
+      
+      .quote-option {
+        padding: 20px;
+      }
+
+      .consultation-note {
+        padding: 15px;
+      }
+    }
+
+    /* Persistent contact header */
+    .contact-header {
+        background-color: var(--deep-forest-green);
+        color: var(--background-color);
+        text-align: center;
+        padding: 5px 20px;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1001;
+        font-size: 0.9em;
+        box-sizing: border-box;
+    }
+
+    .contact-header a {
+        color: #F5F5F5;  /* Light color by default */
+        text-decoration: none;
+        margin: 0 15px;
+        transition: color 0.3s;
+    }
+
+    .contact-header a:hover {
+        color: var(--muted-golden-amber);  /* Golden amber on hover */
+    }
+
+    /* Remove the main-logo section since we don't want anything above carpeclear */
+    .main-logo {
+        display: none;
+    }
+
+    .knowledge-categories {
+        margin-top: 30px;
+    }
+
+    .knowledge-categories ul {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .knowledge-categories li {
+        padding: 15px;
+        background: var(--background-color);
+        border: 2px solid var(--deep-forest-green);
+        border-radius: 3px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .knowledge-categories li:hover {
+        background: var(--deep-forest-green);
+        color: var(--background-color);
+        transform: translateY(-2px);
+    }
+
+    /* Contact form styling */
+    .contact-preference {
+      display: flex;
+      gap: 20px;
+      margin: 10px 0;
+    }
+
+    .contact-preference label {
+      margin-left: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid var(--deep-forest-green);
+      border-radius: 3px;
+    }
+
+    /* Service options styling */
+    .service-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .service-option {
+      position: relative;
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 5px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .service-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .service-option label {
+      display: block;
+      cursor: pointer;
+    }
+
+    .service-option h3 {
+      margin: 0 0 10px 0;
+      color: var(--deep-forest-green);
+    }
+
+    .service-option p {
+      margin: 0;
+      font-size: 0.9em;
+    }
+
+    .service-option:hover {
+      background: var(--deep-forest-green);
+      transform: translateY(-2px);
+    }
+
+    .service-option:hover h3,
+    .service-option:hover p {
+      color: var(--background-color);
+    }
+
+    .service-option input[type="radio"]:checked + label {
+      color: var(--background-color);
+    }
+
+    .service-option input[type="radio"]:checked + label h3 {
+      color: var(--background-color);
+    }
+
+    .service-option input[type="radio"]:checked + label p {
+      color: var(--background-color);
+    }
+
+    .service-option input[type="radio"]:checked + label::before {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: var(--background-color);
+    }
+
+    .service-option input[type="radio"]:checked ~ * {
+      background: var(--deep-forest-green);
+    }
+
+    .talk-to-human {
+        text-align: center;
+        margin: 0 0 30px;
+        padding: 15px;
+        background: rgba(44, 95, 45, 0.05);
+        border-radius: 8px;
+        border: 1px solid var(--deep-forest-green);
+    }
+
+    .talk-to-human h3 {
+        color: var(--deep-forest-green);
+        margin: 0 0 10px;
+        font-size: 1.3em;
+    }
+
+    .phone-link {
+        display: inline-block;
+        color: var(--deep-forest-green);
+        font-size: 1.4em;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .phone-link:hover {
+        transform: scale(1.05);
+        color: var(--muted-golden-amber);
+    }
+
+    .popup-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .popup-header h2 {
+        color: var(--deep-forest-green);
+        margin-bottom: 10px;
+        border: none;
+    }
+
+    .popup-header p {
+        color: var(--text-color);
+        font-size: 1.1em;
+        margin: 0 0 5px 0;
+    }
+
+    .popup-header .call-option {
+        margin-top: 15px;
+        font-size: 1em;
+        color: var(--text-color);
+    }
+
+    .popup-header .call-option a {
+        color: var(--deep-forest-green);
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .popup-header .call-option a:hover {
+        color: var(--muted-golden-amber);
+    }
+
+    .popup-header a {
+        color: var(--deep-forest-green);
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .popup-header a:hover {
+        color: var(--muted-golden-amber);
+    }
+  </style>
 </head>
 <body>
-    <nav>
-        <div class="logo">
-            <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-img">
-        </div>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/about/">About</a>
-            <div class="dropdown">
-                <a href="/tree-service/">Services</a>
-                <div class="dropdown-content">
-                    <a href="/tree-service/#tree-thinning">Tree Thinning</a>
-                    <a href="/tree-service/#hazard-pruning">Hazard Pruning</a>
-                    <a href="/tree-removal/">Tree Removal</a>
-                    <a href="/tree-service/#stump-grinding">Stump Grinding</a>
-                    <a href="/tree-service/#tree-planting">Tree Planting</a>
-                    <a href="/tree-service/#dynamic-cabling">Dynamic Cabling</a>
-                    <a href="/tree-service/#tree-risk-assessment">Tree Risk Assessment</a>
-                    <a href="/tree-service/#canopy-elevation">Canopy Elevation</a>
-                    <a href="/tree-service/#tree-milling">Tree Milling</a>
-                </div>
-            </div>
-            <a href="/blog/">Learning Hub</a>
-            <div class="dropdown">
-                <a href="/request-quote/">Request Quote</a>
-                <div class="dropdown-content">
-                    <a href="/video-quote/">Video Assessment</a>
-                    <a href="/request-quote/">Onsite Assessment</a>
-                </div>
-            </div>
-            <a href="/contact/">Contact</a>
-            <a href="/careers/">Careers</a>
-        </div>
-    </nav>
+  <!-- Add this right after <body> tag -->
+  <div class="contact-header">
+    <a href="tel:7786553741">778-655-3741</a> |
+    <a href="mailto:carpetree@icloud.com">carpetree@icloud.com</a>
+  </div>
 
-    <section class="hero" id="home">
-        <div class="hero-content">
-            <h1>Expert Tree Care Services</h1>
-            <p>Professional arborists dedicated to the health and beauty of your trees</p>
-            <button class="cta-button">Get a Free Quote</button>
-            <button class="cta-button">Learn More</button>
-        </div>
-    </section>
+  <div class="main-logo">
+    <img src="images/logo.png" alt="Carpe Tree'em Logo">
+  </div>
 
-    <section class="services" id="services">
-        <h2>Our Services</h2>
-        <div class="services-grid">
-            <div class="service-card">
-                <h3>Tree Pruning</h3>
-                <p>Professional pruning to maintain tree health and appearance</p>
+  <!-- Update the navigation menu -->
+  <nav>
+    <div class="nav-container">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="services.html">Services</a>
+        <a href="root-knowledge.html">Root Knowledge</a>
+        <a href="lets-talk.html">Let's Talk Trees</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Minimalist Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+        <div class="hero-logos">
+            <img src="images/carpeclear.png" alt="Carpe Tree'em" class="hero-logo-main">
+            <img src="images/hero.png" alt="Hero Logo" class="hero-logo-secondary">
+        </div>
+        <p>Modern arboriculture focused on preservation, longevity, and environmental stewardship.</p>
+        <button class="cta-button" onclick="openQuotePopup()">Schedule a Consultation</button>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION: Your Vision and Mission Statements -->
+  <section class="content" id="about">
+    <h2>About Us</h2>
+    <p><strong>Vision Statement</strong></p>
+    <p>
+      Our approach to tree care is eco-centric; informed by a modern understanding of tree biomechanics, of tree biology, and of the crucial roles trees play in our environment. We think a lot about trees. We focus on tree preservation, tree longevity, and environmental stewardship on unceeded Sinixt təmxʷulaʔxʷ.
+    </p>
+    <p>
+      Our company is an option for people in search of transparent, nuanced, and scientific tree care, without predatory or misguided upselling.
+    </p>
+    <p>
+      If you are looking for accountable and focused long-term tree care, reach out to us. We are looking for clients like you.
+    </p>
+    <p><strong>Mission Statement</strong></p>
+    <p>
+      <em>"Unless someone like you cares a whole awful lot, nothing is going to get better. It's not." – Dr. Seuss, <span style="font-style: italic;">The Lorax</span></em>
+    </p>
+    <p>
+      At Carpe Tree'em, we approach tree care differently. Instead of following the conventional forestry or production faller model—where efficiency and high-output pruning take precedence—we prioritize long-term tree health and ecological balance. Our philosophy is rooted in science-backed care, seeing trees as part of a thriving ecosystem rather than objects for removal.
+    </p>
+    <p>
+      Many tree care companies focus on cutting—big chippers, bucket trucks, and maximizing material removal. This leads to an industry that profits from disturbance rather than stability. Ironically, in the name of care, many practices weaken trees, creating cycles of stress and decay.
+    </p>
+    <p>
+      Carpe Tree'em was founded to change that. We work for trees, not against them. Our goal isn't to maximize cuts—it's to provide thoughtful, science-backed care that supports natural growth, resilience, and longevity.
+    </p>
+    <p>
+      "Nothing in life is to be feared, it is only to be understood. Now is the time to understand more so that we may fear less." – Marie Curie
+    </p>
+    <p>
+      Free quotes often come with an incentive to sell unnecessary pruning or removals. We take a different approach. A paid consultation provides an unbiased assessment, ensuring you get expert advice based on your tree's actual needs.
+    </p>
+    <p>
+      Investing in a consultation can ultimately save you money by avoiding unnecessary work while maintaining and even enhancing your property's value. Healthy, well-maintained trees add curb appeal, ecological benefits, and long-term stability.
+    </p>
+    <p>
+      And as a thank you, if you choose our services after the consultation, we'll waive half of the consultation fee—making expert tree care an even better investment.
+    </p>
+    <p>
+      <strong>Schedule your consultation today and take the first step toward truly informed tree care.</strong>
+    </p>
+  </section>
+
+  <!-- SERVICES SECTION: Popular Services buttons -->
+  <section class="services" id="services">
+    <h2>Our Services</h2>
+    <div class="service-grid">
+        <a href="services/assessments.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>
+                </svg>
             </div>
-            <div class="service-card">
-                <h3>Tree Removal</h3>
-                <p>Safe and efficient removal of damaged or unwanted trees</p>
+            <span class="service-name">Tree Assessment</span>
+        </a>
+        <a href="services/pruning.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M19,3L13,9L15,11L22,4V3M12,12.5A0.5,0.5 0 0,1 11.5,12A0.5,0.5 0 0,1 12,11.5A0.5,0.5 0 0,1 12.5,12A0.5,0.5 0 0,1 12,12.5M6,20A2,2 0 0,1 4,18C4,16.89 4.9,16 6,16A2,2 0 0,1 8,18C8,19.11 7.1,20 6,20M6,8A2,2 0 0,1 4,6C4,4.89 4.9,4 6,4A2,2 0 0,1 8,6C8,7.11 7.1,8 6,8M9.64,7.64C9.87,7.14 10,6.59 10,6A4,4 0 0,0 6,2A4,4 0 0,0 2,6A4,4 0 0,0 6,10C6.59,10 7.14,9.87 7.64,9.64L10,12L7.64,14.36C7.14,14.13 6.59,14 6,14A4,4 0 0,0 2,18A4,4 0 0,0 6,22A4,4 0 0,0 10,18C10,17.41 9.87,16.86 9.64,16.36L12,14L19,21H22V20L9.64,7.64Z"/>
+                </svg>
             </div>
-            <div class="service-card">
-                <h3>Tree Health Care</h3>
-                <p>Comprehensive care to ensure long-term tree vitality</p>
+            <span class="service-name">Precision Pruning</span>
+        </a>
+        <a href="services/soil-health.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,12.5C10.62,12.5 9.5,13.62 9.5,15C9.5,16.38 10.62,17.5 12,17.5C13.38,17.5 14.5,16.38 14.5,15C14.5,13.62 13.38,12.5 12,12.5M12,3C7.03,3 3,7.03 3,12C3,16.97 7.03,21 12,21C16.97,21 21,16.97 21,12C21,7.03 16.97,3 12,3M12,19.5C7.86,19.5 4.5,16.14 4.5,12C4.5,7.86 7.86,4.5 12,4.5C16.14,4.5 19.5,7.86 19.5,12C19.5,16.14 16.14,19.5 12,19.5Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Soil & Root Health</span>
+        </a>
+        <a href="services/emergency.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M14.5,17L13,19H10L8.5,17H5V15H19V17H14.5M18,12H6L2,8L6,4H18L22,8L18,12M15.36,10L16.76,8.61L15.36,7.22L14,8.61L15.36,10M8.63,10L10,8.61L8.63,7.22L7.24,8.61L8.63,10M11.99,10L13.36,8.61L11.99,7.22L10.62,8.61L11.99,10Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Emergency Response</span>
+        </a>
+        <a href="services/cabling.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H16L12,22L8,18H4A2,2 0 0,1 2,16V4A2,2 0 0,1 4,2M4,4V16H8.83L12,19.17L15.17,16H20V4H4M6,7H18V9H6V7M6,11H16V13H6V11Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Cabling & Bracing</span>
+        </a>
+        <a href="services/planting.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,3.77L11.25,4.61C11.25,4.61 9.97,6.06 8.68,7.94C7.39,9.82 6,12.07 6,14.23A6,6 0 0,0 12,20.23A6,6 0 0,0 18,14.23C18,12.07 16.61,9.82 15.32,7.94C14.03,6.06 12.75,4.61 12.75,4.61L12,3.77M12,6.9C12.44,7.42 12.84,7.85 13.68,9.07C14.89,10.83 16,13.07 16,14.23C16,16.45 14.22,18.23 12,18.23C9.78,18.23 8,16.45 8,14.23C8,13.07 9.11,10.83 10.32,9.07C11.16,7.85 11.56,7.42 12,6.9Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Tree Planting</span>
+        </a>
+        <a href="services/removal.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Tree Removal</span>
+        </a>
+        <a href="services/milling.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M3,17V19H9V17H3M3,5V7H13V5H3M13,21V19H21V17H13V15H11V21H13M7,9V11H3V13H7V15H9V9H7M21,13V11H11V13H21M15,9H17V7H21V5H17V3H15V9Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Custom Milling</span>
+        </a>
+        <a href="services/rescue.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,8L10.67,8.09C9.81,7.07 7.4,4.5 5,4.5C5,4.5 3.03,7.46 4.96,11.41C4.41,12.24 4.07,12.67 4,13.66L2.07,13.95L2.28,14.93L4.04,14.67L4.18,15.38L2.61,16.32L3.08,17.21L4.53,16.32C5.68,18.76 8.59,20 12,20C15.41,20 18.32,18.76 19.47,16.32L20.92,17.21L21.39,16.32L19.82,15.38L19.96,14.67L21.72,14.93L21.93,13.95L20,13.66C19.93,12.67 19.59,12.24 19.04,11.41C20.97,7.46 19,4.5 19,4.5C16.6,4.5 14.19,7.07 13.33,8.09L12,8M9,11A1,1 0 0,1 10,12A1,1 0 0,1 9,13A1,1 0 0,1 8,12A1,1 0 0,1 9,11M15,11A1,1 0 0,1 16,12A1,1 0 0,1 15,13A1,1 0 0,1 14,12A1,1 0 0,1 15,11M11,14H13L12.3,15.39C12.5,16.03 13.06,16.5 13.75,16.5A1.5,1.5 0 0,0 15.25,15H15.75A2,2 0 0,1 13.75,17C13,17 12.35,16.59 12,16V16H12C11.65,16.59 11,17 10.25,17A2,2 0 0,1 8.25,15H8.75A1.5,1.5 0 0,0 10.25,16.5C10.94,16.5 11.5,16.03 11.7,15.39L11,14Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Cat & Drone Rescue</span>
+        </a>
+        <a href="services/tree-installations.html" class="service-item">
+            <div class="service-icon">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                    <path d="M12,3L2,12H5V20H19V12H22L12,3M12,7.7C14.1,7.7 15.8,9.4 15.8,11.5C15.8,13.6 14.1,15.3 12,15.3C9.9,15.3 8.2,13.6 8.2,11.5C8.2,9.4 9.9,7.7 12,7.7M12,9.7C11,9.7 10.2,10.5 10.2,11.5C10.2,12.5 11,13.3 12,13.3C13,13.3 13.8,12.5 13.8,11.5C13.8,10.5 13,9.7 12,9.7Z"/>
+                </svg>
+            </div>
+            <span class="service-name">Tree Installations</span>
+        </a>
+    </div>
+  </section>
+
+  <!-- BLOG/EDUCATION SECTION: Placeholder for future content -->
+  <section class="content" id="blog">
+    <h2>learning hub</h2>
+    <p>
+      Explore our tree health guides and seasonal care tips to keep your trees thriving.
+    </p>
+    <p><em>Blog posts coming soon...</em></p>
+  </section>
+
+  <!-- CONTACT SECTION: Contact details and simple form -->
+  <section class="content" id="lets-talk">
+    <h2>Let's Talk Trees</h2>
+    <p>
+      For inquiries, please call us at <a href="tel:7786553741">778-655-3741</a> or email us at <a href="mailto:carpetree@icloud.com">carpetree@icloud.com</a>.
+    </p>
+    <form action="#" method="post">
+      <p>
+        <label for="contact-name">Name:</label><br>
+        <input type="text" id="contact-name" name="contact-name" required>
+      </p>
+      <p>
+        <label for="contact-email">Email:</label><br>
+        <input type="email" id="contact-email" name="contact-email" required>
+      </p>
+      <p>
+        <label for="contact-phone">Phone (for SMS):</label><br>
+        <input type="tel" id="contact-phone" name="contact-phone">
+      </p>
+      <p>
+        <label>Preferred Contact Method:</label><br>
+        <div class="contact-preference">
+          <input type="radio" id="prefer-email" name="contact-preference" value="email" required>
+          <label for="prefer-email">Email</label>
+          <input type="radio" id="prefer-sms" name="contact-preference" value="sms">
+          <label for="prefer-sms">SMS</label>
+        </div>
+      </p>
+      <p>
+        <label for="contact-message">Message:</label><br>
+        <textarea id="contact-message" name="contact-message" rows="4" required></textarea>
+      </p>
+      <p>
+        <button type="submit" class="service-button">Send Message</button>
+      </p>
+    </form>
+  </section>
+
+  <!-- FOOTER: Social links and final notes -->
+  <footer>
+    <p>Metro Detroit | Modern Arboriculture</p>
+    <!-- <p>
+      <a href="https://www.instagram.com/tree.first" target="_blank">Instagram</a> | 
+      <a href="https://www.facebook.com/397327770905594" target="_blank">Facebook</a>
+    </p> -->
+    <p>&copy; 2025 Carpe Tree'em. All rights reserved.</p>
+  </footer>
+
+  <!-- Update the popup HTML structure -->
+  <div class="popup-overlay" id="quotePopup">
+    <div class="popup">
+        <span class="close-popup" onclick="closeQuotePopup()">&times;</span>
+        <img src="images/carpeclear.png" alt="Carpe Tree'em" class="popup-logo">
+        <div class="popup-header">
+            <h2>Choose Assessment Type</h2>
+            <p>Select the type of assessment that best suits your needs</p>
+            <p class="call-option">or call now to talk to a human: <a href="tel:7786553741">778-655-3741</a></p>
+        </div>
+        <div class="quote-options">
+            <div class="quote-option">
+                <h3>Video Assessment</h3>
+                <p>A science-backed evaluation through video consultation, perfect when:</p>
+                <ul>
+                    <li>You need swift, informed guidance about your tree's health</li>
+                    <li>Your project is focused on a specific tree or small group of trees</li>
+                    <li>You'd like to understand potential costs for tree care services</li>
+                    <li>You've noticed changes in your tree and want expert insight before proceeding with an on-site visit</li>
+                </ul>
+                <p class="eco-note">🌱 This option reduces our carbon footprint while still providing expert guidance.</p>
+                <a href="video_quote.html" class="cta-button">Request Video Assessment</a>
+            </div>
+
+            <div class="quote-option">
+                <h3>On-Site Consultation</h3>
+                <p>A comprehensive, in-person evaluation, ideal when:</p>
+                <ul>
+                    <li>Your project involves multiple trees or complex site conditions</li>
+                    <li>The situation requires detailed biomechanical assessment</li>
+                    <li>Multiple parties are involved (neighbors, property managers, etc.)</li>
+                    <li>You prefer direct, hands-on collaboration in developing your tree care plan</li>
+                </ul>
+                <p class="eco-note">🌳 Includes soil assessment and detailed site-specific recommendations.</p>
+                <a href="lets-talk.html" class="cta-button">Schedule On-Site Visit</a>
             </div>
         </div>
-    </section>
 
-    <section class="testimonials" id="testimonials">
-        <h2>What Our Clients Say</h2>
-        <div class="testimonial-grid">
-            <div class="testimonial-card">
-                <p>"Outstanding service! They took great care of our old oak tree."</p>
-                <h4>- John Smith</h4>
-            </div>
-            <div class="testimonial-card">
-                <p>"Professional, knowledgeable, and efficient team. Highly recommend!"</p>
-                <h4>- Sarah Johnson</h4>
-            </div>
+        <div class="consultation-note">
+            <p><strong>Why We Charge for Consultations:</strong> Unlike free quotes that often incentivize unnecessary work, our paid consultations ensure you receive unbiased, science-based recommendations focused solely on your trees' health and your property's needs. Plus, if you proceed with our services, we'll credit half the consultation fee toward your tree care.</p>
         </div>
-    </section>
+    </div>
+  </div>
 
-    <section class="contact-section" id="contact">
-        <h2>Contact Us</h2>
-        <div class="contact-form">
-            <form>
-                <input type="text" placeholder="Name" required>
-                <input type="email" placeholder="Email" required>
-                <input type="tel" placeholder="Phone">
-                <textarea placeholder="Message" rows="5" required></textarea>
-                <button type="submit">Send Message</button>
+  <!-- Add JavaScript for popup functionality -->
+  <script>
+    function openQuotePopup() {
+        document.getElementById('quotePopup').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuotePopup() {
+        document.getElementById('quotePopup').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close popup when clicking outside
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('quotePopup')) {
+            closeQuotePopup();
+        }
+    }
+  </script>
+
+  <!-- Add the Root Knowledge section where pricing was -->
+  <section class="content" id="root-knowledge">
+    <h2>Root Knowledge</h2>
+    <p>
+        Understanding trees is the first step to caring for them. Explore our collection of arboricultural insights, scientific research, and practical tree care knowledge.
+    </p>
+    <!-- You can add more content categories here -->
+    <div class="knowledge-categories">
+        <h3>Topics Include:</h3>
+        <ul>
+            <li>Tree Biology & Growth</li>
+            <li>Soil Health & Root Systems</li>
+            <li>Pruning Science</li>
+            <li>Environmental Impact</li>
+            <li>Tree Risk Assessment</li>
+            <li>Seasonal Care Guidelines</li>
+        </ul>
+    </div>
+  </section>
+
+  <!-- Replace the old tutorialSection with this interactive version -->
+  <div id="tutorialSection" class="content">
+    <h1>Interactive Tutorial: Fractions, Decimals & Mixed Numbers</h1>
+    <!-- Container where the current tutorial step is displayed -->
+    <div id="tutorialContent">
+      <!-- Tutorial content will be injected by JavaScript -->
+    </div>
+    <!-- Tutorial controls for navigating through the steps -->
+    <div id="tutorialControls">
+      <button id="prevTutorial" onclick="prevTutorial()" disabled>Previous</button>
+      <button id="nextTutorial" onclick="nextTutorial()">Next</button>
+    </div>
+  </div>
+
+  <!-- Add this to your index.html where you want the Video Quote button -->
+  <button onclick="openQuoteForm()" class="quote-button">Video Quote</button>
+
+  <!-- Add this modal/popup HTML structure at the end of your body tag but before closing </body> -->
+  <div id="quoteModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeQuoteForm()">&times;</span>
+        <!-- Form container will go here -->
+        <div class="form-container">
+            <!-- Step indicators -->
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+            </div>
+
+            <!-- Success message -->
+            <div id="successMessage" class="success-message">
+                <h3>Thank you for your submission!</h3>
+                <p>We'll get back to you shortly.</p>
+            </div>
+
+            <!-- Multi-step form -->
+            <form id="contactForm">
+                <!-- Rest of your form content from lets-talk.html -->
             </form>
         </div>
-    </section>
-
-    <footer>
-        <p>&copy; 2023 Carpe Tree'em. All rights reserved.</p>
-    </footer>
-
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('nav a').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const section = document.querySelector(this.getAttribute('href'));
-                section.scrollIntoView({ behavior: 'smooth' });
-            });
-        });
-    </script>
+    </div>
+  </div>
 </body>
 </html>

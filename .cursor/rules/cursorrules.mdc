@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+---
+# CursorRules for Carpe Tree'em Project
+project_name: Carpe Tree'em
+description: Tree service management platform with AI-driven tree identification, customer CRM, and service automation.
+
+tech_stack:
+  frontend:
+    - React.js
+    - Tailwind CSS
+    - HTML5 / CSS3 / JavaScript
+    - Axios (for HTTP requests)
+  backend:
+    - Node.js with Express
+    - Python (for AI tree identification and data processing)
+    - Multer (for file uploads)
+    - JSON Web Tokens (JWT) for authentication
+   database:
+    - MySQL (managed through Hostinger)(primary database for customer data and service records)
+  integrations:
+    - n8n (for workflow automation)
+    - Twilio (SMS notifications)
+    - SendGrid (email notifications)
+    - AWS S3 (media storage)
+  AI and Machine Learning:
+    - TensorFlow (AI tree species identification)
+    - OpenAI (language model support)
+  security:
+    - HTTPS (secure web communication)
+    - Data encryption for sensitive data storage
+    - GDPR compliance for customer data handling
+
+rules:
+  - Ensure consistent use of Primary Green `#4A7C59` for UI elements.
+  - All icons must be flat-style and SVG format for scalability.
+  - Use ESLint for code linting and Prettier for formatting.
+  - Document all API endpoints in OpenAPI format (Swagger).
+  
