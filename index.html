@@ -1035,19 +1035,15 @@
     </div>
   </div>
 
+  <!-- Mobile Menu JavaScript -->
   <script>
-    // Mobile menu toggle
     document.addEventListener('DOMContentLoaded', function() {
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
       
       menuToggle.addEventListener('click', function() {
         navLinks.classList.toggle('active');
-        
-        // Animate hamburger to X
         this.classList.toggle('active');
-        
-        // Prevent body scrolling when menu is open
         document.body.classList.toggle('menu-open');
       });
 
