@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#F5F1E6"/>
+
+  <!-- Tree trunk with textured bark -->
+  <path d="M512 800 
+    C508 750, 510 700, 505 650
+    C500 600, 495 550, 512 500 
+    C529 450, 535 400, 530 350
+    C525 300, 515 250, 512 200" 
+    fill="none" stroke="#2E7D32" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Bark texture on trunk -->
+  <path d="M497 750 C490 730, 487 710, 497 690" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M527 750 C534 730, 537 710, 527 690" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M497 650 C490 630, 487 610, 497 590" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M527 650 C534 630, 537 610, 527 590" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M497 550 C490 530, 487 510, 497 490" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M527 550 C534 530, 537 510, 527 490" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M497 450 C490 430, 487 410, 497 390" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <path d="M527 450 C534 430, 537 410, 527 390" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Branches with jagged ends -->
+  <path d="M512 400 C540 380, 570 365, 600 370" fill="none" stroke="#2E7D32" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M600 370 C610 368, 620 372, 630 365" fill="none" stroke="#2E7D32" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M630 365 L638 360 L635 370 L645 367 L640 375" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <path d="M512 320 C480 300, 450 290, 420 295" fill="none" stroke="#2E7D32" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M420 295 C410 292, 400 290, 390 282" fill="none" stroke="#2E7D32" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M390 282 L382 278 L384 286 L376 288 L380 295" fill="none" stroke="#2E7D32" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Root system -->
+  <path d="M512 800 C530 820, 550 830, 575 835" fill="none" stroke="#6D4C41" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M575 835 C590 838, 605 842, 615 850" fill="none" stroke="#6D4C41" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M575 835 C580 845, 582 855, 590 865" fill="none" stroke="#6D4C41" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <path d="M512 800 C495 820, 475 830, 450 835" fill="none" stroke="#6D4C41" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M450 835 C435 838, 420 842, 410 850" fill="none" stroke="#6D4C41" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M450 835 C445 845, 443 855, 435 865" fill="none" stroke="#6D4C41" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Ground indication (dashed) -->
+  <path d="M300 810 C400 800, 600 800, 700 810" fill="none" stroke="#6D4C41" stroke-width="5" stroke-dasharray="20,15" stroke-linecap="round"/>
+  
+  <!-- Magnifying glass -->
+  <circle cx="675" cy="325" r="110" fill="none" stroke="#FFB74D" stroke-width="18"/>
+  <line x1="748" y1="410" x2="820" y2="480" stroke="#FFB74D" stroke-width="22" stroke-linecap="round"/>
+  
+  <!-- Debris/Leaves -->
+  <path d="M380 350 L390 340 L385 330 L397 335 L405 325" fill="none" stroke="#FDD835" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M670 450 L680 440 L675 430 L687 435 L695 425" fill="none" stroke="#FDD835" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M540 280 L550 270 L545 260 L557 265 L565 255" fill="none" stroke="#FDD835" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg> 

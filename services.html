@@ -47,6 +47,7 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
             margin-top: 40px;
+            margin-bottom: 40px;
         }
 
         .service-card {
@@ -105,6 +106,40 @@
             max-width: 800px;
             margin: 0 auto;
             line-height: 1.6;
+        }
+        
+        /* Service category styles */
+        .service-category {
+            margin-top: 60px;
+            margin-bottom: 30px;
+        }
+        
+        .service-category h2 {
+            color: var(--deep-forest-green);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-sage-green);
+        }
+        
+        .service-category h3 {
+            color: var(--warm-earth-brown);
+            font-size: 1.3em;
+            margin: 25px 0 15px;
+        }
+        
+        .service-category p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .service-category ul {
+            margin: 15px 0 25px 25px;
+        }
+        
+        .service-category li {
+            margin-bottom: 10px;
+            line-height: 1.5;
         }
 
         /* Responsive styles */
@@ -168,7 +203,127 @@
     <section class="content">
         <div class="services-hero">
             <h1>Our Services</h1>
-            <p>At Carpe Tree'em, we take a proactive, whole-systems approach to tree health, from the ground up. Our services are designed to support your trees for generations by offering precision care that's tailored to your site's unique conditions.</p>
+            <p>At Carpe Tree'em, we take tree care to heart—because trees are the backbone of our landscapes, and we believe in keeping them standing tall for generations. Our services are deeply rooted in science-backed arboriculture, ensuring your trees remain safe, healthy, and beautiful in the diverse environments of the West Kootenays. Below you'll find our comprehensive tree care offerings, thoughtfully categorized for ease of navigation. Whether you're looking for preventative maintenance, risk assessment, or solutions tailored to your unique landscape, we're here to help you make informed and responsible tree care decisions.</p>
+        </div>
+
+        <div class="service-category">
+            <h2>Tree Health & Preservation</h2>
+            <p>Keep your trees thriving through preventive care and expert maintenance. Our Tree Health & Preservation services focus on strengthening tree structure, promoting vigor, and preventing problems before they start. In the West Kootenays's climate of wet winters and dry summers, proactive care is essential for long-lived, resilient trees. We follow industry best practices (including ANSI A300 standards) to ensure every cut or treatment benefits your tree's health.</p>
+            
+            <h3>Services in this category include:</h3>
+        </div>
+
+        <div class="service-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4"/>
+                        <path d="M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4"/>
+                        <path d="M4 10v6c0 2 2 4 4 4h8c2 0 4-2 4-4v-6"/>
+                        <path d="M12 10v10"/>
+                        <path d="M4 14h16"/>
+                        <path d="M2 10h20"/>
+                        <path d="M7.5 17.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
+                        <path d="M7.5 14.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
+                    </svg>
+                </div>
+                <h3>Soil & Root Health</h3>
+                <p>Improving the underground conditions for your trees through aeration of compacted soil, organic mulching, and root care.</p>
+                <a href="services/soil-health.html" class="service-link">Learn More →</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                        <path d="M12 22v-4"/>
+                        <path d="M8 22h8"/>
+                        <path d="M6 12h12"/>
+                        <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
+                        <path d="M10 12v-1"/>
+                        <path d="M14 12v-1"/>
+                        <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
+                    </svg>
+                </div>
+                <h3>Pruning</h3>
+                <p>Pruning is a fundamental aspect of tree care that considers both the tree's life stage and its surrounding environment.</p>
+                <a href="services/pruning.html" class="service-link">Learn More →</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22v-7"/>
+                        <path d="M12 15l-2-3"/>
+                        <path d="M12 15l2-3"/>
+                        <path d="M12 8v4"/>
+                        <path d="M12 8c-2 0-4-1.5-4-4 0 0 1 1 4 1s4-1 4-1c0 2.5-2 4-4 4z"/>
+                        <path d="M9 15c-2 0-5-1-5-5 0 0 1.5 2 5 2"/>
+                        <path d="M15 15c2 0 5-1 5-5 0 0-1.5 2-5 2"/>
+                        <path d="M9 22h6"/>
+                        <path d="M9 19h6"/>
+                    </svg>
+                </div>
+                <h3>Fruit Tree Pruning</h3>
+                <p>Tailored pruning for fruit-bearing trees to enhance fruit production, manage tree size, and reduce disease pressure.</p>
+                <a href="services/pruning.html" class="service-link">Learn More →</a>
+            </div>
+        </div>
+
+        <div class="service-category">
+            <h2>Structural Pruning</h2>
+            <p>Structural pruning shapes the framework of a young or mature tree to ensure it grows with a sturdy, balanced form. Our tree care specialists selectively remove or shorten weak, crossing, or competing limbs to encourage one well-defined central leader and strong branch structure. Techniques like crown cleaning (removing dead or weak wood), crown raising (lifting low limbs for clearance), and tipping (reducing leverage on overreaching branches) are employed as needed to meet your tree's specific needs. We follow industry-recognized ANSI A300 pruning standards – meaning no "topping" or other harmful cuts that could injure the tree.</p>
+            
+            <h3>Why is structural pruning important?</h3>
+            <ul>
+                <li><strong>Stronger, Safer Trees:</strong> Proactive pruning prevents weak branch unions, reducing storm damage risk.</li>
+                <li><strong>Healthier Growth:</strong> Improved sunlight and air circulation boost tree vigor and reduce pest/disease issues.</li>
+                <li><strong>Reduced Future Costs:</strong> Early pruning minimizes the need for costly emergency removals later.</li>
+            </ul>
+            
+            <h3>Local Considerations:</h3>
+            <p>The Kootenay's variable climate, with its mild, wet winters and dry summers, climate leads to vigorous tree growth. Without structural pruning, trees may become overgrown or hazardous. For example, codominant stems (two main trunks of equal size) are common in certain conifers and are structurally weaker due to frequently included bark, making them prone to splitting. Our science-backed approach includes techniques such as subordination pruning – gently reducing a co-dominant stem so that one leader dominates – to prevent splits in the canopy.</p>
+            
+            <p><strong>Next Steps:</strong> Ready to fortify your trees for the future? Use our free quote generator or book an in-person consultation to have one of our arborists evaluate the health and structural integrity of your tree.</p>
+        </div>
+
+        <div class="service-category">
+            <h2>Fruit Tree Pruning</h2>
+            <p>Fruit trees require a specialized pruning approach to maximize fruit yield while maintaining tree health. We prune fruit trees (such as walnut, apple, pear, plum, and cherry trees common in the kootenays) with a focus on creating an open, balanced canopy that allows sunlight to reach fruit-bearing wood. By thinning out dense clusters of branches and removing vertical "water sprouts," we help sunlight and air circulate, which improves fruit quality and reduces fungal diseases (a critical concern in our damp West Kootenays climate).</p>
+            
+            <h3>Our arborists are knowledgeable about proper fruit tree pruning techniques:</h3>
+            <ul>
+                <li>Eliminating dead, diseased, or crossing branches to prevent pest spread and rubbing damage.</li>
+                <li>Removing vigorous upright shoots (suckers and water sprouts) to direct the tree's energy into fruit production.</li>
+                <li>Thinning the canopy to enhance air circulation, which reduces disease pressure and promotes better fruit development.</li>
+            </ul>
+            
+            <p><strong>Next Steps:</strong> Let us help you get the best harvest from your fruit trees! To schedule a pruning service, use our online quote tool or book a consultation.</p>
+        </div>
+
+        <div class="service-category">
+            <h2>Soil & Root Health (Air Spading & Mulching)</h2>
+            <p>Healthy roots are the foundation of a healthy tree. In urban and suburban environments, soil compaction, nutrient deficiencies, and poor drainage can all stress your trees' root systems. Our Soil & Root Health services address these issues using modern, tree-friendly techniques that improve the underground conditions without harming the tree.</p>
+            
+            <p>One of our flagship services is <strong>air spading</strong> – a process of using a high-powered air tool to break up compacted soil around the root zone. This technique safely loosens soil without damaging roots, allowing better water infiltration and root respiration. We often follow up air spading with <strong>organic amendments</strong> like compost, biochar, and mycorrhizal fungi to boost soil health.</p>
+            
+            <p>We also offer guidance on proper mulching and soil management: applying wood chip mulch over the root zone to conserve moisture, moderate soil temperature, and add organic matter as it breaks down.</p>
+            
+            <h3>Client Education – Soil & Root Care in the koots:</h3>
+            <ul>
+                <li><strong>Signs of Soil Problems:</strong> Slow growth, wilting in summer despite watering, or dieback in the crown often signal poor soil conditions.</li>
+                <li><strong>Air Spade Benefits:</strong> Air spading can save a struggling tree by relieving compaction, improving aeration, and encouraging root expansion.</li>
+                <li><strong>Mulching and Aftercare:</strong> Proper mulching reduces weed growth, improves soil structure, and insulates roots from extreme temperatures.</li>
+            </ul>
+            
+            <p><strong>Next Steps:</strong> Concerned about your tree's root health? Schedule a soil and root health assessment with us.</p>
+        </div>
+
+        <div class="service-category">
+            <h2>Tree Risk Management</h2>
+            <p>Ensure the safety of your trees and property with our Risk Management services. Living in the West Kootenays means coexisting with very tall trees and the occasional intense windstorm. Our tree risk management offerings are designed to identify potential hazards early and mitigate them in a responsible way.</p>
+            
+            <h3>Services in this category include:</h3>
         </div>
 
         <div class="service-grid">
@@ -188,8 +343,8 @@
                         <path d="M9 3.5c-1 .5-2 2-2 3.5"/>
                     </svg>
                 </div>
-                <h3>Tree Assessments & Consultations</h3>
-                <p>Unbiased, science-backed tree evaluations to guide informed decisions.</p>
+                <h3>Tree Risk Assessments & Consultations</h3>
+                <p>Science-backed tree health evaluations conducted by ISA Certified Arborists to identify potential hazards.</p>
                 <a href="services/assessments.html" class="service-link">Learn More →</a>
             </div>
 
@@ -199,17 +354,15 @@
                         <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
                         <path d="M12 22v-4"/>
                         <path d="M8 22h8"/>
-                        <path d="M7 8c-2 0-3 1-3 3"/>
-                        <path d="M17 8c2 0 3 1 3 3"/>
-                        <path d="M7 16a3 3 0 0 1-3-3"/>
-                        <path d="M17 16a3 3 0 0 0 3-3"/>
-                        <circle cx="5" cy="11" r="1"/>
-                        <circle cx="19" cy="11" r="1"/>
+                        <path d="M6 10h12"/>
+                        <path d="M6 10c0 4 6 8 6 8s6-4 6-8"/>
+                        <path d="M6 14h12"/>
+                        <path d="M6 18h12"/>
                     </svg>
                 </div>
-                <h3>Tree Removal & Wildlife Trees</h3>
-                <p>Thoughtful removals with ecological responsibility in mind.</p>
-                <a href="services/removal.html" class="service-link">Learn More →</a>
+                <h3>Cabling & Bracing</h3>
+                <p>Professional structural support systems that meet ANSI A300 standards to preserve valuable trees.</p>
+                <a href="services/cabling.html" class="service-link">Learn More →</a>
             </div>
 
             <div class="service-card">
@@ -228,27 +381,57 @@
                         <path d="M16 3l1 1"/>
                     </svg>
                 </div>
-                <h3>Emergency Tree Care</h3>
-                <p>Rapid response when nature strikes.</p>
+                <h3>Storm Damage Mitigation</h3>
+                <p>Emergency response and proactive preparation for extreme weather events that affect your trees.</p>
                 <a href="services/emergency.html" class="service-link">Learn More →</a>
+            </div>
+        </div>
+
+        <div class="service-category">
+            <h2>Tree Removal & Alternatives</h2>
+            <p>When a tree must be removed, we ensure it's done safely and responsibly. We always consider alternatives to complete removal when appropriate, including habitat creation and fire-safe management approaches.</p>
+            
+            <h3>Services in this category include:</h3>
+        </div>
+
+        <div class="service-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                        <path d="M12 22v-4"/>
+                        <path d="M8 22h8"/>
+                        <path d="M7 8c-2 0-3 1-3 3"/>
+                        <path d="M17 8c2 0 3 1 3 3"/>
+                        <path d="M7 16a3 3 0 0 1-3-3"/>
+                        <path d="M17 16a3 3 0 0 0 3-3"/>
+                        <circle cx="5" cy="11" r="1"/>
+                        <circle cx="19" cy="11" r="1"/>
+                    </svg>
+                </div>
+                <h3>Tree Removal & Alternatives</h3>
+                <p>Thoughtful, professional tree removal with ecological alternatives including wildlife snags and fire-safe management.</p>
+                <a href="services/removal.html" class="service-link">Learn More →</a>
             </div>
 
             <div class="service-card">
                 <div class="service-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v4"/>
-                        <path d="M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4"/>
-                        <path d="M4 10v6c0 2 2 4 4 4h8c2 0 4-2 4-4v-6"/>
-                        <path d="M12 10v10"/>
-                        <path d="M4 14h16"/>
-                        <path d="M2 10h20"/>
-                        <path d="M7.5 17.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
-                        <path d="M7.5 14.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
+                        <rect x="4" y="4" width="16" height="16" rx="1"/>
+                        <path d="M4 8h16"/>
+                        <path d="M8 4v16"/>
+                        <path d="M4 12h4"/>
+                        <path d="M12 12h8"/>
+                        <path d="M12 4v16"/>
+                        <path d="M4 16h4"/>
+                        <path d="M12 16h8"/>
+                        <path d="M16 4v16"/>
+                        <path d="M4 20h16"/>
                     </svg>
                 </div>
-                <h3>Soil & Root Health Services</h3>
-                <p>Strengthening trees from the ground up.</p>
-                <a href="services/soil-health.html" class="service-link">Learn More →</a>
+                <h3>Value-Added Wood Services</h3>
+                <p>Transform your trees into enduring beauty through expert milling, craftsmanship and upcycling.</p>
+                <a href="services/milling.html" class="service-link">Learn More →</a>
             </div>
 
             <div class="service-card">
@@ -269,7 +452,16 @@
                 <p>Precision planting for a thriving, site-specific urban canopy.</p>
                 <a href="services/planting.html" class="service-link">Learn More →</a>
             </div>
+        </div>
 
+        <div class="service-category">
+            <h2>Specialty Tree Services</h2>
+            <p>Our team's advanced climbing and rigging skills enable us to offer specialized services that go beyond traditional tree care. From animal rescue to scientific research support and custom installations, we bring professional arboricultural expertise to unique canopy challenges.</p>
+            
+            <h3>Services in this category include:</h3>
+        </div>
+
+        <div class="service-grid">
             <div class="service-card">
                 <div class="service-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -283,63 +475,9 @@
                         <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
                     </svg>
                 </div>
-                <h3>Tree Swings & Treehouses</h3>
-                <p>Bringing joy to the canopy—safely and sustainably.</p>
-                <a href="services/tree-installations.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M6 10h12"/>
-                        <path d="M6 10c0 4 6 8 6 8s6-4 6-8"/>
-                        <path d="M6 14h12"/>
-                        <path d="M6 18h12"/>
-                    </svg>
-                </div>
-                <h3>Cabling & Bracing</h3>
-                <p>Professional structural support systems that meet ANSI A300 standards.</p>
-                <a href="services/cabling.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="4" width="16" height="16" rx="1"/>
-                        <path d="M4 8h16"/>
-                        <path d="M8 4v16"/>
-                        <path d="M4 12h4"/>
-                        <path d="M12 12h8"/>
-                        <path d="M12 4v16"/>
-                        <path d="M4 16h4"/>
-                        <path d="M12 16h8"/>
-                        <path d="M16 4v16"/>
-                        <path d="M4 20h16"/>
-                    </svg>
-                </div>
-                <h3>Custom Milling Services</h3>
-                <p>Transform fallen or removed trees into premium, custom-milled wood products.</p>
-                <a href="services/milling.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="8"/>
-                        <path d="M12 4v16"/>
-                        <path d="M4 12h16"/>
-                        <path d="M7.5 7.5l9 9"/>
-                        <path d="M7.5 16.5l9-9"/>
-                        <path d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8z"/>
-                        <path d="M9 12h6"/>
-                    </svg>
-                </div>
-                <h3>Stump Grinding</h3>
-                <p>Professional removal of tree stumps with specialized grinding equipment.</p>
-                <a href="services/stump-grinding.html" class="service-link">Learn More →</a>
+                <h3>Specialty Tree Services</h3>
+                <p>Unique canopy access services including cat/drone rescue, canopy science support, and recreational installations.</p>
+                <a href="services/rescue.html" class="service-link">Learn More →</a>
             </div>
         </div>
     </section>
