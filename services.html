@@ -194,46 +194,319 @@
             margin-top: 0;
         }
 
+        /* Compass Rose Design */
+        .compass-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+        
+        .compass-center {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background-color: var(--deep-forest-green);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .compass-center:hover {
+            transform: scale(1.05);
+        }
+        
+        .compass-center-content {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .compass-center-content h2 {
+            margin: 0 0 10px;
+            font-size: 1.5em;
+        }
+        
+        .compass-center-content p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+        
+        .compass-ring {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            margin-top: -100px;
+        }
+        
+        .compass-quadrant {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        
+        .quadrant-title {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            background-color: var(--light-sage-green);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--deep-forest-green);
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 5;
+            transition: all 0.3s ease;
+        }
+        
+        .quadrant-title:hover {
+            background-color: var(--deep-forest-green);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* Quadrant positions */
+        .north-title {
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .east-title {
+            top: 50%;
+            right: 50px;
+            transform: translateY(-50%);
+        }
+        
+        .south-title {
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .west-title {
+            top: 50%;
+            left: 50px;
+            transform: translateY(-50%);
+        }
+        
+        .service-cards {
+            position: absolute;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 300px;
+            justify-content: center;
+        }
+        
+        /* Service cards positioning */
+        .north-cards {
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .east-cards {
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+        
+        .south-cards {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .west-cards {
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+        
+        .service-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 220px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 2;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: var(--deep-forest-green);
+            border: 2px solid var(--deep-forest-green);
+            border-radius: 50%;
+            padding: 12px;
+            transition: all 0.3s ease;
+            background-color: var(--background-color);
+        }
+        
+        .service-icon svg {
+            width: 30px;
+            height: 30px;
+            transition: all 0.3s ease;
+            stroke-width: 1.5;
+        }
+        
+        .service-card:hover .service-icon {
+            background-color: var(--deep-forest-green);
+            color: var(--background-color);
+            transform: scale(1.1);
+        }
+        
+        .service-card h3 {
+            margin: 10px 0;
+            color: var(--deep-forest-green);
+            font-size: 1.1em;
+        }
+        
+        .service-link {
+            color: var(--deep-forest-green);
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .service-link:hover {
+            color: var(--warm-earth-brown);
+            transform: translateX(5px);
+        }
+        
+        /* Connection lines */
+        .connection-line {
+            position: absolute;
+            background-color: var(--light-sage-green);
+            opacity: 0.6;
+            z-index: 1;
+        }
+        
+        .line-n1, .line-s1 {
+            height: 3px;
+            width: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .line-n1 {
+            top: 100px;
+        }
+        
+        .line-s1 {
+            bottom: 100px;
+        }
+        
+        .line-e1, .line-w1 {
+            width: 3px;
+            height: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .line-e1 {
+            right: 100px;
+        }
+        
+        .line-w1 {
+            left: 100px;
+        }
+        
         /* Responsive styles */
-        @media (max-width: 768px) {
-            .service-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+        @media (max-width: 1200px) {
+            .compass-ring {
+                height: 700px;
             }
-
-            .service-card {
-                padding: 20px;
+            
+            .north-cards, .south-cards {
+                width: 600px;
             }
-
-            .service-icon {
-                width: 70px;
-                height: 70px;
-                padding: 12px;
-            }
-
-            .service-icon svg {
-                width: 35px;
-                height: 35px;
-            }
-
-            .services-hero h1 {
-                font-size: 2em;
-            }
-
-            .services-hero p {
-                font-size: 1em;
-            }
-
-            .quick-nav ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
+            
+            .east-cards, .west-cards {
+                width: 250px;
             }
         }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .service-grid {
-                grid-template-columns: repeat(2, 1fr);
+        
+        @media (max-width: 992px) {
+            .compass-container {
+                margin-top: 30px;
+            }
+            
+            .compass-ring {
+                height: auto;
+                margin-top: 0;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .compass-center {
+                position: static;
+                margin-bottom: 30px;
+            }
+            
+            .compass-quadrant {
+                position: static;
+                height: auto;
+                margin-bottom: 50px;
+            }
+            
+            .quadrant-title {
+                position: static;
+                margin: 0 auto 20px;
+                transform: none;
+            }
+            
+            .service-cards {
+                position: static;
+                width: 100%;
+                transform: none;
+                justify-content: center;
+            }
+            
+            .connection-line {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .compass-center {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .quadrant-title {
+                width: 180px;
+            }
+            
+            .service-card {
+                width: 85%;
+                max-width: 300px;
             }
         }
     </style>
@@ -277,202 +550,245 @@
             </ul>
         </div>
 
-        <div id="tree-health" class="service-category">
-            <h2>1. Tree Health & Preservation</h2>
-            <p>Keep your trees thriving through preventive care and expert maintenance. Our Tree Health & Preservation services focus on strengthening tree structure, promoting vigor, and preventing problems before they start. We follow industry best practices (including ANSI A300 standards) to ensure every cut or treatment benefits your tree's health.</p>
-        </div>
-
-        <div class="service-grid">
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v4"/>
-                        <path d="M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4"/>
-                        <path d="M4 10v6c0 2 2 4 4 4h8c2 0 4-2 4-4v-6"/>
-                        <path d="M12 10v10"/>
-                        <path d="M4 14h16"/>
-                        <path d="M2 10h20"/>
-                        <path d="M7.5 17.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
-                        <path d="M7.5 14.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
-                    </svg>
+        <div class="compass-container">
+            <!-- Central Hub -->
+            <div class="compass-center">
+                <div class="compass-center-content">
+                    <h2>Tree Care Services</h2>
+                    <p>Holistic arboriculture for the West Kootenays</p>
                 </div>
-                <h3>Soil & Root Health</h3>
-                <p>Improving the underground conditions for your trees through aeration of compacted soil, organic mulching, and root care.</p>
-                <a href="services/soil-health.html" class="service-link">Learn More →</a>
             </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M6 12h12"/>
-                        <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
-                        <path d="M10 12v-1"/>
-                        <path d="M14 12v-1"/>
-                        <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
-                    </svg>
+            
+            <!-- Connection Lines -->
+            <div class="connection-line line-n1"></div>
+            <div class="connection-line line-e1"></div>
+            <div class="connection-line line-s1"></div>
+            <div class="connection-line line-w1"></div>
+            
+            <div class="compass-ring">
+                <!-- North Quadrant: Tree Health & Preservation -->
+                <div id="tree-health" class="compass-quadrant">
+                    <div class="quadrant-title north-title">Tree Health & Preservation</div>
+                    <div class="service-cards north-cards">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v4"/>
+                                    <path d="M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4"/>
+                                    <path d="M4 10v6c0 2 2 4 4 4h8c2 0 4-2 4-4v-6"/>
+                                    <path d="M12 10v10"/>
+                                    <path d="M4 14h16"/>
+                                    <path d="M2 10h20"/>
+                                    <path d="M7.5 17.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
+                                    <path d="M7.5 14.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
+                                </svg>
+                            </div>
+                            <h3>Soil & Root Health</h3>
+                            <a href="services/soil-health.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                                    <path d="M12 22v-4"/>
+                                    <path d="M8 22h8"/>
+                                    <path d="M6 12h12"/>
+                                    <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
+                                    <path d="M10 12v-1"/>
+                                    <path d="M14 12v-1"/>
+                                    <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
+                                </svg>
+                            </div>
+                            <h3>Pruning</h3>
+                            <a href="services/pruning.html" class="service-link">Learn More →</a>
+                        </div>
+                    </div>
                 </div>
-                <h3>Pruning</h3>
-                <p>Comprehensive pruning services including structural pruning for strength and safety, and specialized fruit tree pruning for optimal production.</p>
-                <a href="services/pruning.html" class="service-link">Learn More →</a>
-            </div>
-        </div>
-
-        <div id="risk-management" class="service-category">
-            <h2>2. Tree Risk Management</h2>
-            <p>Ensure the safety of your trees and property with our Risk Management services. Living in the West Kootenays means coexisting with very tall trees and the occasional intense windstorm. Our tree risk management offerings are designed to identify potential hazards early and mitigate them in a responsible way.</p>
-        </div>
-
-        <div class="service-grid">
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3c-1.5 0-2.5 1-2.5 2.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-1.5-1-2.5-2.5-2.5z"/>
-                        <path d="M12 8v3"/>
-                        <path d="M10 14h4"/>
-                        <path d="M8 21h8"/>
-                        <path d="M12 11l-2 3h4l-2 3"/>
-                        <path d="M3 21h18"/>
-                        <path d="M19 21v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v1"/>
-                        <path d="M4 10h2"/>
-                        <path d="M18 10h2"/>
-                        <path d="M15 3.5c1 .5 2 2 2 3.5"/>
-                        <path d="M9 3.5c-1 .5-2 2-2 3.5"/>
-                    </svg>
+                
+                <!-- East Quadrant: Tree Risk Management -->
+                <div id="risk-management" class="compass-quadrant">
+                    <div class="quadrant-title east-title">Tree Risk Management</div>
+                    <div class="service-cards east-cards">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3c-1.5 0-2.5 1-2.5 2.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-1.5-1-2.5-2.5-2.5z"/>
+                                    <path d="M12 8v3"/>
+                                    <path d="M10 14h4"/>
+                                    <path d="M8 21h8"/>
+                                    <path d="M12 11l-2 3h4l-2 3"/>
+                                    <path d="M3 21h18"/>
+                                    <path d="M19 21v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v1"/>
+                                    <path d="M4 10h2"/>
+                                    <path d="M18 10h2"/>
+                                    <path d="M15 3.5c1 .5 2 2 2 3.5"/>
+                                    <path d="M9 3.5c-1 .5-2 2-2 3.5"/>
+                                </svg>
+                            </div>
+                            <h3>Risk Assessments</h3>
+                            <a href="services/assessments.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                                    <path d="M12 22v-4"/>
+                                    <path d="M8 22h8"/>
+                                    <path d="M6 10h12"/>
+                                    <path d="M6 10c0 4 6 8 6 8s6-4 6-8"/>
+                                    <path d="M6 14h12"/>
+                                    <path d="M6 18h12"/>
+                                </svg>
+                            </div>
+                            <h3>Cabling & Bracing</h3>
+                            <a href="services/cabling.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                                    <path d="M12 22v-4"/>
+                                    <path d="M8 22h8"/>
+                                    <path d="M4.5 9.5l-2-2"/>
+                                    <path d="M19.5 9.5l2-2"/>
+                                    <path d="M2.5 7.5l2 2"/>
+                                    <path d="M21.5 7.5l-2 2"/>
+                                    <path d="M3 12h3"/>
+                                    <path d="M18 12h3"/>
+                                    <path d="M8 3l-1 1"/>
+                                    <path d="M16 3l1 1"/>
+                                </svg>
+                            </div>
+                            <h3>Storm Damage</h3>
+                            <a href="services/emergency.html" class="service-link">Learn More →</a>
+                        </div>
+                    </div>
                 </div>
-                <h3>Tree Risk Assessments & Consultations</h3>
-                <p>Science-backed tree health evaluations conducted by ISA Certified Arborists to identify potential hazards.</p>
-                <a href="services/assessments.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M6 10h12"/>
-                        <path d="M6 10c0 4 6 8 6 8s6-4 6-8"/>
-                        <path d="M6 14h12"/>
-                        <path d="M6 18h12"/>
-                    </svg>
+                
+                <!-- South Quadrant: Tree Removal & Alternatives -->
+                <div id="removal" class="compass-quadrant">
+                    <div class="quadrant-title south-title">Tree Removal & Alternatives</div>
+                    <div class="service-cards south-cards">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                                    <path d="M12 22v-4"/>
+                                    <path d="M8 22h8"/>
+                                    <path d="M7 8c-2 0-3 1-3 3"/>
+                                    <path d="M17 8c2 0 3 1 3 3"/>
+                                    <path d="M7 16a3 3 0 0 1-3-3"/>
+                                    <path d="M17 16a3 3 0 0 0 3-3"/>
+                                    <circle cx="5" cy="11" r="1"/>
+                                    <circle cx="19" cy="11" r="1"/>
+                                </svg>
+                            </div>
+                            <h3>Tree Removal</h3>
+                            <a href="services/removal.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="4" width="16" height="16" rx="1"/>
+                                    <path d="M4 8h16"/>
+                                    <path d="M8 4v16"/>
+                                    <path d="M4 12h4"/>
+                                    <path d="M12 12h8"/>
+                                    <path d="M12 4v16"/>
+                                    <path d="M4 16h4"/>
+                                    <path d="M12 16h8"/>
+                                    <path d="M16 4v16"/>
+                                    <path d="M4 20h16"/>
+                                </svg>
+                            </div>
+                            <h3>Value-Added Wood</h3>
+                            <a href="services/milling.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22v-7"/>
+                                    <path d="M12 15l-2-3"/>
+                                    <path d="M12 15l2-3"/>
+                                    <path d="M12 8v4"/>
+                                    <path d="M12 8c-2 0-4-1.5-4-4 0 0 1 1 4 1s4-1 4-1c0 2.5-2 4-4 4z"/>
+                                    <path d="M9 15c-2 0-5-1-5-5 0 0 1.5 2 5 2"/>
+                                    <path d="M15 15c2 0 5-1 5-5 0 0-1.5 2-5 2"/>
+                                    <path d="M9 22h6"/>
+                                    <path d="M9 19h6"/>
+                                </svg>
+                            </div>
+                            <h3>Tree Planting</h3>
+                            <a href="services/planting.html" class="service-link">Learn More →</a>
+                        </div>
+                    </div>
                 </div>
-                <h3>Cabling & Bracing</h3>
-                <p>Professional structural support systems that meet ANSI A300 standards to preserve valuable trees.</p>
-                <a href="services/cabling.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M4.5 9.5l-2-2"/>
-                        <path d="M19.5 9.5l2-2"/>
-                        <path d="M2.5 7.5l2 2"/>
-                        <path d="M21.5 7.5l-2 2"/>
-                        <path d="M3 12h3"/>
-                        <path d="M18 12h3"/>
-                        <path d="M8 3l-1 1"/>
-                        <path d="M16 3l1 1"/>
-                    </svg>
+                
+                <!-- West Quadrant: Specialty Tree Services -->
+                <div id="specialty" class="compass-quadrant">
+                    <div class="quadrant-title west-title">Specialty Tree Services</div>
+                    <div class="service-cards west-cards">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
+                                    <path d="M12 22v-4"/>
+                                    <path d="M8 22h8"/>
+                                    <path d="M6 12h12"/>
+                                    <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
+                                    <path d="M10 12v-1"/>
+                                    <path d="M14 12v-1"/>
+                                    <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
+                                </svg>
+                            </div>
+                            <h3>Animal Rescue</h3>
+                            <a href="services/animal-rescue.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22v-4"/>
+                                    <path d="M10 18h4"/>
+                                    <path d="M12 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                    <path d="M12 11v3"/>
+                                    <path d="M9 14h6"/>
+                                    <path d="M17 10c2 0 3 1.5 3 3s-1 3-3 3"/>
+                                    <path d="M7 10c-2 0-3 1.5-3 3s1 3 3 3"/>
+                                </svg>
+                            </div>
+                            <h3>Canopy Science</h3>
+                            <a href="services/canopy-science.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                    <path d="M12 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                                </svg>
+                            </div>
+                            <h3>Treehouse Installation</h3>
+                            <a href="services/treehouse-installation.html" class="service-link">Learn More →</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 2v4"/>
+                                    <path d="M12 18v4"/>
+                                    <path d="M4.93 4.93l2.83 2.83"/>
+                                    <path d="M16.24 16.24l2.83 2.83"/>
+                                    <path d="M2 12h4"/>
+                                    <path d="M18 12h4"/>
+                                    <path d="M4.93 19.07l2.83-2.83"/>
+                                    <path d="M16.24 7.76l2.83-2.83"/>
+                                </svg>
+                            </div>
+                            <h3>Artistic Services</h3>
+                            <a href="services/artistic-services.html" class="service-link">Learn More →</a>
+                        </div>
+                    </div>
                 </div>
-                <h3>Storm Damage Mitigation</h3>
-                <p>Emergency response and proactive preparation for extreme weather events that affect your trees.</p>
-                <a href="services/emergency.html" class="service-link">Learn More →</a>
-            </div>
-        </div>
-
-        <div id="removal" class="service-category">
-            <h2>3. Tree Removal & Alternatives</h2>
-            <p>When a tree must be removed, we ensure it's done safely and responsibly. We always consider alternatives to complete removal when appropriate, including habitat creation and fire-safe management approaches.</p>
-        </div>
-
-        <div class="service-grid">
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M7 8c-2 0-3 1-3 3"/>
-                        <path d="M17 8c2 0 3 1 3 3"/>
-                        <path d="M7 16a3 3 0 0 1-3-3"/>
-                        <path d="M17 16a3 3 0 0 0 3-3"/>
-                        <circle cx="5" cy="11" r="1"/>
-                        <circle cx="19" cy="11" r="1"/>
-                    </svg>
-                </div>
-                <h3>Tree Removal & Alternatives</h3>
-                <p>Thoughtful, professional tree removal with ecological alternatives including wildlife snags and fire-safe management.</p>
-                <a href="services/removal.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="4" width="16" height="16" rx="1"/>
-                        <path d="M4 8h16"/>
-                        <path d="M8 4v16"/>
-                        <path d="M4 12h4"/>
-                        <path d="M12 12h8"/>
-                        <path d="M12 4v16"/>
-                        <path d="M4 16h4"/>
-                        <path d="M12 16h8"/>
-                        <path d="M16 4v16"/>
-                        <path d="M4 20h16"/>
-                    </svg>
-                </div>
-                <h3>Value-Added Wood Services</h3>
-                <p>Transform your trees into enduring beauty through expert milling, craftsmanship and upcycling.</p>
-                <a href="services/milling.html" class="service-link">Learn More →</a>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22v-7"/>
-                        <path d="M12 15l-2-3"/>
-                        <path d="M12 15l2-3"/>
-                        <path d="M12 8v4"/>
-                        <path d="M12 8c-2 0-4-1.5-4-4 0 0 1 1 4 1s4-1 4-1c0 2.5-2 4-4 4z"/>
-                        <path d="M9 15c-2 0-5-1-5-5 0 0 1.5 2 5 2"/>
-                        <path d="M15 15c2 0 5-1 5-5 0 0-1.5 2-5 2"/>
-                        <path d="M9 22h6"/>
-                        <path d="M9 19h6"/>
-                    </svg>
-                </div>
-                <h3>Tree Planting</h3>
-                <p>Precision planting for a thriving, site-specific urban canopy.</p>
-                <a href="services/planting.html" class="service-link">Learn More →</a>
-            </div>
-        </div>
-
-        <div id="specialty" class="service-category">
-            <h2>4. Specialty Tree Services</h2>
-            <p>Our team's advanced climbing and rigging skills enable us to offer specialized services that go beyond traditional tree care. From animal rescue to scientific research support and custom installations, we bring professional arboricultural expertise to unique canopy challenges.</p>
-        </div>
-
-        <div class="service-grid">
-            <div class="service-card">
-                <div class="service-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                        <path d="M12 22v-4"/>
-                        <path d="M8 22h8"/>
-                        <path d="M6 12h12"/>
-                        <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
-                        <path d="M10 12v-1"/>
-                        <path d="M14 12v-1"/>
-                        <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
-                    </svg>
-                </div>
-                <h3>Specialty Tree Services</h3>
-                <p>Unique canopy access services including cat/drone rescue, canopy science support, and recreational installations.</p>
-                <a href="services/rescue.html" class="service-link">Learn More →</a>
             </div>
         </div>
     </section>
