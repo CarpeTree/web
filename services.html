@@ -5,508 +5,467 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Services - Carpe Tree'em</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Service icon styles */
-        .service-icon {
-            width: 80px;
-            height: 80px;
+        /* MODERN TREE-THEMED RADIAL LAYOUT */
+        .radial-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto 60px;
+            height: 700px;
+            font-family: 'Lato', sans-serif;
+        }
+        
+        /* Tree canopy background element */
+        .canopy-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: radial-gradient(
+                ellipse at top,
+                rgba(200, 230, 200, 0.1) 0%,
+                rgba(255, 255, 255, 0) 70%
+            );
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Tree roots background element */
+        .roots-background {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: radial-gradient(
+                ellipse at bottom,
+                rgba(180, 160, 130, 0.1) 0%,
+                rgba(255, 255, 255, 0) 70%
+            );
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Tree-rings central circle - increased by 20% */
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 360px;
+            height: 360px;
+            background-color: transparent;
+            border-radius: 50%;
+            z-index: 10;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            color: var(--deep-forest-green);
+            text-align: center;
+            overflow: hidden;
             border: 2px solid var(--deep-forest-green);
-            border-radius: 50%;
-            padding: 15px;
+            padding-top: 0;
+        }
+        
+        /* Center logo styling - fully opaque and better centered */
+        .center-logo {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            opacity: 1;
             transition: all 0.3s ease;
-            background-color: var(--background-color);
+            transform: translateY(0);
         }
-
-        .service-icon svg {
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-            stroke-width: 1.5;
+        
+        .center-circle:hover .center-logo {
+            opacity: 0.2;
         }
-
-        .service-card:hover .service-icon {
-            background-color: var(--deep-forest-green);
-            color: var(--background-color);
-            transform: scale(1.1);
+        
+        /* Organic connecting elements - more symmetrical */
+        .organic-connectors {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 450px;
+            height: 450px;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            opacity: 0.08;
+            pointer-events: none;
         }
-
-        .service-card:hover .service-icon svg {
-            stroke-width: 2;
+        
+        /* Root-like lines extending from center - more symmetrical */
+        .root-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 2px;
+            transform-origin: 0 50%;
+            background: linear-gradient(to right, rgba(44, 95, 45, 0.7), rgba(44, 95, 45, 0));
+            border-radius: 2px;
+            z-index: 2;
+            width: 200px;
         }
-
-        /* Service grid layout */
-        .service-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-            margin-bottom: 40px;
+        
+        .root-line-1 {
+            transform: rotate(30deg);
         }
-
-        .service-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+        
+        .root-line-2 {
+            transform: rotate(150deg);
         }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        
+        .root-line-3 {
+            transform: rotate(210deg);
         }
-
-        .service-card h3 {
-            margin: 15px 0;
+        
+        .root-line-4 {
+            transform: rotate(330deg);
+        }
+        
+        /* Service sections with improved symmetry */
+        .service-section {
+            position: absolute;
+            z-index: 5;
+            width: 35%;
+        }
+        
+        /* Position sections closer to center */
+        .section-nw {
+            top: 10%;
+            left: 10%;
+        }
+        
+        .section-ne {
+            top: 10%;
+            right: 10%;
+        }
+        
+        .section-sw {
+            bottom: 10%;
+            left: 10%;
+        }
+        
+        .section-se {
+            bottom: 10%;
+            right: 10%;
+        }
+        
+        /* Move category titles outside the wheel */
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
             color: var(--deep-forest-green);
-        }
-
-        .service-card p {
-            color: var(--text-color);
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .service-link {
-            color: var(--deep-forest-green);
-            font-weight: bold;
-            text-decoration: none;
+            position: relative;
+            border-bottom: 2px solid var(--muted-golden-amber);
+            padding-bottom: 8px;
             display: inline-block;
-            transition: all 0.3s ease;
-        }
-
-        .service-link:hover {
-            color: var(--warm-earth-brown);
-            transform: translateX(5px);
-        }
-
-        /* Services hero section */
-        .services-hero {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .services-hero h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: var(--deep-forest-green);
-        }
-
-        .services-hero p {
-            font-size: 1.1em;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        /* Service category styles */
-        .service-category {
-            margin-top: 60px;
-            margin-bottom: 30px;
-        }
-        
-        .service-category h2 {
-            color: var(--deep-forest-green);
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-sage-green);
-        }
-        
-        .service-category h3 {
-            color: var(--warm-earth-brown);
-            font-size: 1.3em;
-            margin: 25px 0 15px;
-        }
-        
-        .service-category p {
-            line-height: 1.6;
+            font-family: 'Montserrat', sans-serif;
             margin-bottom: 15px;
         }
         
-        .service-category ul {
-            margin: 15px 0 25px 25px;
+        /* Top sections have title above */
+        .section-nw .section-title,
+        .section-ne .section-title {
+            margin-bottom: 15px;
         }
         
-        .service-category li {
+        /* Bottom sections have title below */
+        .section-sw .section-title,
+        .section-se .section-title {
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+        
+        .section-nw .section-title {
+            text-align: left;
+            margin-left: 10px;
+        }
+        
+        .section-ne .section-title {
+            text-align: right;
+            margin-right: 10px;
+            float: right;
+        }
+        
+        .section-sw .section-title {
+            text-align: left;
+            margin-left: 10px;
+            clear: both;
+        }
+        
+        .section-se .section-title {
+            text-align: right;
+            margin-right: 10px;
+            float: right;
+            clear: both;
+        }
+        
+        /* Service items container */
+        .service-items {
+            clear: both;
+            margin-top: 10px;
+        }
+        
+        /* For bottom sections, reduce the top margin */
+        .section-sw .service-items,
+        .section-se .service-items {
             margin-bottom: 10px;
-            line-height: 1.5;
+            margin-top: 0;
         }
-
-        /* Quick navigation */
-        .quick-nav {
-            background-color: var(--light-sage-green);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-
-        .quick-nav h3 {
-            color: var(--deep-forest-green);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .quick-nav ul {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .quick-nav li a {
-            display: inline-block;
-            padding: 8px 15px;
-            background-color: var(--background-color);
-            color: var(--deep-forest-green);
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
+        
+        /* Individual service items */
+        .service-item {
+            margin: 12px 0;
+            position: relative;
             transition: all 0.3s ease;
         }
-
-        .quick-nav li a:hover {
-            background-color: var(--deep-forest-green);
-            color: white;
+        
+        .section-nw .service-items {
+            text-align: left;
+            padding-left: 20px;
         }
-
+        
+        .section-ne .service-items {
+            text-align: right;
+            padding-right: 20px;
+        }
+        
+        .section-sw .service-items {
+            text-align: left;
+            padding-left: 20px;
+        }
+        
+        .section-se .service-items {
+            text-align: right;
+            padding-right: 20px;
+        }
+        
+        .service-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .service-link {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-block;
+            font-size: 1.1em;
+            font-family: 'Lato', sans-serif;
+            font-weight: 500;
+        }
+        
+        /* Service icons */
+        .service-icon {
+            display: none;
+        }
+        
+        .section-nw .service-icon,
+        .section-sw .service-icon {
+            margin-right: 0;
+        }
+        
+        .section-ne .service-icon,
+        .section-se .service-icon {
+            margin-left: 0;
+        }
+        
+        .service-item:hover .service-icon {
+            opacity: 1;
+        }
+        
+        .service-link:hover {
+            color: var(--warm-earth-brown);
+        }
+        
+        /* Hover effects */
+        .section-nw .service-link:hover,
+        .section-sw .service-link:hover {
+            transform: translateX(5px);
+        }
+        
+        .section-ne .service-link:hover,
+        .section-se .service-link:hover {
+            transform: translateX(-5px);
+        }
+        
+        /* Remove the organic connecting paths */
+        .service-line {
+            display: none;
+        }
+        
+        /* Service summary that appears in center circle on hover */
+        .service-summary {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 15;
+            pointer-events: none;
+            padding: 30px;
+            border-radius: 50%;
+            color: var(--deep-forest-green);
+            box-sizing: border-box;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        
+        .service-summary .summary-content {
+            max-width: 85%;
+            background-color: transparent;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .service-summary .summary-image {
+            display: none;
+        }
+        
+        .service-summary h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--deep-forest-green);
+            text-align: center;
+            text-shadow: 
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff,
+                0 0 8px rgba(255, 255, 255, 0.8);
+        }
+        
+        .service-summary p {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            text-align: center;
+            color: #000;
+            text-shadow: 
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff,
+                0 0 8px rgba(255, 255, 255, 0.8);
+        }
+        
         /* Local considerations box */
         .local-considerations {
             background-color: rgba(var(--light-sage-green-rgb), 0.2);
             border-left: 4px solid var(--deep-forest-green);
             padding: 20px;
-            margin: 30px 0;
+            margin: 30px auto;
+            max-width: 1000px;
             border-radius: 0 8px 8px 0;
+            font-family: 'Lato', sans-serif;
         }
 
         .local-considerations h3 {
             color: var(--deep-forest-green);
             margin-top: 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
         }
-
-        /* Compass Rose Design */
-        .compass-container {
-            position: relative;
-            width: 100%;
+        
+        /* Carpe Tree logo at the top */
+        .logo-header {
+            text-align: center;
+            margin: 20px auto;
             max-width: 1000px;
-            margin: 50px auto;
         }
         
-        .compass-center {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            background-color: var(--deep-forest-green);
-            border-radius: 50%;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .compass-center:hover {
-            transform: scale(1.05);
-        }
-        
-        .compass-center-content {
-            text-align: center;
-            color: white;
-            padding: 20px;
-        }
-        
-        .compass-center-content h2 {
-            margin: 0 0 10px;
-            font-size: 1.5em;
-        }
-        
-        .compass-center-content p {
-            margin: 0;
-            font-size: 0.9em;
-        }
-        
-        .compass-ring {
-            position: relative;
-            width: 100%;
-            height: 800px;
-            margin-top: -100px;
-        }
-        
-        .compass-quadrant {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-        
-        .quadrant-title {
-            position: absolute;
-            width: 200px;
-            height: 60px;
-            background-color: var(--light-sage-green);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--deep-forest-green);
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 5;
-            transition: all 0.3s ease;
-        }
-        
-        .quadrant-title:hover {
-            background-color: var(--deep-forest-green);
-            color: white;
-            transform: scale(1.05);
-        }
-        
-        /* Quadrant positions */
-        .north-title {
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .east-title {
-            top: 50%;
-            right: 50px;
-            transform: translateY(-50%);
-        }
-        
-        .south-title {
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .west-title {
-            top: 50%;
-            left: 50px;
-            transform: translateY(-50%);
-        }
-        
-        .service-cards {
-            position: absolute;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            width: 300px;
-            justify-content: center;
-        }
-        
-        /* Service cards positioning */
-        .north-cards {
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .east-cards {
-            top: 50%;
-            right: 0;
-            transform: translateY(-50%);
-        }
-        
-        .south-cards {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .west-cards {
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-        }
-        
-        .service-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            width: 220px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 2;
-        }
-        
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-        
-        .service-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            color: var(--deep-forest-green);
-            border: 2px solid var(--deep-forest-green);
-            border-radius: 50%;
-            padding: 12px;
-            transition: all 0.3s ease;
-            background-color: var(--background-color);
-        }
-        
-        .service-icon svg {
-            width: 30px;
-            height: 30px;
-            transition: all 0.3s ease;
-            stroke-width: 1.5;
-        }
-        
-        .service-card:hover .service-icon {
-            background-color: var(--deep-forest-green);
-            color: var(--background-color);
-            transform: scale(1.1);
-        }
-        
-        .service-card h3 {
-            margin: 10px 0;
-            color: var(--deep-forest-green);
-            font-size: 1.1em;
-        }
-        
-        .service-link {
-            color: var(--deep-forest-green);
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-        
-        .service-link:hover {
-            color: var(--warm-earth-brown);
-            transform: translateX(5px);
-        }
-        
-        /* Connection lines */
-        .connection-line {
-            position: absolute;
-            background-color: var(--light-sage-green);
-            opacity: 0.6;
-            z-index: 1;
-        }
-        
-        .line-n1, .line-s1 {
-            height: 3px;
-            width: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .line-n1 {
-            top: 100px;
-        }
-        
-        .line-s1 {
-            bottom: 100px;
-        }
-        
-        .line-e1, .line-w1 {
-            width: 3px;
-            height: 100px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        .line-e1 {
-            right: 100px;
-        }
-        
-        .line-w1 {
-            left: 100px;
+        .logo-header img {
+            max-width: 250px;
+            height: auto;
         }
         
         /* Responsive styles */
-        @media (max-width: 1200px) {
-            .compass-ring {
-                height: 700px;
-            }
-            
-            .north-cards, .south-cards {
-                width: 600px;
-            }
-            
-            .east-cards, .west-cards {
-                width: 250px;
-            }
-        }
-        
         @media (max-width: 992px) {
-            .compass-container {
-                margin-top: 30px;
-            }
-            
-            .compass-ring {
+            .radial-container {
                 height: auto;
-                margin-top: 0;
-                display: flex;
-                flex-direction: column;
+                padding: 20px;
+                margin: 30px auto;
             }
             
-            .compass-center {
-                position: static;
-                margin-bottom: 30px;
-            }
-            
-            .compass-quadrant {
-                position: static;
-                height: auto;
-                margin-bottom: 50px;
-            }
-            
-            .quadrant-title {
-                position: static;
-                margin: 0 auto 20px;
+            .center-circle {
+                position: relative;
+                top: 0;
+                left: 0;
                 transform: none;
+                margin: 0 auto 40px;
+                width: 320px;
+                height: 320px;
             }
             
-            .service-cards {
-                position: static;
-                width: 100%;
-                transform: none;
-                justify-content: center;
-            }
-            
-            .connection-line {
+            .organic-connectors, .root-line, .service-line, 
+            .canopy-background, .roots-background {
                 display: none;
             }
-        }
-        
-        @media (max-width: 768px) {
-            .compass-center {
-                width: 180px;
-                height: 180px;
+            
+            .service-section {
+                position: relative;
+                width: 100%;
+                text-align: center;
+                margin-bottom: 40px;
+                top: auto;
+                left: auto;
+                right: auto;
+                bottom: auto;
             }
             
-            .quadrant-title {
-                width: 180px;
+            .section-nw, .section-ne, .section-sw, .section-se {
+                text-align: center;
             }
             
-            .service-card {
-                width: 85%;
-                max-width: 300px;
+            .section-title {
+                display: block;
+                text-align: center;
+            }
+            
+            .section-nw .service-link,
+            .section-ne .service-link,
+            .section-sw .service-link,
+            .section-se .service-link {
+                padding: 0;
+            }
+            
+            .service-item {
+                margin: 15px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-nw .service-link:hover {
+                transform: translateX(0);
+            }
+            
+            .section-nw .service-icon,
+            .section-ne .service-icon,
+            .section-sw .service-icon,
+            .section-se .service-icon {
+                margin: 0 0 5px 0;
+                display: block;
+            }
+            
+            .service-item:hover {
+                transform: translateY(-3px);
+            }
+            
+            .section-ne .service-link:hover,
+            .section-sw .service-link:hover,
+            .section-se .service-link:hover {
+                transform: translateX(0);
             }
         }
     </style>
@@ -530,273 +489,216 @@
     </nav>
 
     <section class="content">
-        <div class="services-hero">
-            <h1>Our Services</h1>
-            <p>At Carpe Tree'em, we take tree care to heart—because trees are the backbone of our landscapes, and we believe in keeping them standing tall for generations. Our services are deeply rooted in science-backed arboriculture, ensuring your trees remain safe, healthy, and beautiful in the diverse environments of the West Kootenays.</p>
+        <!-- MODERN TREE-THEMED RADIAL LAYOUT -->
+        <div class="radial-container">
+            <!-- Tree-themed background elements -->
+            <div class="canopy-background"></div>
+            <div class="roots-background"></div>
+            
+            <!-- Organic connecting lines (root-like) -->
+            <div class="organic-connectors">
+                <div class="root-line root-line-1"></div>
+                <div class="root-line root-line-2"></div>
+                <div class="root-line root-line-3"></div>
+                <div class="root-line root-line-4"></div>
+            </div>
+            
+            <!-- Central circle with hero logo -->
+            <div class="center-circle">
+                <img src="images/hero.png" alt="Carpe Tree'em Logo" class="center-logo">
+                
+                <!-- Service summaries - they'll be shown on hover -->
+                <div id="soil-health-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Soil & Root Health</h4>
+                        <p>We analyze and improve your soil conditions to optimize root health, ensuring your trees have a strong foundation for growth and longevity.</p>
+                    </div>
+                </div>
+                
+                <div id="pruning-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Pruning</h4>
+                        <p>Our professional pruning services enhance tree structure, health, and aesthetics while promoting safety and longevity through careful technique.</p>
+                    </div>
+                </div>
+                
+                <div id="planting-summary" class="service-summary" style="background-image: url('images/services/tree-planting2.jpg'); background-position: center; background-size: cover;">
+                    <div class="summary-content">
+                        <h4>Tree Planting</h4>
+                        <p>We ensure successful tree establishment through proper species selection, planting techniques, and initial care tailored to your local environment.</p>
+                    </div>
+                </div>
+                
+                <div id="risk-assessment-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Risk Assessments</h4>
+                        <p>Our comprehensive evaluations identify potential hazards to protect your property and loved ones from tree-related risks.</p>
+                    </div>
+                </div>
+                
+                <div id="cabling-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Cabling & Bracing</h4>
+                        <p>We provide structural support for vulnerable trees, preserving them safely with professional reinforcement techniques.</p>
+                    </div>
+                </div>
+                
+                <div id="storm-damage-summary" class="service-summary" style="background-image: url('images/services/storm-pruning-after.jpeg'); background-position: center; background-size: cover;">
+                    <div class="summary-content">
+                        <h4>Storm & Fire Damage</h4>
+                        <p>Quick response and professional handling of storm or fire-damaged trees to prevent further property damage and restore safety. Our before and after results show how we can transform damaged trees into safe, aesthetically pleasing assets.</p>
+                    </div>
+                </div>
+                
+                <div id="removal-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Tree Removal</h4>
+                        <p>When necessary, we safely and efficiently remove trees with minimal impact to surrounding landscape and structures.</p>
+                    </div>
+                </div>
+                
+                <div id="milling-summary" class="service-summary" style="background-image: url('images/services/milling-timber.jpg');">
+                    <div class="summary-content">
+                        <h4>Milling</h4>
+                        <p>Transform removed trees into valuable lumber, giving them new life as sustainable wood products for your home or projects. Our portable sawmill creates high-quality dimensional lumber from trees right on your property.</p>
+                    </div>
+                </div>
+                
+                <div id="wildlife-summary" class="service-summary" style="background-image: url('images/services/wildlife-tree.jpg'); background-position: calc(50% - 95px) center; background-size: 150%;">
+                    <div class="summary-content">
+                        <h4>Wildlife Snags</h4>
+                        <p>Convert hazardous trees into valuable wildlife habitat, supporting local biodiversity while maintaining safety. These modified trees provide essential nesting cavities and foraging sites for woodpeckers, owls, and other cavity-nesting species.</p>
+                    </div>
+                </div>
+                
+                <div id="animal-rescue-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Cat & Drone Rescue</h4>
+                        <p>Professional and humane retrieval of cats, drones, and anything of value stuck in difficult locations. Whether it's a pet up a tree, a drone caught in branches, or valuables down a crevasse, our climbing technicians can safely recover it.</p>
+                    </div>
+                </div>
+                
+                <div id="canopy-science-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Canopy Science</h4>
+                        <p>Research and monitoring services in tree canopies to support conservation, education, and scientific understanding.</p>
+                    </div>
+                </div>
+                
+                <div id="treehouse-summary" class="service-summary">
+                    <div class="summary-content">
+                        <h4>Treehouse & Walkways</h4>
+                        <p>Custom design and installation of tree-supported structures that blend with nature while preserving tree health.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tree Health & Preservation -->
+            <div id="tree-health" class="service-section section-nw">
+                <h3 class="section-title">Tree Health & Preservation</h3>
+                <div class="service-items">
+                    <div class="service-item" data-summary="soil-health-summary">
+                        <a href="services/soil-health.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            Soil & Root Health
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="pruning-summary">
+                        <a href="services/pruning.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg>
+                            Pruning
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="planting-summary">
+                        <a href="services/planting.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Tree Planting
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tree Risk Management -->
+            <div id="risk-management" class="service-section section-ne">
+                <h3 class="section-title">Tree Risk Management</h3>
+                <div class="service-items">
+                    <div class="service-item" data-summary="risk-assessment-summary">
+                        <a href="services/assessments.html" class="service-link">
+                            Risk Assessments
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="cabling-summary">
+                        <a href="services/cabling.html" class="service-link">
+                            Cabling & Bracing
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="storm-damage-summary">
+                        <a href="services/emergency.html" class="service-link">
+                            Storm & Fire Damage
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tree Removal & Alternatives -->
+            <div id="removal" class="service-section section-sw">
+                <div class="service-items">
+                    <div class="service-item" data-summary="removal-summary">
+                        <a href="services/removal.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Tree Removal
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="milling-summary">
+                        <a href="services/milling.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            Milling
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="wildlife-summary">
+                        <a href="services/wildlife-snags.html" class="service-link">
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+                            Wildlife Snags
+                        </a>
+                    </div>
+                </div>
+                <h3 class="section-title">Tree Solutions</h3>
+            </div>
+            
+            <!-- Climbing Technician (Previously Specialty Tree Services) -->
+            <div id="climbing" class="service-section section-se">
+                <div class="service-items">
+                    <div class="service-item" data-summary="animal-rescue-summary">
+                        <a href="services/animal-rescue.html" class="service-link">
+                            Cat & Drone Rescue
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="canopy-science-summary">
+                        <a href="services/canopy-science.html" class="service-link">
+                            Canopy Science
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="14.31" y1="8" x2="20.05" y2="17.94"></line><line x1="9.69" y1="8" x2="21.17" y2="8"></line><line x1="7.38" y1="12" x2="13.12" y2="2.06"></line><line x1="9.69" y1="16" x2="3.95" y2="6.06"></line><line x1="14.31" y1="16" x2="2.83" y2="16"></line><line x1="16.62" y1="12" x2="10.88" y2="21.94"></line></svg>
+                        </a>
+                    </div>
+                    <div class="service-item" data-summary="treehouse-summary">
+                        <a href="services/treehouse-installation.html" class="service-link">
+                            Treehouse & Walkways
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        </a>
+                    </div>
+                </div>
+                <h3 class="section-title">Climbing Technician</h3>
+            </div>
         </div>
-
+        
+        <!-- Local considerations moved below the radial layout -->
         <div class="local-considerations">
             <h3>West Kootenays Climate Considerations</h3>
             <p>The West Kootenays' unique climate—with mild, wet winters and dry summers—creates specific challenges for tree care. This variable climate leads to vigorous tree growth but also increases risks of disease, storm damage, and drought stress. Our approach to tree care is tailored to these local conditions, ensuring your trees thrive in our specific environment.</p>
         </div>
-
-        <div class="quick-nav">
-            <h3>Quick Navigation</h3>
-            <ul>
-                <li><a href="#tree-health">Tree Health & Preservation</a></li>
-                <li><a href="#risk-management">Tree Risk Management</a></li>
-                <li><a href="#removal">Tree Removal & Alternatives</a></li>
-                <li><a href="#specialty">Specialty Tree Services</a></li>
-            </ul>
-        </div>
-
-        <div class="compass-container">
-            <!-- Central Hub -->
-            <div class="compass-center">
-                <div class="compass-center-content">
-                    <h2>Tree Care Services</h2>
-                    <p>Holistic arboriculture for the West Kootenays</p>
-                </div>
-            </div>
-            
-            <!-- Connection Lines -->
-            <div class="connection-line line-n1"></div>
-            <div class="connection-line line-e1"></div>
-            <div class="connection-line line-s1"></div>
-            <div class="connection-line line-w1"></div>
-            
-            <div class="compass-ring">
-                <!-- North Quadrant: Tree Health & Preservation -->
-                <div id="tree-health" class="compass-quadrant">
-                    <div class="quadrant-title north-title">Tree Health & Preservation</div>
-                    <div class="service-cards north-cards">
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2v4"/>
-                                    <path d="M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4"/>
-                                    <path d="M4 10v6c0 2 2 4 4 4h8c2 0 4-2 4-4v-6"/>
-                                    <path d="M12 10v10"/>
-                                    <path d="M4 14h16"/>
-                                    <path d="M2 10h20"/>
-                                    <path d="M7.5 17.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
-                                    <path d="M7.5 14.5c1-1 3-1 4.5 0 1.5-1 3.5-1 4.5 0"/>
-                                </svg>
-                            </div>
-                            <h3>Soil & Root Health</h3>
-                            <a href="services/soil-health.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                                    <path d="M12 22v-4"/>
-                                    <path d="M8 22h8"/>
-                                    <path d="M6 12h12"/>
-                                    <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
-                                    <path d="M10 12v-1"/>
-                                    <path d="M14 12v-1"/>
-                                    <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
-                                </svg>
-                            </div>
-                            <h3>Pruning</h3>
-                            <a href="services/pruning.html" class="service-link">Learn More →</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- East Quadrant: Tree Risk Management -->
-                <div id="risk-management" class="compass-quadrant">
-                    <div class="quadrant-title east-title">Tree Risk Management</div>
-                    <div class="service-cards east-cards">
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 3c-1.5 0-2.5 1-2.5 2.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-1.5-1-2.5-2.5-2.5z"/>
-                                    <path d="M12 8v3"/>
-                                    <path d="M10 14h4"/>
-                                    <path d="M8 21h8"/>
-                                    <path d="M12 11l-2 3h4l-2 3"/>
-                                    <path d="M3 21h18"/>
-                                    <path d="M19 21v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v1"/>
-                                    <path d="M4 10h2"/>
-                                    <path d="M18 10h2"/>
-                                    <path d="M15 3.5c1 .5 2 2 2 3.5"/>
-                                    <path d="M9 3.5c-1 .5-2 2-2 3.5"/>
-                                </svg>
-                            </div>
-                            <h3>Risk Assessments</h3>
-                            <a href="services/assessments.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                                    <path d="M12 22v-4"/>
-                                    <path d="M8 22h8"/>
-                                    <path d="M6 10h12"/>
-                                    <path d="M6 10c0 4 6 8 6 8s6-4 6-8"/>
-                                    <path d="M6 14h12"/>
-                                    <path d="M6 18h12"/>
-                                </svg>
-                            </div>
-                            <h3>Cabling & Bracing</h3>
-                            <a href="services/cabling.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                                    <path d="M12 22v-4"/>
-                                    <path d="M8 22h8"/>
-                                    <path d="M4.5 9.5l-2-2"/>
-                                    <path d="M19.5 9.5l2-2"/>
-                                    <path d="M2.5 7.5l2 2"/>
-                                    <path d="M21.5 7.5l-2 2"/>
-                                    <path d="M3 12h3"/>
-                                    <path d="M18 12h3"/>
-                                    <path d="M8 3l-1 1"/>
-                                    <path d="M16 3l1 1"/>
-                                </svg>
-                            </div>
-                            <h3>Storm Damage</h3>
-                            <a href="services/emergency.html" class="service-link">Learn More →</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- South Quadrant: Tree Removal & Alternatives -->
-                <div id="removal" class="compass-quadrant">
-                    <div class="quadrant-title south-title">Tree Removal & Alternatives</div>
-                    <div class="service-cards south-cards">
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                                    <path d="M12 22v-4"/>
-                                    <path d="M8 22h8"/>
-                                    <path d="M7 8c-2 0-3 1-3 3"/>
-                                    <path d="M17 8c2 0 3 1 3 3"/>
-                                    <path d="M7 16a3 3 0 0 1-3-3"/>
-                                    <path d="M17 16a3 3 0 0 0 3-3"/>
-                                    <circle cx="5" cy="11" r="1"/>
-                                    <circle cx="19" cy="11" r="1"/>
-                                </svg>
-                            </div>
-                            <h3>Tree Removal</h3>
-                            <a href="services/removal.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="4" y="4" width="16" height="16" rx="1"/>
-                                    <path d="M4 8h16"/>
-                                    <path d="M8 4v16"/>
-                                    <path d="M4 12h4"/>
-                                    <path d="M12 12h8"/>
-                                    <path d="M12 4v16"/>
-                                    <path d="M4 16h4"/>
-                                    <path d="M12 16h8"/>
-                                    <path d="M16 4v16"/>
-                                    <path d="M4 20h16"/>
-                                </svg>
-                            </div>
-                            <h3>Value-Added Wood</h3>
-                            <a href="services/milling.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22v-7"/>
-                                    <path d="M12 15l-2-3"/>
-                                    <path d="M12 15l2-3"/>
-                                    <path d="M12 8v4"/>
-                                    <path d="M12 8c-2 0-4-1.5-4-4 0 0 1 1 4 1s4-1 4-1c0 2.5-2 4-4 4z"/>
-                                    <path d="M9 15c-2 0-5-1-5-5 0 0 1.5 2 5 2"/>
-                                    <path d="M15 15c2 0 5-1 5-5 0 0-1.5 2-5 2"/>
-                                    <path d="M9 22h6"/>
-                                    <path d="M9 19h6"/>
-                                </svg>
-                            </div>
-                            <h3>Tree Planting</h3>
-                            <a href="services/planting.html" class="service-link">Learn More →</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- West Quadrant: Specialty Tree Services -->
-                <div id="specialty" class="compass-quadrant">
-                    <div class="quadrant-title west-title">Specialty Tree Services</div>
-                    <div class="service-cards west-cards">
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L8 6l4 2-4 2 4 2-4 2 4 2-4 2 4 2 4-2-4-2 4-2-4-2 4-2-4-2 4-2-4-4z"/>
-                                    <path d="M12 22v-4"/>
-                                    <path d="M8 22h8"/>
-                                    <path d="M6 12h12"/>
-                                    <path d="M8 12c0-2 2-3 4-3s4 1 4 3"/>
-                                    <path d="M10 12v-1"/>
-                                    <path d="M14 12v-1"/>
-                                    <path d="M10 15c0 1.5 1 2 2 2s2-.5 2-2"/>
-                                </svg>
-                            </div>
-                            <h3>Animal Rescue</h3>
-                            <a href="services/animal-rescue.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 22v-4"/>
-                                    <path d="M10 18h4"/>
-                                    <path d="M12 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                                    <path d="M12 11v3"/>
-                                    <path d="M9 14h6"/>
-                                    <path d="M17 10c2 0 3 1.5 3 3s-1 3-3 3"/>
-                                    <path d="M7 10c-2 0-3 1.5-3 3s1 3 3 3"/>
-                                </svg>
-                            </div>
-                            <h3>Canopy Science</h3>
-                            <a href="services/canopy-science.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                    <polyline points="9 22 9 12 15 12 15 22"/>
-                                    <path d="M12 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-                                </svg>
-                            </div>
-                            <h3>Treehouse Installation</h3>
-                            <a href="services/treehouse-installation.html" class="service-link">Learn More →</a>
-                        </div>
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M12 2v4"/>
-                                    <path d="M12 18v4"/>
-                                    <path d="M4.93 4.93l2.83 2.83"/>
-                                    <path d="M16.24 16.24l2.83 2.83"/>
-                                    <path d="M2 12h4"/>
-                                    <path d="M18 12h4"/>
-                                    <path d="M4.93 19.07l2.83-2.83"/>
-                                    <path d="M16.24 7.76l2.83-2.83"/>
-                                </svg>
-                            </div>
-                            <h3>Artistic Services</h3>
-                            <a href="services/artistic-services.html" class="service-link">Learn More →</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta-section">
-        <h2>Ready to Care for Your Trees?</h2>
-        <p>Schedule a consultation today and take the first step toward truly informed tree care.</p>
-        <a href="lets-talk.html" class="cta-button">Get Started</a>
     </section>
 
     <!-- Footer -->
@@ -807,5 +709,73 @@
             </div>
         </div>
     </footer>
+
+    <!-- JavaScript for service summaries on hover -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all service items
+            const serviceItems = document.querySelectorAll('.service-item');
+            const centerLogo = document.querySelector('.center-logo');
+            const summaries = document.querySelectorAll('.service-summary');
+            
+            // First, ensure all summaries are hidden initially
+            summaries.forEach(summary => {
+                summary.style.opacity = '0';
+                summary.style.pointerEvents = 'none';
+            });
+            
+            // Add event listeners to each service item
+            serviceItems.forEach(item => {
+                const summaryId = item.getAttribute('data-summary');
+                const summary = document.getElementById(summaryId);
+                
+                if (summary) {
+                    // Show summary on mouse enter
+                    item.addEventListener('mouseenter', function() {
+                        // Hide all summaries first
+                        summaries.forEach(el => {
+                            el.style.opacity = '0';
+                        });
+                        
+                        // Show this one
+                        summary.style.opacity = '1';
+                        
+                        // Ensure logo is faded
+                        if (centerLogo) centerLogo.style.opacity = '0.2';
+                    });
+                    
+                    // Hide summary on mouse leave
+                    item.addEventListener('mouseleave', function() {
+                        // Small delay to prevent flickering when moving between items
+                        setTimeout(function() {
+                            // Only hide if we're not hovering any service item
+                            if (!document.querySelector('.service-item:hover')) {
+                                summary.style.opacity = '0';
+                                
+                                // Restore logo opacity when not hovering
+                                if (centerLogo) centerLogo.style.opacity = '1';
+                            }
+                        }, 50);
+                    });
+                }
+            });
+            
+            // Add direct hover handling for center circle
+            const centerCircle = document.querySelector('.center-circle');
+            if (centerCircle) {
+                centerCircle.addEventListener('mouseenter', function() {
+                    // If we're not showing any summary, restore full logo opacity
+                    if (!document.querySelector('.service-summary[style*="opacity: 1"]')) {
+                        if (centerLogo) centerLogo.style.opacity = '1';
+                    }
+                });
+            }
+            
+            // Debug check - log if any elements weren't found
+            if (serviceItems.length === 0) console.warn('No service items found');
+            if (!centerLogo) console.warn('Center logo not found');
+            if (summaries.length === 0) console.warn('No service summaries found');
+        });
+    </script>
 </body>
 </html> 
