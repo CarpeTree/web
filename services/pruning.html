@@ -56,6 +56,48 @@
             display: inline-block;
             margin-top: 15px;
         }
+        
+        .before-after-container {
+            margin: 40px 0;
+            background-color: rgba(var(--light-sage-green-rgb), 0.2);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .before-after-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .before-after-image {
+            flex: 1;
+            min-width: 300px;
+            max-width: 48%;
+        }
+        
+        .before-after-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .image-caption {
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--deep-forest-green);
+        }
+        
+        @media (max-width: 768px) {
+            .before-after-image {
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -121,6 +163,22 @@
             <p>Fruit trees require a specialized pruning approach to maximize fruit yield while maintaining tree health. We prune fruit trees (such as walnut, apple, pear, plum, and cherry trees common in the Kootenays) with a focus on creating an open, balanced canopy that allows sunlight to reach fruit-bearing wood.</p>
             
             <p>By thinning out dense clusters of branches and removing vertical "water sprouts," we help sunlight and air circulate, which improves fruit quality and reduces fungal diseases (a critical concern in our damp West Kootenays climate).</p>
+            
+            <div class="before-after-container">
+                <h3>Fruit Tree Pruning: Before & After</h3>
+                <p>This apple tree transformation demonstrates how proper pruning improves structure and opens the canopy for better air circulation and light penetration, which leads to improved fruit production and reduced disease pressure.</p>
+                
+                <div class="before-after-images">
+                    <div class="before-after-image">
+                        <img src="../images/services/pruning/fruit-tree-before.jpg" alt="Apple tree before pruning" onerror="this.style.display='none'">
+                        <p class="image-caption">Before: This apple tree has overcrowded branches, crossing limbs, and poor structure.</p>
+                    </div>
+                    <div class="before-after-image">
+                        <img src="../images/services/pruning/fruit-tree-after.jpg" alt="Apple tree after pruning" onerror="this.style.display='none'">
+                        <p class="image-caption">After: The pruned tree has an open center, well-spaced branches, and improved access to sunlight.</p>
+                    </div>
+                </div>
+            </div>
             
             <h3>Our fruit tree pruning techniques include:</h3>
             <ul class="feature-list">
