@@ -746,80 +746,19 @@
     </p>
   </section>
 
-  <!-- SERVICES SECTION: Popular Services buttons -->
-  <section class="services" id="services">
-    <h2>Our Services</h2>
-    <div class="service-grid">
-        <a href="services/assessments.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Tree Assessment</span>
-        </a>
-        <a href="services/pruning.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Precision Pruning</span>
-        </a>
-        <a href="services/soil-health.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Soil & Root Health</span>
-        </a>
-        <a href="services/emergency.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Emergency Response</span>
-        </a>
-        <a href="services/cabling.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Cabling & Bracing</span>
-        </a>
-        <a href="services/planting.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Tree Planting</span>
-        </a>
-        <a href="services/removal.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Tree Removal</span>
-        </a>
-        <a href="services/milling.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Custom Milling</span>
-        </a>
-        <a href="services/rescue.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Cat & Drone Rescue</span>
-        </a>
-        <a href="services/tree-installations.html" class="service-item">
-            <div class="service-icon">
-                <img src="images/logo.png" alt="Carpe Tree'em Logo">
-            </div>
-            <span class="service-name">Tree Installations</span>
-        </a>
+  <!-- TESTIMONIALS SECTION -->
+  <section class="content" id="testimonials">
+    <h2>Client Feedback</h2>
+    <div class="testimonial-container">
+      <div class="testimonial">
+        <p>"The team at Carpe Tree'em provided exceptional service. Their knowledge of tree health and commitment to sustainable practices really impressed me."</p>
+        <p class="testimonial-author">- Sarah K., Nelson</p>
+      </div>
+      <div class="testimonial">
+        <p>"I appreciated their honest assessment - they recommended preservation instead of removal, saving us money while protecting a beautiful tree on our property."</p>
+        <p class="testimonial-author">- Michael T., Castlegar</p>
+      </div>
     </div>
-  </section>
-
-  <!-- BLOG/EDUCATION SECTION: Placeholder for future content -->
-  <section class="content" id="blog">
-    <h2>learning hub</h2>
-    <p>
-      Explore our tree health guides and seasonal care tips to keep your trees thriving.
-    </p>
-    <p><em>Blog posts coming soon...</em></p>
   </section>
 
   <!-- CONTACT SECTION: Contact details and simple form -->
@@ -1002,6 +941,50 @@
           document.body.classList.remove('menu-open');
         }
       });
+    });
+  </script>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile menu toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          this.classList.toggle('active');
+          navLinks.classList.toggle('active');
+        });
+      }
+      
+      // Close menu when a link is clicked
+      const navItems = document.querySelectorAll('.nav-links a');
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+          }
+        });
+      });
+    });
+    
+    // Quote popup functionality
+    function openQuotePopup() {
+      document.getElementById('quoteModal').style.display = 'flex';
+    }
+    
+    function closeQuotePopup() {
+      document.getElementById('quoteModal').style.display = 'none';
+    }
+
+    // Close popup when clicking outside of the modal content
+    window.addEventListener('click', function(event) {
+      var modal = document.getElementById('quoteModal');
+      if (event.target == modal) {
+        closeQuotePopup();
+      }
     });
   </script>
 </body>
