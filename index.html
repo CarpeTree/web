@@ -713,8 +713,6 @@
         <a href="index.html">Home</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="services.html">Services</a>
-        <a href="root-knowledge.html">Root Knowledge</a>
-        <a href="lets-talk.html">Let's Talk Trees</a>
       </div>
     </div>
   </nav>
@@ -746,21 +744,6 @@
     </p>
   </section>
 
-  <!-- TESTIMONIALS SECTION -->
-  <section class="content" id="testimonials">
-    <h2>Client Feedback</h2>
-    <div class="testimonial-container">
-      <div class="testimonial">
-        <p>"The team at Carpe Tree'em provided exceptional service. Their knowledge of tree health and commitment to sustainable practices really impressed me."</p>
-        <p class="testimonial-author">- Sarah K., Nelson</p>
-      </div>
-      <div class="testimonial">
-        <p>"I appreciated their honest assessment - they recommended preservation instead of removal, saving us money while protecting a beautiful tree on our property."</p>
-        <p class="testimonial-author">- Michael T., Castlegar</p>
-      </div>
-    </div>
-  </section>
-
   <!-- GOOGLE REVIEWS SECTION -->
   <section class="content" id="google-reviews">
     <h2>Our Google Reviews</h2>
@@ -775,44 +758,6 @@
       <p>Had a great experience with us? We'd appreciate your feedback!</p>
       <a href="https://g.page/r/YOUR_REVIEW_URL/review" target="_blank" class="review-button">Leave a Review</a>
     </div>
-  </section>
-
-  <!-- CONTACT SECTION: Contact details and simple form -->
-  <section class="content" id="lets-talk">
-    <h2>Let's Talk Trees</h2>
-    <p>
-      For inquiries, please call us at <a href="tel:7786553741">778-655-3741</a> or email us at <a href="mailto:carpetree@icloud.com">carpetree@icloud.com</a>.
-    </p>
-    <form action="#" method="post">
-      <p>
-        <label for="contact-name">Name:</label><br>
-        <input type="text" id="contact-name" name="contact-name" required>
-      </p>
-      <p>
-        <label for="contact-email">Email:</label><br>
-        <input type="email" id="contact-email" name="contact-email" required>
-      </p>
-      <p>
-        <label for="contact-phone">Phone (for SMS):</label><br>
-        <input type="tel" id="contact-phone" name="contact-phone">
-      </p>
-      <p>
-        <label>Preferred Contact Method:</label><br>
-        <div class="contact-preference">
-          <input type="radio" id="prefer-email" name="contact-preference" value="email" required>
-          <label for="prefer-email">Email</label>
-          <input type="radio" id="prefer-sms" name="contact-preference" value="sms">
-          <label for="prefer-sms">SMS</label>
-        </div>
-      </p>
-      <p>
-        <label for="contact-message">Message:</label><br>
-        <textarea id="contact-message" name="contact-message" rows="4" required></textarea>
-      </p>
-      <p>
-        <button type="submit" class="service-button">Send Message</button>
-      </p>
-    </form>
   </section>
 
   <!-- FOOTER: Social links and final notes -->
@@ -884,71 +829,32 @@
     }
   </script>
 
-  <!-- Add the Root Knowledge section where pricing was -->
-  <section class="content" id="root-knowledge">
-    <h2>Root Knowledge</h2>
-    <p>
-        Understanding trees is the first step to caring for them. Explore our collection of arboricultural insights, scientific research, and practical tree care knowledge.
-    </p>
-    <!-- You can add more content categories here -->
-    <div class="knowledge-categories">
-        <h3>Topics Include:</h3>
-        <ul>
-            <li>Tree Biology & Growth</li>
-            <li>Soil Health & Root Systems</li>
-            <li>Pruning Science</li>
-            <li>Environmental Impact</li>
-            <li>Tree Risk Assessment</li>
-            <li>Seasonal Care Guidelines</li>
-        </ul>
-    </div>
-    <p class="coming-soon">
-      Our comprehensive knowledge base is currently under development. Check back soon to explore in-depth articles, research insights, and practical guides about tree care and environmental stewardship.
-    </p>
-  </section>
-
-  <!-- Add this to your index.html where you want the Video Quote button -->
-  <button onclick="openQuoteForm()" class="quote-button">Video Quote</button>
-
-  <!-- Add this modal/popup HTML structure at the end of your body tag but before closing </body> -->
-  <div id="quoteModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" onclick="closeQuoteForm()">&times;</span>
-        <!-- Form container will go here -->
-        <div class="form-container">
-            <!-- Step indicators -->
-            <div class="step-indicator">
-                <div class="step active">1</div>
-                <div class="step">2</div>
-                <div class="step">3</div>
-            </div>
-
-            <!-- Success message -->
-            <div id="successMessage" class="success-message">
-                <h3>Thank you for your submission!</h3>
-                <p>We'll get back to you shortly.</p>
-            </div>
-
-            <!-- Multi-step form -->
-            <form id="contactForm">
-                <!-- Rest of your form content from lets-talk.html -->
-            </form>
-        </div>
-    </div>
-  </div>
-
   <!-- Mobile Menu JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
       
-      menuToggle.addEventListener('click', function() {
-        navLinks.classList.toggle('active');
-        this.classList.toggle('active');
-        document.body.classList.toggle('menu-open');
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          this.classList.toggle('active');
+          navLinks.classList.toggle('active');
+          document.body.classList.toggle('menu-open');
+        });
+      }
+      
+      // Close menu when a link is clicked
+      const navItems = document.querySelectorAll('.nav-links a');
+      navItems.forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+            document.body.classList.remove('menu-open');
+          }
+        });
       });
-
+      
       // Close menu when clicking outside
       document.addEventListener('click', function(e) {
         if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
@@ -960,50 +866,6 @@
     });
   </script>
 
-  <!-- Scripts -->
-  <script>
-    // Mobile menu toggle functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const menuToggle = document.querySelector('.menu-toggle');
-      const navLinks = document.querySelector('.nav-links');
-      
-      if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-          this.classList.toggle('active');
-          navLinks.classList.toggle('active');
-        });
-      }
-      
-      // Close menu when a link is clicked
-      const navItems = document.querySelectorAll('.nav-links a');
-      navItems.forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            navLinks.classList.remove('active');
-            menuToggle.classList.remove('active');
-          }
-        });
-      });
-    });
-    
-    // Quote popup functionality
-    function openQuotePopup() {
-      document.getElementById('quoteModal').style.display = 'flex';
-    }
-    
-    function closeQuotePopup() {
-      document.getElementById('quoteModal').style.display = 'none';
-    }
-
-    // Close popup when clicking outside of the modal content
-    window.addEventListener('click', function(event) {
-      var modal = document.getElementById('quoteModal');
-      if (event.target == modal) {
-        closeQuotePopup();
-      }
-    });
-  </script>
-  
   <!-- Google Reviews Widget Script -->
   <script src="https://apps.elfsight.com/p/platform.js" defer></script>
 </body>
