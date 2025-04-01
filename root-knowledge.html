@@ -5,6 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Root Knowledge - Carpe Tree'em</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .tree-species {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tree-species h2 {
+            color: var(--deep-forest-green);
+            border-bottom: 2px solid var(--warm-earth-brown);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tree-species h3 {
+            color: var(--deep-forest-green);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .tree-species table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .tree-species th {
+            background-color: var(--deep-forest-green);
+            color: white;
+            padding: 10px;
+            text-align: left;
+            width: 200px;
+        }
+
+        .tree-species td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tree-species ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+
+        .tree-species li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .tree-species li:before {
+            content: "•";
+            color: var(--deep-forest-green);
+            position: absolute;
+            left: -15px;
+        }
+
+        .pruning-calendar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .pruning-calendar table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pruning-calendar th, .pruning-calendar td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .pruning-calendar th {
+            background-color: var(--deep-forest-green);
+            color: white;
+        }
+
+        .pest-comparison {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .pest-comparison table {
+            min-width: 800px;
+        }
+
+        .root-systems {
+            margin: 20px 0;
+        }
+
+        .root-systems table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .root-systems th, .root-systems td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .root-systems th {
+            background-color: var(--deep-forest-green);
+            color: white;
+        }
+
+        .species-nav {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .species-nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .species-nav li {
+            margin: 8px 0;
+        }
+
+        .species-nav a {
+            color: var(--deep-forest-green);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .species-nav a:hover {
+            color: var(--warm-earth-brown);
+        }
+
+        @media (max-width: 768px) {
+            .species-nav {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="contact-header">
@@ -25,23 +169,708 @@
     </nav>
 
     <section class="content">
-        <h2>Root Knowledge</h2>
-        <p>Understanding trees is the first step to caring for them. Explore our collection of arboricultural insights, scientific research, and practical tree care knowledge.</p>
-        
-        <div class="knowledge-categories">
-            <h3>Topics Include:</h3>
+        <h1>Trees of the Nelson – Kootenay – Okanagan Region</h1>
+        <p class="subtitle">Native & Introduced Species in Wild and Urban Environments – Zone 5b</p>
+
+        <div class="species-nav">
+            <h3>Species Quick Links</h3>
             <ul>
-                <li>Tree Biology & Growth</li>
-                <li>Soil Health & Root Systems</li>
-                <li>Pruning Science</li>
-                <li>Environmental Impact</li>
-                <li>Tree Risk Assessment</li>
-                <li>Seasonal Care Guidelines</li>
+                <li><a href="#douglas-fir">Douglas-fir (Pseudotsuga menziesii var. glauca)</a></li>
+                <li><a href="#ponderosa-pine">Ponderosa Pine (Pinus ponderosa)</a></li>
+                <li><a href="#lodgepole-pine">Lodgepole Pine (Pinus contorta var. latifolia)</a></li>
+                <li><a href="#western-larch">Western Larch (Larix occidentalis)</a></li>
+                <li><a href="#western-white-pine">Western White Pine (Pinus monticola)</a></li>
+                <li><a href="#engelmann-spruce">Engelmann Spruce (Picea engelmannii)</a></li>
             </ul>
+        </div>
+
+        <div id="douglas-fir" class="tree-species">
+            <h2>Douglas-fir (Pseudotsuga menziesii var. glauca)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Interior Douglas-fir (Interior Douglas Fir)<br>
+                <strong>Scientific Name:</strong> <em>Pseudotsuga menziesii</em> var. <em>glauca</em><br>
+                <strong>Origin:</strong> Native (dominant in Interior dry forests)<br>
+                <strong>Habitat & Frequency:</strong> Widespread on warm, dry slopes and valley bottoms; forms extensive open stands in the Interior Douglas-fir zone. Occurs from low elevations (~500m) to mid-elevations (~1500m). Mature trees 25–40 m tall.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>Douglas-fir Beetle (Dendroctonus pseudotsugae)</li>
+                        <li>Western Spruce Budworm (Choristoneura occidentalis)</li>
+                        <li>Douglas-fir Tussock Moth (Orgyia pseudotsugata)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>Swiss Needle Cast (Phaeocryptopus gaeumannii)</li>
+                        <li>Rhabdocline Needle Cast (Rhabdocline pseudotsugae)</li>
+                        <li>Armillaria Root Disease (Armillaria ostoyae)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="ponderosa-pine" class="tree-species">
+            <h2>Ponderosa Pine (Pinus ponderosa)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Ponderosa Pine<br>
+                <strong>Scientific Name:</strong> <em>Pinus ponderosa</em><br>
+                <strong>Origin:</strong> Native<br>
+                <strong>Habitat & Frequency:</strong> Common in dry, open forests; often found on south-facing slopes and ridges. Elevation range 500-2000m.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>Mountain Pine Beetle (Dendroctonus ponderosae)</li>
+                        <li>Pine Tip Moth (Rhyacionia frustrana)</li>
+                        <li>Pine Needle Scale (Chionaspis pinifoliae)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>Dwarf Mistletoe (Arceuthobium spp.)</li>
+                        <li>Pine Needle Rust (Coleosporium asterum)</li>
+                        <li>Root Rot (Heterobasidion annosum)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="lodgepole-pine" class="tree-species">
+            <h2>Lodgepole Pine (Pinus contorta var. latifolia)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Lodgepole Pine<br>
+                <strong>Scientific Name:</strong> <em>Pinus contorta</em> var. <em>latifolia</em><br>
+                <strong>Origin:</strong> Native<br>
+                <strong>Habitat & Frequency:</strong> Common in subalpine forests and post-fire areas. Elevation range 1000-2500m.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>Mountain Pine Beetle (Dendroctonus ponderosae)</li>
+                        <li>Pine Tip Moth (Rhyacionia frustrana)</li>
+                        <li>Pine Needle Scale (Chionaspis pinifoliae)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>Dwarf Mistletoe (Arceuthobium spp.)</li>
+                        <li>Pine Needle Rust (Coleosporium asterum)</li>
+                        <li>Root Rot (Heterobasidion annosum)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="western-larch" class="tree-species">
+            <h2>Western Larch (Larix occidentalis)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Western Larch<br>
+                <strong>Scientific Name:</strong> <em>Larix occidentalis</em><br>
+                <strong>Origin:</strong> Native<br>
+                <strong>Habitat & Frequency:</strong> Common in moist, cool environments. Elevation range 800-2000m.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>Larch Casebearer (Coleophora laricella)</li>
+                        <li>Larch Sawfly (Pristiphora erichsonii)</li>
+                        <li>Larch Bud Moth (Zeiraphera improbana)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>Larch Canker (Lachnellula willkommii)</li>
+                        <li>Root Rot (Armillaria ostoyae)</li>
+                        <li>Needle Cast (Meria laricis)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="western-white-pine" class="tree-species">
+            <h2>Western White Pine (Pinus monticola)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Western White Pine<br>
+                <strong>Scientific Name:</strong> <em>Pinus monticola</em><br>
+                <strong>Origin:</strong> Native<br>
+                <strong>Habitat & Frequency:</strong> Common in moist, cool environments. Elevation range 800-2000m.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>White Pine Blister Rust (Cronartium ribicola)</li>
+                        <li>Pine Tip Moth (Rhyacionia frustrana)</li>
+                        <li>Pine Needle Scale (Chionaspis pinifoliae)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>White Pine Blister Rust (Cronartium ribicola)</li>
+                        <li>Root Rot (Heterobasidion annosum)</li>
+                        <li>Dwarf Mistletoe (Arceuthobium spp.)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div id="engelmann-spruce" class="tree-species">
+            <h2>Engelmann Spruce (Picea engelmannii)</h2>
+            <table>
+                <tr><th>Classification</th><td><strong>Common Name:</strong> Engelmann Spruce<br>
+                <strong>Scientific Name:</strong> <em>Picea engelmannii</em><br>
+                <strong>Origin:</strong> Native<br>
+                <strong>Habitat & Frequency:</strong> Common in subalpine forests. Elevation range 1500-3000m.</td></tr>
+                <tr><th>Pests & Diseases</th><td>
+                    <strong>Primary Pests:</strong>
+                    <ul>
+                        <li>Spruce Beetle (Dendroctonus rufipennis)</li>
+                        <li>Spruce Budworm (Choristoneura fumiferana)</li>
+                        <li>Spruce Needle Miner (Endothenia albolineana)</li>
+                    </ul>
+                    <strong>Diseases:</strong>
+                    <ul>
+                        <li>Spruce Needle Rust (Chrysomyxa ledi)</li>
+                        <li>Root Rot (Heterobasidion annosum)</li>
+                        <li>Dwarf Mistletoe (Arceuthobium spp.)</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Pruning Schedule</th><td>
+                    <strong>Best Time:</strong> Late winter to early spring (February-March)<br>
+                    <strong>Frequency:</strong> Every 3-5 years for structural pruning<br>
+                    <strong>Special Considerations:</strong> Avoid pruning during active growth periods to prevent resin flow
+                </td></tr>
+                <tr><th>Pest Management</th><td>
+                    <strong>Preventive Measures:</strong>
+                    <ul>
+                        <li>Maintain tree vigor through proper watering and fertilization</li>
+                        <li>Remove dead and dying branches promptly</li>
+                        <li>Monitor for early signs of beetle activity</li>
+                    </ul>
+                    <strong>Treatment Options:</strong>
+                    <ul>
+                        <li>Pheromone treatments for beetle control</li>
+                        <li>Biological control agents for budworm</li>
+                        <li>Fungicide applications for needle cast diseases</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Structural Pruning</th><td>
+                    <strong>Key Objectives:</strong>
+                    <ul>
+                        <li>Establish strong central leader</li>
+                        <li>Maintain balanced crown structure</li>
+                        <li>Remove competing leaders</li>
+                        <li>Reduce branch attachment angles</li>
+                    </ul>
+                    <strong>Techniques:</strong>
+                    <ul>
+                        <li>Subordination pruning for multiple leaders</li>
+                        <li>Lateral branch reduction for structural balance</li>
+                        <li>Deadwood removal for safety and aesthetics</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Growth Form</th><td>
+                    <strong>Habit:</strong> Pyramidal to irregular crown<br>
+                    <strong>Branching Pattern:</strong> Whorled with random branching<br>
+                    <strong>Mature Height:</strong> 25-40m<br>
+                    <strong>Spread:</strong> 8-12m at maturity
+                </td></tr>
+                <tr><th>Root System</th><td>
+                    <strong>Type:</strong> Deep taproot with lateral spread<br>
+                    <strong>Characteristics:</strong>
+                    <ul>
+                        <li>Strong taproot development in youth</li>
+                        <li>Extensive lateral root system</li>
+                        <li>Mycorrhizal associations crucial for nutrient uptake</li>
+                    </ul>
+                    <strong>Infrastructure Considerations:</strong>
+                    <ul>
+                        <li>Maintain 3-5m clearance from foundations</li>
+                        <li>Monitor root growth near utilities</li>
+                        <li>Consider root barriers for urban plantings</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Arborist Considerations</th><td>
+                    <strong>Climbing Challenges:</strong>
+                    <ul>
+                        <li>Rough bark texture requires proper climbing gear</li>
+                        <li>Dense branching in lower crown</li>
+                        <li>Resin production during active growth</li>
+                    </ul>
+                    <strong>Safety Precautions:</strong>
+                    <ul>
+                        <li>Wear protective clothing for resin contact</li>
+                        <li>Use appropriate saws for dense wood</li>
+                        <li>Monitor for dead branches in upper crown</li>
+                    </ul>
+                </td></tr>
+                <tr><th>Use Cases</th><td>
+                    <strong>Urban Applications:</strong>
+                    <ul>
+                        <li>Large parks and open spaces</li>
+                        <li>Commercial properties with adequate space</li>
+                        <li>Rural residential properties</li>
+                    </ul>
+                    <strong>Limitations:</strong>
+                    <ul>
+                        <li>Not suitable for small urban lots</li>
+                        <li>Requires significant root space</li>
+                        <li>May drop large branches in storms</li>
+                    </ul>
+                </td></tr>
+            </table>
+        </div>
+
+        <div class="pruning-calendar">
+            <h2>Pruning Calendar by Month (Zone 5b – Nelson/Kootenay/Okanagan)</h2>
+            <table>
+                <tr>
+                    <th>Month</th>
+                    <th>Pruning Recommendations</th>
+                </tr>
+                <tr>
+                    <td>January – February</td>
+                    <td>Deep Winter: Ideal time for most trees. Deciduous trees can be pruned heavily while fully dormant. Conifers also pruned now – resin is minimized and pests are inactive.</td>
+                </tr>
+                <!-- Add other months -->
+            </table>
+        </div>
+
+        <div class="pest-comparison">
+            <h2>Pest/Disease Susceptibility Comparison</h2>
+            <table>
+                <tr>
+                    <th>Tree Species</th>
+                    <th>Mountain Pine Beetle</th>
+                    <th>Spruce Beetle</th>
+                    <th>Douglas-fir Beetle</th>
+                    <th>Western Spruce Budworm</th>
+                    <th>White Pine Blister Rust</th>
+                    <th>Fire Blight</th>
+                    <th>Dwarf Mistletoe</th>
+                </tr>
+                <!-- Add species rows -->
+            </table>
+        </div>
+
+        <div class="root-systems">
+            <h2>Root Systems & Infrastructure Interaction</h2>
+            <table>
+                <tr>
+                    <th>Species / Group</th>
+                    <th>Root Characteristics</th>
+                    <th>Infrastructure Impact</th>
+                </tr>
+                <!-- Add species rows -->
+            </table>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2025 Carpe Tree'em. All rights reserved.</p>
     </footer>

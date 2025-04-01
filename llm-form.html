@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM-Fillable Form</title>
+    <style>
+        :root {
+            --deep-forest-green: #2C5F2D;
+            --warm-earth-brown: #8B5E3B;
+            --soft-bark-gray: #A9A9A9;
+            --muted-golden-amber: #D4A373;
+            --text-color: #333333;
+            --background-color: #F5F5F5;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            color: var(--deep-forest-green);
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--deep-forest-green);
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--deep-forest-green);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--deep-forest-green);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #234a24;
+        }
+        
+        .ai-controls {
+            background-color: #f0f7f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .ai-prompt {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading::after {
+            content: "⏳";
+            animation: loading 1.5s infinite;
+            font-size: 24px;
+        }
+        
+        @keyframes loading {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            background-color: #ffeaea;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic LLM-Fillable Form</h1>
+    
+    <div class="ai-controls">
+        <h2>AI Form Filling</h2>
+        <p>Enter a description of the information you want to fill in the form, and the AI will attempt to complete it for you.</p>
+        
+        <textarea class="ai-prompt" id="aiPrompt" placeholder="Example: Fill out this form for John Smith who is a 45-year-old arborist with 20 years of experience, specializing in tree risk assessment..."></textarea>
+        
+        <button id="generateButton">Generate Form Data</button>
+        
+        <div class="loading" id="loadingIndicator"></div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+    
+    <div class="form-container">
+        <form id="dynamicForm">
+            <!-- Form fields will be based on your PDF structure -->
+            <!-- This is just a sample structure -->
+            
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="serviceDate">Preferred Service Date</label>
+                <input type="date" id="serviceDate" name="serviceDate">
+            </div>
+            
+            <div class="form-group">
+                <label for="serviceType">Service Type</label>
+                <select id="serviceType" name="serviceType">
+                    <option value="">Select a service</option>
+                    <option value="assessment">Tree Assessment</option>
+                    <option value="pruning">Precision Pruning</option>
+                    <option value="soil">Soil & Root Health</option>
+                    <option value="emergency">Emergency Response</option>
+                    <option value="cabling">Cabling & Bracing</option>
+                    <option value="planting">Tree Planting</option>
+                    <option value="removal">Tree Removal</option>
+                    <option value="milling">Custom Milling</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Project Description</label>
+                <textarea id="description" name="description" rows="5"></textarea>
+            </div>
+            
+            <button type="submit">Submit Form</button>
+        </form>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateButton = document.getElementById('generateButton');
+            const aiPrompt = document.getElementById('aiPrompt');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            const form = document.getElementById('dynamicForm');
+            
+            generateButton.addEventListener('click', async function() {
+                // Show loading indicator
+                loadingIndicator.style.display = 'block';
+                errorMessage.style.display = 'none';
+                
+                try {
+                    // Get the prompt text
+                    const promptText = aiPrompt.value;
+                    
+                    if (!promptText.trim()) {
+                        throw new Error('Please enter a description for the AI to work with.');
+                    }
+                    
+                    // This is where you would call your LLM API
+                    // For example, using OpenAI's API:
+                    const response = await callLLMAPI(promptText);
+                    
+                    // Fill the form with the response
+                    fillFormWithData(response);
+                    
+                } catch (error) {
+                    // Show error message
+                    errorMessage.textContent = error.message || 'An error occurred while generating form data.';
+                    errorMessage.style.display = 'block';
+                } finally {
+                    // Hide loading indicator
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+            
+            // Function to call the LLM API
+            async function callLLMAPI(prompt) {
+                // This is a placeholder for the actual API call
+                // In a real implementation, you would call your LLM API here
+                
+                // For demonstration purposes, we'll return mock data
+                // In production, replace this with your actual API call
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Mock response - in reality, this would come from your LLM API
+                return {
+                    fullName: "John Smith",
+                    email: "john.smith@example.com",
+                    phone: "(555) 123-4567",
+                    address: "123 Main Street\nAnytown, CA 12345",
+                    serviceDate: "2023-08-15",
+                    serviceType: "assessment",
+                    description: "I have a large oak tree in my backyard that I'm concerned about. It's approximately 50 years old and has some dead branches. I'd like a professional assessment to determine if it poses any risk."
+                };
+            }
+            
+            // Function to fill the form with data from the LLM
+            function fillFormWithData(data) {
+                // Loop through all the properties in the data object
+                for (const [key, value] of Object.entries(data)) {
+                    // Find the form element with the matching ID
+                    const element = document.getElementById(key);
+                    
+                    // If the element exists, set its value
+                    if (element) {
+                        element.value = value;
+                    }
+                }
+            }
+            
+            // Form submission handler
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                alert('Form submitted successfully!');
+                // In a real application, you would send the form data to your server here
+            });
+        });
+    </script>
+</body>
+</html> 
