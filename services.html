@@ -15,6 +15,7 @@
             margin: 20px auto 60px;
             height: 700px;
             font-family: 'Lato', sans-serif;
+            background-color: #F5F5F5;
         }
         
         /* Tree canopy background element */
@@ -42,7 +43,7 @@
             height: 40%;
             background: radial-gradient(
                 ellipse at bottom,
-                rgba(180, 160, 130, 0.1) 0%,
+                rgba(245, 245, 245, 0.1) 0%,
                 rgba(255, 255, 255, 0) 70%
             );
             z-index: 1;
@@ -129,28 +130,28 @@
         .service-section {
             position: absolute;
             z-index: 5;
-            width: 35%;
+            width: 38%;
         }
         
-        /* Position sections closer to center */
+        /* Position sections with better alignment */
         .section-nw {
-            top: 10%;
-            left: 10%;
+            top: 8%;
+            left: 5%;
         }
         
         .section-ne {
-            top: 10%;
-            right: 10%;
+            top: 8%;
+            right: 5%;
         }
         
         .section-sw {
-            bottom: 10%;
-            left: 10%;
+            bottom: 8%;
+            left: 5%;
         }
         
         .section-se {
-            bottom: 10%;
-            right: 10%;
+            bottom: 8%;
+            right: 5%;
         }
         
         /* Move category titles outside the wheel */
@@ -181,24 +182,24 @@
         
         .section-nw .section-title {
             text-align: left;
-            margin-left: 10px;
+            margin-left: 0;
         }
         
         .section-ne .section-title {
             text-align: right;
-            margin-right: 10px;
+            margin-right: 0;
             float: right;
         }
         
         .section-sw .section-title {
             text-align: left;
-            margin-left: 10px;
+            margin-left: 0;
             clear: both;
         }
         
         .section-se .section-title {
             text-align: right;
-            margin-right: 10px;
+            margin-right: 0;
             float: right;
             clear: both;
         }
@@ -225,22 +226,22 @@
         
         .section-nw .service-items {
             text-align: left;
-            padding-left: 20px;
+            padding-left: 0;
         }
         
         .section-ne .service-items {
             text-align: right;
-            padding-right: 20px;
+            padding-right: 0;
         }
         
         .section-sw .service-items {
             text-align: left;
-            padding-left: 20px;
+            padding-left: 0;
         }
         
         .section-se .service-items {
             text-align: right;
-            padding-right: 20px;
+            padding-right: 0;
         }
         
         .service-item:hover {
@@ -322,7 +323,7 @@
         
         .service-summary .summary-content {
             max-width: 85%;
-            background-color: transparent;
+            background-color: rgba(245, 245, 245, 0.95);
             padding: 15px;
             border-radius: 8px;
         }
@@ -361,7 +362,7 @@
         
         /* Local considerations box */
         .local-considerations {
-            background-color: rgba(var(--light-sage-green-rgb), 0.2);
+            background-color: #F5F5F5;
             border-left: 4px solid var(--deep-forest-green);
             padding: 20px;
             margin: 30px auto;
