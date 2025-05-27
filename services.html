@@ -130,28 +130,28 @@
         .service-section {
             position: absolute;
             z-index: 5;
-            width: 38%;
+            width: 40%;
         }
         
         /* Position sections with better alignment */
         .section-nw {
-            top: 8%;
-            left: 5%;
+            top: 5%;
+            left: 2%;
         }
         
         .section-ne {
-            top: 8%;
-            right: 5%;
+            top: 5%;
+            right: 2%;
         }
         
         .section-sw {
-            bottom: 8%;
-            left: 5%;
+            bottom: 5%;
+            left: 2%;
         }
         
         .section-se {
-            bottom: 8%;
-            right: 5%;
+            bottom: 5%;
+            right: 2%;
         }
         
         /* Move category titles outside the wheel */
@@ -222,6 +222,8 @@
             margin: 12px 0;
             position: relative;
             transition: all 0.3s ease;
+            background: none !important;
+            background-color: transparent !important;
         }
         
         .section-nw .service-items {
@@ -249,13 +251,31 @@
         }
         
         .service-link {
-            color: var(--text-color);
-            text-decoration: none;
+            color: var(--text-color) !important;
+            text-decoration: none !important;
             transition: all 0.25s ease;
             display: inline-block;
             font-size: 1.1em;
             font-family: 'Lato', sans-serif;
             font-weight: 500;
+            background: none !important;
+            background-color: transparent !important;
+            border: none !important;
+            padding: 8px 12px !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        /* Ensure service links don't inherit button styling */
+        .service-item a,
+        .service-item a:link,
+        .service-item a:visited {
+            background: none !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: var(--text-color) !important;
         }
         
         /* Service icons */
