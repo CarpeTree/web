@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireSmart Tree Protection Poster</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Styles for print and poster layout */
+        body {
+            font-family: 'Lato', sans-serif;
+            color: var(--text-color);
+            background-color: #ffffff; /* White background for printing */
+            width: 8.5in;
+            /* height: 11in; */ /* Let content define height, or set min-height */
+            min-height: 10.9in; /* Ensure it mostly fills for print */
+            margin: 0 auto; /* Center page */
+            padding: 0.4in; /* Adjusted printable margins slightly */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .poster-container {
+            border: 3px solid var(--deep-forest-green);
+            padding: 0.25in; /* Adjusted padding */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            /* text-align: center; */ /* Removed, will be handled by children */
+        }
+
+        .poster-header-bar, .poster-footer-bar { /* New common class for header/footer bars */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.15in;
+            margin-bottom: 0.15in;
+            border-bottom: 1px solid var(--muted-golden-amber); /* Separator for header */
+        }
+        
+        .poster-footer-bar {
+            border-bottom: none; /* No bottom border for footer bar itself */
+            border-top: 1px solid var(--muted-golden-amber); /* Separator for footer */
+            margin-top: auto; /* Pushes footer to the bottom */
+            padding-top: 0.15in;
+            margin-bottom: 0; /* No margin at the very bottom of poster */
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-group img.logo-word {
+            height: 35pt; /* Adjusted height for header */
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .logo-group img.logo-tree {
+            height: 35pt; /* Matched height for header */
+            width: auto;
+        }
+        
+        .poster-footer-bar .logo-group img.logo-word, 
+        .poster-footer-bar .logo-group img.logo-tree { /* Specific for footer logos */
+             height: 28pt; /* Slightly smaller in footer */
+        }
+
+        .contact-group { /* General contact group style */
+            text-align: right;
+            font-size: 9pt; /* Smaller contact info in header/footer bars */
+            line-height: 1.4;
+            color: var(--text-color); /* Ensure text color is set */
+        }
+        
+        .contact-group strong { /* For brand name if added */
+            color: var(--deep-forest-green);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .contact-group a {
+            color: var(--warm-earth-brown);
+            text-decoration: none;
+        }
+        .contact-group a:hover {
+            text-decoration: underline;
+        }
+
+        .poster-footer-bar .contact-group .qr-code {
+            max-width: 0.75in; /* Size for the QR code in footer */
+            height: auto;
+            margin-top: 5px;
+            display: block;
+            margin-left: auto; /* Aligns to right if block */
+        }
+
+        .poster-main-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 22pt; /* Adjusted */
+            color: var(--deep-forest-green);
+            font-weight: 700;
+            margin-top: 0; /* Adjusted margin after header bar */
+            margin-bottom: 0.05in;
+            line-height: 1.2;
+            text-align: center; /* Center titles */
+        }
+
+        .poster-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14pt; /* Adjusted */
+            color: var(--warm-earth-brown);
+            font-weight: 600;
+            margin-bottom: 0.2in;
+            text-align: center; /* Center titles */
+        }
+        
+        hr {
+            border: 0;
+            height: 2px;
+            background-color: var(--muted-golden-amber);
+            margin: 0.2in 0;
+        }
+
+        .intro-text {
+            font-size: 12pt;
+            line-height: 1.5;
+            margin-bottom: 0.2in;
+            text-align: left;
+        }
+        
+        .intro-text strong {
+            color: var(--deep-forest-green);
+            font-weight: 700;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 0.2in;
+            text-align: left;
+        }
+
+        .benefits-list li {
+            font-size: 11pt;
+            margin-bottom: 0.1in;
+            padding-left: 20px; /* Space for custom bullet */
+            position: relative;
+        }
+
+        .benefits-list li::before {
+            content: '🌳'; /* Tree emoji as bullet */
+            position: absolute;
+            left: 0;
+            color: var(--deep-forest-green);
+            font-size: 12pt;
+        }
+        
+        .package-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15pt;
+            color: var(--deep-forest-green);
+            font-weight: 600;
+            margin-top: 0.1in;
+            margin-bottom: 0.15in;
+            text-align: center;
+        }
+
+        .package-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 0.2in;
+            text-align: left;
+            columns: 2; /* Create two columns for package items */
+            column-gap: 0.3in;
+        }
+
+        .package-list li {
+            font-size: 10pt;
+            line-height: 1.4;
+            margin-bottom: 0.1in;
+            padding-left: 25px; /* Space for checkmark */
+            position: relative;
+            break-inside: avoid-column; /* Prevent items from breaking across columns */
+        }
+
+        .package-list li::before {
+            content: '✔';
+            position: absolute;
+            left: 0;
+            color: var(--deep-forest-green);
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        
+        .package-list strong {
+            font-weight: 600;
+        }
+
+        /* Print specific styles */
+        @media print {
+            body {
+                margin: 0; /* Remove browser default margins for printing */
+                padding: 0.5in; /* Ensure content fits within printable area */
+                -webkit-print-color-adjust: exact; /* Ensures colors print correctly in Chrome/Safari */
+                print-color-adjust: exact; /* Standard property */
+            }
+            .poster-container {
+                border: 3px solid var(--deep-forest-green) !important; /* Ensure border prints */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="poster-container">
+        <div class="poster-header-bar">
+            <div class="logo-group">
+                <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-word">
+                <img src="images/hero.png" alt="Carpe Tree'em Detailed Tree Logo" class="logo-tree">
+            </div>
+            <div class="contact-group">
+                <strong>Carpe Tree'em</strong>
+                📞 <a href="tel:778-655-3741">778-655-3741</a><br>
+                🌐 <a href="http://www.carpetree.com">www.carpetree.com</a><br>
+                📧 <a href="mailto:support@carpetree.com">support@carpetree.com</a>
+            </div>
+        </div>
+
+        <!-- Main Page Titles -->
+        <h1 class="poster-main-title">PROTECT YOUR HOME — AND HONOUR YOUR TREES</h1>
+        <h2 class="poster-subtitle">A Tree-Friendly FireSmart Solution for the Trees You Love</h2>
+        
+        <hr>
+
+        <p class="intro-text">
+            <strong>Care for your trees AND keep your home FireSmart ready!</strong>
+        </p>
+        <p class="intro-text" style="font-size: 11pt;">
+            FireSmart BC recommends removing coniferous trees within 10 meters of homes due to their high flammability. 
+            But what if you could preserve the beauty and benefits of those trees — while staying FireSmart compliant?
+            With this tree-first approach, you can:
+        </p>
+
+        <ul class="benefits-list">
+            <li>Keep your conifers and broadleaf trees alive and thriving near your home — safely</li>
+            <li>Maintain FireSmart compliance without clear-cutting your yard</li>
+            <li>Preserve ecosystem services: carbon storage, wildlife habitat, water retention, and soil stability</li>
+            <li>Lower your summer energy bills by keeping the natural shade canopy</li>
+            <li>Maintain biodiversity and beauty while safeguarding your home and family</li>
+        </ul>
+
+        <hr>
+
+        <h3 class="package-title">What's Included in Your All-in-One Tree Protection Package:</h3>
+        <ul class="package-list">
+            <li>A tree risk inspection to confirm each tree's suitability for long-term retention near your home!</li>
+            <li>Deadwooding, ladder fuel removal, building clearance, and pruning around service drops.</li>
+            <li>Professional tree climbing using <strong>ISA standards and professional techniques</strong> — no spiking, no topping, and no harmful practices</li>
+            <li>Precision installation of <strong>premium 360° Rain Bird canopy sprinklers</strong> for seasonal hydration</li>
+            <li>A tall, wind-stable riser mounted above the live crown, delivering <strong>weekly canopy watering</strong> to reduce fire vulnerability and keep trees healthy and cooling</li>
+            <li>Code-compliant backflow prevention that meets <strong>BC Plumbing standards</strong>, including an <strong>easy winter drain-down system</strong></li>
+            <li>Installation of <strong>MCH bubble caps or species-appropriate pheromones</strong> to deter beetles and reduce pest pressure</li>
+        </ul>
+        
+        <div class="poster-footer-bar">
+             <div class="logo-group"> <!-- Re-using .logo-group, footer specific sizing handled in CSS -->
+                <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-word">
+                <img src="images/hero.png" alt="Carpe Tree'em Detailed Tree Logo" class="logo-tree">
+            </div>
+            <div class="contact-group"> <!-- Re-using .contact-group -->
+                <strong>Carpe Tree'em</strong>
+                📞 <a href="tel:778-655-3741">778-655-3741</a><br>
+                🌐 <a href="http://www.carpetree.com">www.carpetree.com</a><br>
+                📧 <a href="mailto:support@carpetree.com">support@carpetree.com</a>
+                <img src="assets/carpetreeqr.png" alt="Carpe Tree'em Website QR Code" class="qr-code">
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
