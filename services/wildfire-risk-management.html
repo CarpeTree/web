@@ -162,6 +162,38 @@
             font-weight: 600;
         }
         
+        /* Side-by-side layout for sprinkler and bullet points */
+        .sprinkler-consultations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+            margin: 30px 0;
+        }
+        
+        .sprinkler-image-section {
+            text-align: center;
+        }
+        
+        .sprinkler-image-section img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+        
+        .sprinkler-image-section p {
+            font-style: italic;
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        .consultations-list h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        
         @media (max-width: 768px) {
             .service-hero h1 {
                 font-size: 2.5em;
@@ -170,6 +202,11 @@
             .before-after-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
+            }
+            
+            .sprinkler-consultations {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
     </style>
@@ -201,18 +238,21 @@
         <h2>A New Kind of Fire Preparedness</h2>
         <p>Forget the one-size-fits-all brush-clearing that often causes more harm than good. We begin with a site-specific walkthrough and develop a spacing prescription that balances safety with shade, habitat, and soil stability.</p>
         
-        <h3>Our Wildfire Risk Consultations Include:</h3>
-        
-        <ul>
-            <li><strong>🌲 Ladder Fuel Identification & Reduction:</strong> We pinpoint vertical continuity between ground fuels and your tree canopies, thinning thoughtfully without gutting your forest.</li>
-            <li><strong>🚶 Tree Spacing Prescriptions:</strong> Science-backed guidelines tailored to your terrain, wind exposure, and species mix—not cookie-cutter spacing from outdated manuals.</li>
-            <li><strong>💧 Sprinkler System Design:</strong> We help you integrate overhead and ground-level sprinklers to create a protective moisture barrier around key trees and structures.</li>
-            <li><strong>🔥 Defensible Zones That Defend Ecology:</strong> Our prescriptions protect your home and your trees—preserving anchor conifers, stabilizing slopes, and retaining wildlife corridors.</li>
-        </ul>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <img src="../images/WILDFIRE SPRINKLER.tiff" alt="Wildfire sprinkler system protecting trees and structures with strategic water coverage" style="width: 100%; height: auto; border-radius: 8px; max-height: 400px; object-fit: cover;">
-            <p style="font-style: italic; margin-top: 10px; color: #666;">Strategic sprinkler placement creates protective moisture barriers around key trees and structures</p>
+        <div class="sprinkler-consultations">
+            <div class="sprinkler-image-section">
+                <img src="../images/WILDFIRE SPRINKLER.tiff" alt="Wildfire sprinkler system protecting trees and structures with strategic water coverage">
+                <p>Strategic sprinkler placement creates protective moisture barriers around key trees and structures</p>
+            </div>
+            
+            <div class="consultations-list">
+                <h3>Our Wildfire Risk Consultations Include:</h3>
+                <ul>
+                    <li><strong>🌲 Ladder Fuel Identification & Reduction:</strong> We pinpoint vertical continuity between ground fuels and your tree canopies, thinning thoughtfully without gutting your forest.</li>
+                    <li><strong>🚶 Tree Spacing Prescriptions:</strong> Science-backed guidelines tailored to your terrain, wind exposure, and species mix—not cookie-cutter spacing from outdated manuals.</li>
+                    <li><strong>💧 Sprinkler System Design:</strong> We help you integrate overhead and ground-level sprinklers to create a protective moisture barrier around key trees and structures.</li>
+                    <li><strong>🔥 Defensible Zones That Defend Ecology:</strong> Our prescriptions protect your home and your trees—preserving anchor conifers, stabilizing slopes, and retaining wildlife corridors.</li>
+                </ul>
+            </div>
         </div>
 
         <h2>Why Conifer Preservation Matters</h2>
