@@ -9,10 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         .service-hero {
-            background: linear-gradient(135deg, rgba(44, 95, 45, 0.9), rgba(139, 69, 19, 0.8)), url('../images/services/wildfire-background.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white;
+            background-color: #F5F5F5;
+            color: var(--text-color);
             text-align: center;
             padding: 80px 20px 60px;
             margin-top: 70px;
@@ -23,7 +21,7 @@
             margin-bottom: 20px;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: var(--deep-forest-green);
         }
         
         .service-hero p {
@@ -32,7 +30,7 @@
             margin: 0 auto;
             font-family: 'Lato', sans-serif;
             line-height: 1.6;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            color: var(--text-color);
         }
         
         .content-section {
@@ -41,96 +39,108 @@
             padding: 60px 20px;
         }
         
-        .wildfire-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            margin: 40px 0;
-        }
-        
-        .wildfire-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--warm-earth-brown);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .wildfire-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .wildfire-card h3 {
+        .content-section h2 {
             color: var(--deep-forest-green);
             font-family: 'Montserrat', sans-serif;
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
+            font-size: 2em;
+            margin: 40px 0 20px 0;
+            text-align: center;
         }
         
-        .wildfire-card .icon {
-            margin-right: 12px;
-            font-size: 1.2em;
-            color: var(--warm-earth-brown);
+        .content-section h3 {
+            color: var(--deep-forest-green);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
         }
         
-        .process-timeline {
-            background: #f9f9f9;
-            padding: 40px;
-            border-radius: 12px;
+        .content-section p {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin: 20px 0;
+            color: var(--text-color);
+        }
+        
+        .content-section ul {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin: 20px 0;
+            color: var(--text-color);
+        }
+        
+        .content-section ul li {
+            margin: 10px 0;
+        }
+        
+        .before-after-section {
             margin: 40px 0;
+            text-align: center;
         }
         
-        .timeline-step {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #e0e0e0;
+        .before-after-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
         }
         
-        .timeline-step:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .before-after-grid img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
         }
         
-        .step-number {
-            background: var(--deep-forest-green);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .before-after-grid p {
             font-weight: bold;
-            margin-right: 20px;
-            flex-shrink: 0;
+            margin-top: 10px;
+            color: var(--deep-forest-green);
         }
         
-        .emergency-contact {
-            background: linear-gradient(135deg, #ff4444, #cc0000);
-            color: white;
+        .video-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .video-section h4 {
+            color: var(--deep-forest-green);
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 15px;
+        }
+        
+        .video-section video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            max-height: 400px;
+        }
+        
+        .video-section p {
+            font-style: italic;
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        .contact-section {
+            background-color: #F5F5F5;
             text-align: center;
             padding: 30px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin: 40px 0;
         }
         
-        .emergency-contact h3 {
+        .contact-section h3 {
             margin-bottom: 15px;
             font-size: 1.5em;
+            color: var(--deep-forest-green);
         }
         
-        .emergency-contact .phone {
+        .contact-section .phone {
             font-size: 1.8em;
             font-weight: bold;
             text-decoration: none;
-            color: white;
+            color: var(--deep-forest-green);
             display: inline-block;
             margin-top: 10px;
         }
@@ -157,24 +167,9 @@
                 font-size: 2.5em;
             }
             
-            .wildfire-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .timeline-step {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .step-number {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            
             .before-after-grid {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
         }
     </style>
@@ -204,70 +199,52 @@
 
     <section class="content-section">
         <h2>A New Kind of Fire Preparedness</h2>
-        <p style="font-size: 1.2em; line-height: 1.7; margin-bottom: 30px;">Forget the one-size-fits-all brush-clearing that often causes more harm than good. We begin with a site-specific walkthrough and develop a spacing prescription that balances safety with shade, habitat, and soil stability.</p>
+        <p>Forget the one-size-fits-all brush-clearing that often causes more harm than good. We begin with a site-specific walkthrough and develop a spacing prescription that balances safety with shade, habitat, and soil stability.</p>
         
         <h3>Our Wildfire Risk Consultations Include:</h3>
-        <div class="wildfire-grid">
-            <div class="wildfire-card">
-                <h3><span class="icon">🌲</span>Ladder Fuel Identification & Reduction</h3>
-                <p>We pinpoint vertical continuity between ground fuels and your tree canopies, thinning thoughtfully without gutting your forest.</p>
-            </div>
-            
-            <div class="wildfire-card">
-                <h3><span class="icon">🚶</span>Tree Spacing Prescriptions</h3>
-                <p>Science-backed guidelines tailored to your terrain, wind exposure, and species mix—not cookie-cutter spacing from outdated manuals.</p>
-            </div>
-            
-            <div class="wildfire-card">
-                <h3><span class="icon">💧</span>Sprinkler System Design</h3>
-                <p>We help you integrate overhead and ground-level sprinklers to create a protective moisture barrier around key trees and structures.</p>
-            </div>
-            
-            <div class="wildfire-card">
-                <h3><span class="icon">🔥</span>Defensible Zones That Defend Ecology</h3>
-                <p>Our prescriptions protect your home and your trees—preserving anchor conifers, stabilizing slopes, and retaining wildlife corridors.</p>
-            </div>
-        </div>
+        
+        <ul>
+            <li><strong>🌲 Ladder Fuel Identification & Reduction:</strong> We pinpoint vertical continuity between ground fuels and your tree canopies, thinning thoughtfully without gutting your forest.</li>
+            <li><strong>🚶 Tree Spacing Prescriptions:</strong> Science-backed guidelines tailored to your terrain, wind exposure, and species mix—not cookie-cutter spacing from outdated manuals.</li>
+            <li><strong>💧 Sprinkler System Design:</strong> We help you integrate overhead and ground-level sprinklers to create a protective moisture barrier around key trees and structures.</li>
+            <li><strong>🔥 Defensible Zones That Defend Ecology:</strong> Our prescriptions protect your home and your trees—preserving anchor conifers, stabilizing slopes, and retaining wildlife corridors.</li>
+        </ul>
 
         <h2>Why Conifer Preservation Matters</h2>
-        <p style="font-size: 1.1em; line-height: 1.7; margin: 20px 0;">Too often, fire-prep efforts target the very trees that define your landscape. But many mature conifers, if properly spaced and maintained, can withstand fire and protect your home from blowing embers. The key is management, not massacre.</p>
+        <p>Too often, fire-prep efforts target the very trees that define your landscape. But many mature conifers, if properly spaced and maintained, can withstand fire and protect your home from blowing embers. The key is management, not massacre.</p>
         
-        <p style="font-size: 1.1em; line-height: 1.7; margin: 20px 0;">Our approach preserves legacy trees while reducing fine fuels, pruning low branches, and spacing crowns to reduce fire intensity—ensuring you have beauty and shade long after fire season ends.</p>
+        <p>Our approach preserves legacy trees while reducing fine fuels, pruning low branches, and spacing crowns to reduce fire intensity—ensuring you have beauty and shade long after fire season ends.</p>
 
-        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 40px 0;">
-            <h3 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 20px;">Fuel Modification Above the Golf Course</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;" class="before-after-grid">
+        <div class="before-after-section">
+            <h3>Fuel Modification Above the Golf Course</h3>
+            <div class="before-after-grid">
                 <div>
-                    <img src="../images/services/before.jpeg" alt="Before fuel modification - forest floor heavily loaded with fallen logs and dense understory creating ladder fuel conditions" style="width: 100%; height: auto; border-radius: 8px;">
-                    <p style="text-align: center; font-weight: bold; margin-top: 10px; color: var(--deep-forest-green);">BEFORE</p>
+                    <img src="../images/services/before.jpeg" alt="Before fuel modification - forest floor heavily loaded with fallen logs and dense understory creating ladder fuel conditions">
+                    <p>BEFORE</p>
                 </div>
                 <div>
-                    <img src="../images/services/after.jpeg" alt="After fuel modification - clean forest floor with preserved mature trees, organized debris, and reduced fire risk while maintaining forest character" style="width: 100%; height: auto; border-radius: 8px;">
-                    <p style="text-align: center; font-weight: bold; margin-top: 10px; color: var(--deep-forest-green);">AFTER</p>
+                    <img src="../images/services/after.jpeg" alt="After fuel modification - clean forest floor with preserved mature trees, organized debris, and reduced fire risk while maintaining forest character">
+                    <p>AFTER</p>
                 </div>
             </div>
-            <p style="text-align: center; font-style: italic; color: #666; line-height: 1.6;">Heavy fuel loads and ladder fuels transformed into a defensible forest that preserves mature trees while dramatically reducing fire intensity potential. Notice how the forest character remains intact while fire risk is significantly reduced.</p>
+            <p style="font-style: italic; color: #666;">Heavy fuel loads and ladder fuels transformed into a defensible forest that preserves mature trees while dramatically reducing fire intensity potential. Notice how the forest character remains intact while fire risk is significantly reduced.</p>
             
-            <div style="margin-top: 30px;">
-                <h4 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 15px;">Organized Debris Management</h4>
-                <video controls style="width: 100%; height: auto; border-radius: 8px; max-height: 400px;">
+            <div class="video-section">
+                <h4>Organized Debris Management</h4>
+                <video controls>
                     <source src="../images/services/fuelmod.mov" type="video/mp4">
                     <source src="../images/services/fuelmod.mov" type="video/quicktime">
                     Your browser does not support the video tag.
                 </video>
-                <p style="text-align: center; font-style: italic; margin-top: 10px; color: #666;">Professional debris management creates organized piles that can be safely burned or removed, completing the fuel modification process.</p>
+                <p>Professional debris management creates organized piles that can be safely burned or removed, completing the fuel modification process.</p>
             </div>
         </div>
 
-        <div class="process-timeline">
-            <h2>Transparent, Science-Based Advice</h2>
-            <div style="text-align: center; padding: 20px;">
-                <h3 style="font-size: 1.8em; color: var(--deep-forest-green); margin-bottom: 20px;">We don't sell fear. We sell clarity.</h3>
-                <p style="font-size: 1.2em; line-height: 1.7;">Our wildfire assessments are part of a paid consultation—so we're not incentivized to upsell unnecessary removals or gear. You'll receive a clear, written care plan rooted in current wildfire science, tailored to your land, and delivered with integrity.</p>
-            </div>
-        </div>
+        <h2>Transparent, Science-Based Advice</h2>
+        <h3 style="text-align: center; font-size: 1.8em; margin: 30px 0;">We don't sell fear. We sell clarity.</h3>
+        <p style="text-align: center;">Our wildfire assessments are part of a paid consultation—so we're not incentivized to upsell unnecessary removals or gear. You'll receive a clear, written care plan rooted in current wildfire science, tailored to your land, and delivered with integrity.</p>
 
-        <div class="emergency-contact" style="background: linear-gradient(135deg, var(--deep-forest-green), var(--warm-earth-brown));">
+        <div class="contact-section">
             <h3>🌲 Book a Wildfire Consultation</h3>
             <p>Develop a wildfire-resilient forest that still feels like home.</p>
             <a href="tel:7786553741" class="phone">778-655-3741</a>
