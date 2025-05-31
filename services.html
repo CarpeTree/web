@@ -134,7 +134,7 @@
             z-index: 5;
             width: 42%;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
         }
         
         /* Position sections with better alignment and consistent spacing */
@@ -152,14 +152,12 @@
         .section-sw {
             bottom: 8%;
             left: 4%;
-            flex-direction: column-reverse;
         }
         
         .section-se {
             bottom: 8%;
             right: 4%;
             align-items: flex-end;
-            flex-direction: column-reverse;
         }
         
         /* Move category titles outside the wheel */
@@ -701,7 +699,6 @@
             
             <!-- Tree Health & Preservation -->
             <div id="tree-health" class="service-section section-nw">
-                <h3 class="section-title">Tree Health & Preservation</h3>
                 <div class="service-items">
                     <div class="service-item" data-summary="soil-health-summary">
                         <a href="services/soil-health.html" class="service-link">
@@ -722,11 +719,11 @@
                         </a>
                     </div>
                 </div>
+                <h3 class="section-title">Tree Health & Preservation</h3>
             </div>
             
             <!-- Tree Risk Management -->
             <div id="risk-management" class="service-section section-ne">
-                <h3 class="section-title">Tree Risk Management</h3>
                 <div class="service-items">
                     <div class="service-item" data-summary="risk-assessment-summary">
                         <a href="services/assessments.html" class="service-link">
@@ -747,6 +744,7 @@
                         </a>
                     </div>
                 </div>
+                <h3 class="section-title">Tree Risk Management</h3>
             </div>
             
             <!-- Tree Removal & Alternatives -->
