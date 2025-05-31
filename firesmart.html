@@ -96,7 +96,26 @@
             height: auto;
             margin-top: 5px;
             display: block;
-            margin-left: auto; /* Aligns to right if block */
+            margin-left: auto; /* Aligns to right if block, auto + auto for center */
+            margin-right: auto; /* Added to center the block element */
+        }
+
+        .top-content-wrapper { /* NEW: For two-column layout of titles/text and image */
+            display: flex;
+            align-items: flex-start; /* Align items to the top */
+            gap: 0.25in; /* Space between text and image columns */
+            margin-bottom: 0.15in; /* Space before the HR */
+        }
+
+        .text-content-column { /* NEW: Left column for text */
+            flex: 3; /* Takes up more space, e.g., ~60% */
+        }
+
+        .image-content-column { /* NEW: Right column for image */
+            flex: 2; /* Takes up less space, e.g., ~40% */
+            display: flex;
+            justify-content: flex-end; /* Align image container to the right of this column */
+            align-items: flex-start;
         }
 
         .poster-main-title {
@@ -107,7 +126,7 @@
             margin-top: 0; /* Adjusted margin after header bar */
             margin-bottom: 0.05in;
             line-height: 1.2;
-            text-align: center; /* Center titles */
+            text-align: left; /* Changed from center to left */
         }
 
         .poster-subtitle {
@@ -115,8 +134,23 @@
             font-size: 14pt; /* Adjusted */
             color: var(--warm-earth-brown);
             font-weight: 600;
-            margin-bottom: 0.2in;
-            text-align: center; /* Center titles */
+            margin-bottom: 0.15in; /* Adjusted margin */
+            text-align: left; /* Changed from center to left */
+        }
+
+        .solution-image-container {
+            text-align: right; /* This will align the image if it's inline-block inside */
+            /* margin: 0.1in 0 0.15in; */ /* Margins now handled by flex parent */
+            margin: 0; /* Resetting margin */
+            width: 100%; /* Take full width of its parent (.image-content-column) */
+        }
+
+        .solution-image-container img {
+            max-width: 100%; /* Image scales to fit its container */
+            max-height: 3.5in; /* Increased from 2.5in to allow for ~40% larger image */
+            border: 2px solid var(--soft-bark-gray);
+            border-radius: 4px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.15); /* Added for tile effect */
         }
         
         hr {
@@ -230,20 +264,28 @@
             </div>
         </div>
 
-        <!-- Main Page Titles -->
-        <h1 class="poster-main-title">PROTECT YOUR HOME — AND HONOUR YOUR TREES</h1>
-        <h2 class="poster-subtitle">A Tree-Friendly FireSmart Solution for the Trees You Love</h2>
+        <!-- Main Page Titles, Intro Text, and Image in a new two-column layout -->
+        <div class="top-content-wrapper">
+            <div class="text-content-column">
+                <h1 class="poster-main-title">PROTECT YOUR HOME — AND HONOUR YOUR TREES</h1>
+                <h2 class="poster-subtitle">A Tree-Friendly FireSmart Solution for the Trees You Love</h2>
+                <p class="intro-text">
+                    <strong>Care for your trees AND keep your home FireSmart ready!</strong>
+                </p>
+                <p class="intro-text" style="font-size: 11pt;">
+                    FireSmart BC recommends removing coniferous trees within 10 meters of homes due to their high flammability. 
+                    But what if you could preserve the beauty and benefits of those trees — while staying FireSmart compliant?
+                    With this tree-first approach, you can:
+                </p>
+            </div>
+            <div class="image-content-column">
+                <div class="solution-image-container">
+                    <img src="images/sprinkler.webp" alt="Canopy Sprinkler System for Tree Protection">
+                </div>
+            </div>
+        </div>
         
-        <hr>
-
-        <p class="intro-text">
-            <strong>Care for your trees AND keep your home FireSmart ready!</strong>
-        </p>
-        <p class="intro-text" style="font-size: 11pt;">
-            FireSmart BC recommends removing coniferous trees within 10 meters of homes due to their high flammability. 
-            But what if you could preserve the beauty and benefits of those trees — while staying FireSmart compliant?
-            With this tree-first approach, you can:
-        </p>
+        <hr> <!-- HR is now after the two-column layout -->
 
         <ul class="benefits-list">
             <li>Keep your conifers and broadleaf trees alive and thriving near your home — safely</li>
@@ -276,7 +318,7 @@
                 📞 <a href="tel:778-655-3741">778-655-3741</a><br>
                 🌐 <a href="http://www.carpetree.com">www.carpetree.com</a><br>
                 📧 <a href="mailto:support@carpetree.com">support@carpetree.com</a>
-                <img src="assets/carpetreeqr.png" alt="Carpe Tree'em Website QR Code" class="qr-code">
+                <img src="images/carpetreeqr.png" alt="Carpe Tree'em Website QR Code" class="qr-code">
             </div>
         </div>
     </div>
