@@ -216,6 +216,41 @@
             font-weight: 600;
         }
 
+        /* New styles for tiled text and image section */
+        .top-content-area {
+            display: flex;
+            justify-content: space-between; /* Puts space between text and image */
+            align-items: flex-start; /* Aligns items to the top */
+            gap: 0.2in; /* Adds a small gap between text and image columns */
+            margin-bottom: 0.15in; /* Space before the HR */
+        }
+
+        .text-content-column {
+            flex: 1; /* Allows text column to take available space */
+            /* max-width: 65%; */ /* Optional: can set a max-width if needed */
+        }
+
+        .image-content-column {
+            flex-shrink: 0; /* Prevents image column from shrinking */
+            width: 30%; /* Approximate width, adjust as needed */
+            display: flex; /* To help align content within if needed */
+            justify-content: flex-end; /* Aligns image to the right of its column */
+        }
+        
+        .solution-image-container {
+            text-align: right; 
+            margin: 0; 
+            width: 100%; 
+        }
+
+        .solution-image-container img {
+            max-width: 100%; 
+            max-height: 3.0in; /* Adjusted slightly to ensure fit with text */
+            border: 2px solid var(--soft-bark-gray);
+            border-radius: 4px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.15); 
+        }
+
         /* Print specific styles */
         @media print {
             body {
@@ -248,28 +283,27 @@
             </div>
         </div>
 
-        <!-- Main Page Titles, Intro Text, and Image in a new two-column layout -->
-        <div class="top-content-wrapper">
-            <div class="text-content-column">
+        <div class="top-content-area"> <!-- New container for text and image -->
+            <div class="text-content-column"> <!-- Column for text -->
                 <h1 class="poster-main-title">PROTECT YOUR HOME — AND HONOUR YOUR TREES</h1>
                 <h2 class="poster-subtitle">A Tree-Friendly FireSmart Solution for the Trees You Love</h2>
                 <p class="intro-text">
                     <strong>Care for your trees AND keep your home FireSmart ready!</strong>
                 </p>
-                <p class="intro-text" style="font-size: 11pt;">
+                <p class="intro-text">
                     FireSmart BC recommends removing coniferous trees within 10 meters of homes due to their high flammability. 
-                    But what if you could preserve the beauty and benefits of those trees — while staying FireSmart compliant?
+                    But what if you could preserve the beauty and benefits of those trees — while staying FireSmart compliant? 
                     With this tree-first approach, you can:
                 </p>
             </div>
-            <div class="image-content-column">
+            <div class="image-content-column"> <!-- Column for image -->
                 <div class="solution-image-container">
-                    <img src="images/sprinkler2.webp" alt="Canopy Sprinkler System for Tree Protection">
+                    <img src="images/sprinkler2.webp" alt="Tree sprinkler system protecting a home from wildfire">
                 </div>
             </div>
         </div>
-        
-        <hr> <!-- HR is now after the two-column layout -->
+
+        <hr>
 
         <ul class="benefits-list">
             <li>Keep your conifers and broadleaf trees alive and thriving near your home — safely</li>
