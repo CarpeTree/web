@@ -132,32 +132,32 @@
         .service-section {
             position: absolute;
             z-index: 5;
-            width: 35%;
+            width: 42%;
             display: flex;
             flex-direction: column;
         }
         
         /* Position sections with better alignment and consistent spacing */
         .section-nw {
-            top: 5%;
-            left: 2%;
+            top: 8%;
+            left: 4%;
         }
         
         .section-ne {
-            top: 5%;
-            right: 2%;
+            top: 8%;
+            right: 4%;
             align-items: flex-end;
         }
         
         .section-sw {
-            bottom: 5%;
-            left: 2%;
+            bottom: 8%;
+            left: 4%;
             flex-direction: column-reverse;
         }
         
         .section-se {
-            bottom: 5%;
-            right: 2%;
+            bottom: 8%;
+            right: 4%;
             align-items: flex-end;
             flex-direction: column-reverse;
         }
@@ -176,41 +176,25 @@
             white-space: nowrap;
         }
         
-        /* Push titles to outer extremes of each quadrant */
-        .section-nw .section-title {
-            text-align: left;
-            align-self: flex-start;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
-        
-        .section-ne .section-title {
-            text-align: right;
-            align-self: flex-end;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
-        
+        /* Consistent title alignment */
+        .section-nw .section-title,
         .section-sw .section-title {
             text-align: left;
             align-self: flex-start;
-            margin-bottom: 0;
-            margin-top: 25px;
         }
         
+        .section-ne .section-title,
         .section-se .section-title {
             text-align: right;
             align-self: flex-end;
-            margin-bottom: 0;
-            margin-top: 25px;
         }
         
         /* Service items container */
         .service-items {
-            margin: 10px 0;
+            margin: 15px 0;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
         
         /* Align service items properly */
@@ -717,6 +701,7 @@
             
             <!-- Tree Health & Preservation -->
             <div id="tree-health" class="service-section section-nw">
+                <h3 class="section-title">Tree Health & Preservation</h3>
                 <div class="service-items">
                     <div class="service-item" data-summary="soil-health-summary">
                         <a href="services/soil-health.html" class="service-link">
@@ -737,11 +722,11 @@
                         </a>
                     </div>
                 </div>
-                <h3 class="section-title">Tree Health & Preservation</h3>
             </div>
             
             <!-- Tree Risk Management -->
             <div id="risk-management" class="service-section section-ne">
+                <h3 class="section-title">Tree Risk Management</h3>
                 <div class="service-items">
                     <div class="service-item" data-summary="risk-assessment-summary">
                         <a href="services/assessments.html" class="service-link">
@@ -750,8 +735,8 @@
                         </a>
                     </div>
                     <div class="service-item" data-summary="cabling-summary">
-                        <a href="services/wildfire-risk-management.html" class="service-link">
-                            Wildfire Risk Management
+                        <a href="services/cabling.html" class="service-link">
+                            Cabling & Bracing
                             <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                         </a>
                     </div>
@@ -762,7 +747,6 @@
                         </a>
                     </div>
                 </div>
-                <h3 class="section-title">Tree Risk Management</h3>
             </div>
             
             <!-- Tree Removal & Alternatives -->
