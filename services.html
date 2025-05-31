@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Services - Carpe Tree'em</title>
-    <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         /* MODERN TREE-THEMED RADIAL LAYOUT */
         .radial-container {
@@ -132,34 +130,28 @@
         .service-section {
             position: absolute;
             z-index: 5;
-            width: 42%;
-            display: flex;
-            flex-direction: column;
+            width: 40%;
         }
         
-        /* Position sections with better alignment and consistent spacing */
+        /* Position sections with better alignment */
         .section-nw {
-            top: 8%;
-            left: 4%;
+            top: 5%;
+            left: 2%;
         }
         
         .section-ne {
-            top: 8%;
-            right: 4%;
-            align-items: flex-end;
+            top: 5%;
+            right: 2%;
         }
         
         .section-sw {
-            bottom: 8%;
-            left: 4%;
-            flex-direction: column-reverse;
+            bottom: 5%;
+            left: 2%;
         }
         
         .section-se {
-            bottom: 8%;
-            right: 4%;
-            align-items: flex-end;
-            flex-direction: column-reverse;
+            bottom: 5%;
+            right: 2%;
         }
         
         /* Move category titles outside the wheel */
@@ -172,64 +164,86 @@
             padding-bottom: 8px;
             display: inline-block;
             font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            white-space: nowrap;
+            margin-bottom: 15px;
         }
         
-        /* Consistent title alignment */
+        /* Top sections have title above */
         .section-nw .section-title,
+        .section-ne .section-title {
+            margin-bottom: 15px;
+        }
+        
+        /* Bottom sections have title below */
+        .section-sw .section-title,
+        .section-se .section-title {
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+        
+        .section-nw .section-title {
+            text-align: left;
+            margin-left: 0;
+        }
+        
+        .section-ne .section-title {
+            text-align: right;
+            margin-right: 0;
+            float: right;
+        }
+        
         .section-sw .section-title {
             text-align: left;
-            align-self: flex-start;
+            margin-left: 0;
+            clear: both;
         }
         
-        .section-ne .section-title,
         .section-se .section-title {
             text-align: right;
-            align-self: flex-end;
+            margin-right: 0;
+            float: right;
+            clear: both;
         }
         
         /* Service items container */
         .service-items {
-            margin: 15px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            clear: both;
+            margin-top: 10px;
         }
         
-        /* Align service items properly */
-        .section-nw .service-items,
-        .section-sw .service-items {
-            align-items: flex-start;
-        }
-        
-        .section-ne .service-items,
+        /* For bottom sections, reduce the top margin */
+        .section-sw .service-items,
         .section-se .service-items {
-            align-items: flex-end;
+            margin-bottom: 10px;
+            margin-top: 0;
         }
         
         /* Individual service items */
         .service-item {
+            margin: 12px 0;
             position: relative;
             transition: all 0.3s ease;
             background: none !important;
             background-color: transparent !important;
-            display: flex;
-            align-items: center;
-            margin: 0;
         }
         
-        /* Consistent spacing for all sections */
-        .section-nw .service-item,
-        .section-sw .service-item {
-            justify-content: flex-start;
-            flex-direction: row;
+        .section-nw .service-items {
+            text-align: left;
+            padding-left: 0;
         }
         
-        .section-ne .service-item,
-        .section-se .service-item {
-            justify-content: flex-end;
-            flex-direction: row-reverse;
+        .section-ne .service-items {
+            text-align: right;
+            padding-right: 0;
+        }
+        
+        .section-sw .service-items {
+            text-align: left;
+            padding-left: 0;
+        }
+        
+        .section-se .service-items {
+            text-align: right;
+            padding-right: 0;
         }
         
         .service-item:hover {
@@ -240,8 +254,7 @@
             color: var(--text-color) !important;
             text-decoration: none !important;
             transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
+            display: inline-block;
             font-size: 1.1em;
             font-family: 'Lato', sans-serif;
             font-weight: 500;
@@ -252,7 +265,6 @@
             border-radius: 0 !important;
             box-shadow: none !important;
             outline: none !important;
-            gap: 8px;
         }
         
         /* Ensure service links don't inherit button styling */
@@ -266,35 +278,19 @@
             color: var(--text-color) !important;
         }
         
-        /* Service icons - show them consistently */
+        /* Service icons */
         .service-icon {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
+            display: none;
         }
         
-        /* Icon positioning for each section */
         .section-nw .service-icon,
         .section-sw .service-icon {
-            order: 1;
+            margin-right: 0;
         }
         
         .section-ne .service-icon,
         .section-se .service-icon {
-            order: 2;
-        }
-        
-        /* Text positioning */
-        .section-nw .service-link,
-        .section-sw .service-link {
-            flex-direction: row;
-        }
-        
-        .section-ne .service-link,
-        .section-se .service-link {
-            flex-direction: row-reverse;
+            margin-left: 0;
         }
         
         .service-item:hover .service-icon {
@@ -305,7 +301,7 @@
             color: var(--warm-earth-brown);
         }
         
-        /* Hover effects with consistent directions */
+        /* Hover effects */
         .section-nw .service-link:hover,
         .section-sw .service-link:hover {
             transform: translateX(5px);
@@ -328,7 +324,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: transparent;
+            background-color: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -420,9 +416,6 @@
                 height: auto;
                 padding: 20px;
                 margin: 30px auto;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
             }
             
             .center-circle {
@@ -431,9 +424,8 @@
                 left: 0;
                 transform: none;
                 margin: 0 auto 40px;
-                width: 300px;
-                height: 300px;
-                order: 1;
+                width: 320px;
+                height: 320px;
             }
             
             .organic-connectors, .root-line, .service-line, 
@@ -444,106 +436,57 @@
             .service-section {
                 position: relative;
                 width: 100%;
-                max-width: 500px;
-                margin: 30px auto;
+                text-align: center;
+                margin-bottom: 40px;
                 top: auto;
                 left: auto;
                 right: auto;
                 bottom: auto;
+            }
+            
+            .section-nw, .section-ne, .section-sw, .section-se {
+                text-align: center;
+            }
+            
+            .section-title {
+                display: block;
+                text-align: center;
+            }
+            
+            .section-nw .service-link,
+            .section-ne .service-link,
+            .section-sw .service-link,
+            .section-se .service-link {
+                padding: 0;
+            }
+            
+            .service-item {
+                margin: 15px 0;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
             }
             
-            /* Reorder sections for logical flow */
-            .section-nw { order: 2; }
-            .section-ne { order: 3; }
-            .section-sw { order: 4; }
-            .section-se { order: 5; }
+            .section-nw .service-link:hover {
+                transform: translateX(0);
+            }
             
-            .section-title {
+            .section-nw .service-icon,
+            .section-ne .service-icon,
+            .section-sw .service-icon,
+            .section-se .service-icon {
+                margin: 0 0 5px 0;
                 display: block;
-                text-align: center;
-                align-self: center;
-                margin-bottom: 15px;
-                border-bottom: 2px solid var(--muted-golden-amber);
-                padding-bottom: 8px;
-            }
-            
-            .service-items {
-                width: 100%;
-                align-items: center;
-                gap: 15px;
-            }
-            
-            .service-item {
-                width: 100%;
-                max-width: 400px;
-                justify-content: center;
-                flex-direction: row;
-                padding: 12px 20px;
-                border-radius: 8px;
-                background-color: rgba(255, 255, 255, 0.7);
-                border: 1px solid rgba(44, 95, 45, 0.1);
-                transition: all 0.3s ease;
             }
             
             .service-item:hover {
                 transform: translateY(-3px);
-                background-color: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
             
-            .service-link {
-                padding: 0 !important;
-                flex-direction: row;
-                justify-content: center;
-                width: 100%;
-                text-align: center;
-            }
-            
-            .service-icon {
-                display: block;
-                order: 1;
-                margin-right: 8px;
-                opacity: 1;
-            }
-            
-            /* Reset all hover transforms for mobile */
-            .section-nw .service-link:hover,
             .section-ne .service-link:hover,
             .section-sw .service-link:hover,
             .section-se .service-link:hover {
-                transform: none;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .radial-container {
-                padding: 15px;
-                margin: 20px auto;
-            }
-            
-            .center-circle {
-                width: 250px;
-                height: 250px;
-                margin-bottom: 30px;
-            }
-            
-            .service-section {
-                margin: 20px auto;
-            }
-            
-            .section-title {
-                font-size: 1.3em;
-            }
-            
-            .service-item {
-                padding: 10px 15px;
-            }
-            
-            .service-link {
-                font-size: 1em;
+                transform: translateX(0);
             }
         }
     </style>
@@ -785,8 +728,8 @@
                     </div>
                     <div class="service-item" data-summary="cabling-summary">
                         <a href="services/wildfire-risk-management.html" class="service-link">
-                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                             Wildfire Risk Management
+                            <svg class="service-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                         </a>
                     </div>
                     <div class="service-item" data-summary="storm-damage-summary">
