@@ -31,43 +31,27 @@
             /* text-align: center; */ /* Removed, will be handled by children */
         }
 
-        .poster-header-bar, .poster-footer-bar { /* New common class for header/footer bars */
+        .poster-header-bar, .poster-footer-bar { /* .poster-footer-bar will be removed but keeping rule for now */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 0.1in; /* Reduced */
-            margin-bottom: 0.1in; /* Reduced */
-            border-bottom: 1px solid var(--muted-golden-amber); /* Separator for header */
+            padding-bottom: 0.1in; 
+            margin-bottom: 0.1in; 
+            border-bottom: 1px solid var(--muted-golden-amber); 
         }
         
-        .poster-footer-bar {
-            border-bottom: none; /* No bottom border for footer bar itself */
-            border-top: 1px solid var(--muted-golden-amber); /* Separator for footer */
-            margin-top: auto; /* Pushes footer to the bottom */
-            padding-top: 0.1in; /* Reduced */
-            margin-bottom: 0; /* No margin at the very bottom of poster */
-            position: relative; /* Needed for absolute positioning of a centered QR code if that route is taken, or helps manage flex children */
-        }
+        /* Removed .poster-footer-bar specific styles as it will be deleted */
+        /* Removed .poster-footer-bar .logo-group and .poster-footer-bar .contact-group specific styles */
 
-        .poster-footer-bar .logo-group { /* Ensure logo group in footer doesn't interfere with center */
-            flex-shrink: 0; /* Don't shrink if space is tight */
-        }
-
-        .poster-footer-bar .contact-group { /* Ensure contact group in footer doesn't interfere */
-            flex-shrink: 0; /* Don't shrink */
-            text-align: right; /* Keep text aligned right */
-        }
-
-        .qr-code-inline-wrapper { /* NEW: For QR code in the middle of the footer bar */
-            /* flex-grow: 1; */ /* Allow it to take available space if desired, or keep it fixed */
-            text-align: center; /* Center QR if it has intrinsic width less than allocated space */
+        .qr-code-inline-wrapper { /* For QR code now in the header bar */
+            text-align: center; 
         }
 
         .qr-code-inline-wrapper img.qr-code {
-            max-height: 30pt; /* Adjusted to align better with text/logos if needed */
-            width: auto; /* Maintain aspect ratio */
-            display: block; /* Allows margin auto to work if wrapper has width */
-            margin: 0 auto; /* Center it if its wrapper is wider */
+            max-height: 35pt; /* Match header logo height */
+            width: auto; 
+            display: block; 
+            margin: 0 auto; 
         }
 
         .logo-group {
@@ -142,11 +126,11 @@
         }
 
         .solution-image-container img {
-            max-width: 100%; /* Image scales to fit its container */
-            max-height: 3.0in; /* Slightly reduced if needed for fit */
+            max-width: 100%; 
+            max-height: 3.2in; /* Slightly increased available height due to footer removal */
             border: 2px solid var(--soft-bark-gray);
             border-radius: 4px;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.15); /* Added for tile effect */
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.15); 
         }
         
         hr {
@@ -204,10 +188,10 @@
         .package-list {
             list-style: none;
             padding: 0;
-            margin-bottom: 0.15in; /* Reduced */
+            margin-bottom: 0.1in; /* Further reduced margin before potential end of page */
             text-align: left;
-            columns: 2; /* Create two columns for package items */
-            column-gap: 0.2in; /* Slightly reduced */
+            columns: 2; 
+            column-gap: 0.2in; 
         }
 
         .package-list li {
@@ -252,6 +236,9 @@
             <div class="logo-group">
                 <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-word">
                 <img src="images/hero.png" alt="Carpe Tree'em Detailed Tree Logo" class="logo-tree">
+            </div>
+            <div class="qr-code-inline-wrapper"> <!-- QR code moved to header -->
+                <img src="images/carpetreeqr.png" alt="Carpe Tree'em Website QR Code" class="qr-code">
             </div>
             <div class="contact-group">
                 <strong>Carpe Tree'em</strong>
@@ -305,21 +292,6 @@
             <li>Installation of <strong>MCH bubble caps or species-appropriate pheromones</strong> to deter beetles and reduce pest pressure</li>
         </ul>
         
-        <div class="poster-footer-bar">
-             <div class="logo-group"> 
-                <img src="images/carpeclear.png" alt="Carpe Tree'em Logo" class="logo-word">
-                <img src="images/hero.png" alt="Carpe Tree'em Detailed Tree Logo" class="logo-tree">
-            </div>
-            <div class="qr-code-inline-wrapper"> <!-- QR code now in the middle -->
-                <img src="images/carpetreeqr.png" alt="Carpe Tree'em Website QR Code" class="qr-code">
-            </div>
-            <div class="contact-group"> 
-                <strong>Carpe Tree'em</strong>
-                📞 <a href="tel:778-655-3741">778-655-3741</a><br>
-                🌐 <a href="http://www.carpetree.com">www.carpetree.com</a><br>
-                📧 <a href="mailto:support@carpetree.com">support@carpetree.com</a>
-            </div>
-        </div>
     </div>
 </body>
 </html> 
