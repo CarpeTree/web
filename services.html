@@ -172,21 +172,37 @@
             padding-bottom: 8px;
             display: inline-block;
             font-family: 'Montserrat', sans-serif;
-            margin: 15px 0;
+            margin: 0;
             white-space: nowrap;
         }
         
-        /* Consistent title alignment */
-        .section-nw .section-title,
+        /* Push titles to outer extremes of each quadrant */
+        .section-nw .section-title {
+            text-align: left;
+            align-self: flex-start;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        
+        .section-ne .section-title {
+            text-align: right;
+            align-self: flex-end;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        
         .section-sw .section-title {
             text-align: left;
             align-self: flex-start;
+            margin-bottom: 0;
+            margin-top: 25px;
         }
         
-        .section-ne .section-title,
         .section-se .section-title {
             text-align: right;
             align-self: flex-end;
+            margin-bottom: 0;
+            margin-top: 25px;
         }
         
         /* Service items container */
