@@ -266,27 +266,12 @@
             color: var(--text-color) !important;
         }
         
-        /* Service icons - show them consistently */
+        /* Service icons - hide them completely */
         .service-icon {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
+            display: none !important;
         }
         
-        /* Icon positioning for each section */
-        .section-nw .service-icon,
-        .section-sw .service-icon {
-            order: 1;
-        }
-        
-        .section-ne .service-icon,
-        .section-se .service-icon {
-            order: 2;
-        }
-        
-        /* Text positioning */
+        /* Restore proper text positioning for radial design */
         .section-nw .service-link,
         .section-sw .service-link {
             flex-direction: row;
@@ -297,15 +282,7 @@
             flex-direction: row-reverse;
         }
         
-        .service-item:hover .service-icon {
-            opacity: 1;
-        }
-        
-        .service-link:hover {
-            color: var(--warm-earth-brown);
-        }
-        
-        /* Hover effects with consistent directions */
+        /* Restore hover effects with consistent directions */
         .section-nw .service-link:hover,
         .section-sw .service-link:hover {
             transform: translateX(5px);
@@ -316,9 +293,8 @@
             transform: translateX(-5px);
         }
         
-        /* Remove the organic connecting paths */
-        .service-line {
-            display: none;
+        .service-link:hover {
+            color: var(--warm-earth-brown);
         }
         
         /* Service summary that appears in center circle on hover */
@@ -382,24 +358,6 @@
                 -1px 1px 0 #fff,
                 1px 1px 0 #fff,
                 0 0 8px rgba(255, 255, 255, 0.8);
-        }
-        
-        /* Local considerations box */
-        .local-considerations {
-            background-color: #F5F5F5;
-            border-left: 4px solid var(--deep-forest-green);
-            padding: 20px;
-            margin: 30px auto;
-            max-width: 1000px;
-            border-radius: 0 8px 8px 0;
-            font-family: 'Lato', sans-serif;
-        }
-
-        .local-considerations h3 {
-            color: var(--deep-forest-green);
-            margin-top: 0;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
         }
         
         /* Carpe Tree logo at the top */
@@ -500,13 +458,6 @@
                 justify-content: center;
                 width: 100%;
                 text-align: center;
-            }
-            
-            .service-icon {
-                display: block;
-                order: 1;
-                margin-right: 8px;
-                opacity: 1;
             }
             
             /* Reset all hover transforms for mobile */
@@ -847,12 +798,6 @@
                 </div>
                 <h3 class="section-title">Climbing Technician</h3>
             </div>
-        </div>
-        
-        <!-- Local considerations moved below the radial layout -->
-        <div class="local-considerations">
-            <h3>West Kootenays Climate Considerations</h3>
-            <p>The West Kootenays' unique climate—with mild, wet winters and dry summers—creates specific challenges for tree care. This variable climate leads to vigorous tree growth but also increases risks of disease, storm damage, and drought stress. Our approach to tree care is tailored to these local conditions, ensuring your trees thrive in our specific environment.</p>
         </div>
     </section>
 
