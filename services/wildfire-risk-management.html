@@ -162,11 +162,10 @@
             font-weight: 600;
         }
         
-        /* Side-by-side layout for sprinkler and bullet points */
         .sprinkler-consultations {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
+            grid-template-columns: auto 1fr;
+            gap: 30px;
             align-items: start;
             margin: 30px 0;
         }
@@ -176,22 +175,22 @@
         }
         
         .sprinkler-image-section img {
-            width: 100%;
+            width: 350px;
             height: auto;
             border-radius: 8px;
             max-height: 400px;
             object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .sprinkler-image-section img:hover {
+            transform: scale(1.02);
         }
         
         .sprinkler-image-section p {
             font-style: italic;
             margin-top: 10px;
             color: #666;
-        }
-        
-        .consultations-list h3 {
-            margin-top: 0;
-            margin-bottom: 20px;
         }
         
         @media (max-width: 768px) {
@@ -202,11 +201,6 @@
             .before-after-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
-            }
-            
-            .sprinkler-consultations {
-                grid-template-columns: 1fr;
-                gap: 20px;
             }
         }
     </style>
@@ -240,8 +234,9 @@
         
         <div class="sprinkler-consultations">
             <div class="sprinkler-image-section">
-                <img src="../images/WILDFIRE SPRINKLER.tiff" alt="Wildfire sprinkler system protecting trees and structures with strategic water coverage">
-                <p>Strategic sprinkler placement creates protective moisture barriers around key trees and structures</p>
+                <a href="../firesmart.html">
+                    <img src="../images/WILDFIRE SPRINKLER.tiff" alt="Wildfire sprinkler system protecting trees and structures with strategic water coverage">
+                </a>
             </div>
             
             <div class="consultations-list">
@@ -300,12 +295,6 @@
         <h2>Transparent, Science-Based Advice</h2>
         <h3 style="text-align: center; font-size: 1.8em; margin: 30px 0;">We don't sell fear. We sell clarity.</h3>
         <p style="text-align: center;">Our wildfire assessments are part of a paid consultation—so we're not incentivized to upsell unnecessary removals or gear. You'll receive a clear, written care plan rooted in current wildfire science, tailored to your land, and delivered with integrity.</p>
-
-        <div class="contact-section">
-            <h3>🌲 FireSmart Tree Protection</h3>
-            <p>Want to keep your trees AND stay FireSmart compliant? Check out our comprehensive tree protection package that preserves your conifers while meeting BC FireSmart standards.</p>
-            <a href="../firesmart.html" style="display: inline-block; margin: 15px 0; padding: 12px 25px; background-color: var(--deep-forest-green); color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background-color 0.3s;">View FireSmart Tree Protection →</a>
-        </div>
 
         <div class="contact-section">
             <h3>🌲 Book a Wildfire Consultation</h3>
