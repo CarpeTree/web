@@ -104,26 +104,62 @@
     }
 
     .lesson-text {
-      font-size: 18px;
-      line-height: 1.8;
+      font-size: 28px;
+      line-height: 2.0;
       color: var(--text-color);
-      margin-bottom: 20px;
-      min-height: 100px;
+      margin-bottom: 30px;
+      min-height: 120px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      border: 3px solid var(--deep-forest-green);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+      word-spacing: 3px;
+      text-align: left;
+      box-shadow: 0 4px 15px rgba(44, 95, 45, 0.1);
+      position: relative;
+    }
+
+    .lesson-text .current-char {
+      background: var(--muted-golden-amber);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .lesson-text .typed-correct {
+      color: var(--deep-forest-green);
+      font-weight: bold;
+    }
+
+    .lesson-text .typed-incorrect {
+      color: #ff4444;
+      background: #ffe6e6;
+      text-decoration: underline;
     }
 
     .typing-input {
       width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      border: 2px solid var(--soft-bark-gray);
-      border-radius: 5px;
-      font-family: monospace;
+      padding: 20px;
+      font-size: 24px;
+      border: 3px solid var(--soft-bark-gray);
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
       box-sizing: border-box;
+      line-height: 1.5;
+      letter-spacing: 1px;
+      word-spacing: 3px;
+      background: white;
+      color: var(--deep-forest-green);
+      font-weight: bold;
     }
 
     .typing-input:focus {
       outline: none;
       border-color: var(--deep-forest-green);
+      box-shadow: 0 0 15px rgba(44, 95, 45, 0.3);
     }
 
     .controls {
@@ -212,6 +248,18 @@
       background: var(--muted-golden-amber);
       border-color: var(--muted-golden-amber);
       color: white;
+    }
+
+    .lesson-instructions {
+      background: var(--background-color);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid var(--deep-forest-green);
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 18px;
+      color: var(--deep-forest-green);
+      font-weight: bold;
     }
 
     @media (max-width: 768px) {
@@ -352,6 +400,11 @@
           <h3 id="currentLessonName" style="color: var(--deep-forest-green); margin: 0 0 5px 0;">Lesson 1: Home Row Foundation</h3>
           <p id="lessonDescription" style="color: var(--text-color); font-style: italic; margin: 0;">Master the home row keys - the foundation of touch typing</p>
         </div>
+        
+        <div class="lesson-instructions">
+          <i class="fas fa-keyboard"></i> Type the text below exactly as shown. Focus on accuracy first, then speed!
+        </div>
+        
         <div class="lesson-text" id="lessonText">
           Welcome to the Forest Typing Academy! Start with the home row keys: asdf jkl;
         </div>
@@ -359,7 +412,7 @@
           class="typing-input" 
           id="typingInput" 
           placeholder="Start typing here... Type the entire lesson to complete it"
-          rows="3"
+          rows="4"
         ></textarea>
         <div class="progress-bar">
           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
@@ -694,7 +747,11 @@
       const lesson = lessons[lessonId];
       document.getElementById('currentLessonName').textContent = lesson.name;
       document.getElementById('lessonDescription').textContent = lesson.description;
-      document.getElementById('lessonText').textContent = lesson.text;
+      
+      // Display lesson text with first character highlighted
+      const firstChar = lesson.text.charAt(0);
+      const restOfText = lesson.text.substring(1);
+      document.getElementById('lessonText').innerHTML = `<span class="current-char">${firstChar}</span>${restOfText}`;
       
       // Reset game state
       resetLesson();
@@ -729,6 +786,14 @@
       
       document.getElementById('typingInput').value = '';
       document.getElementById('progressFill').style.width = '0%';
+      
+      // Restore lesson text with first character highlighted
+      const lesson = lessons[userData.progress.currentLesson];
+      if (lesson) {
+        const firstChar = lesson.text.charAt(0);
+        const restOfText = lesson.text.substring(1);
+        document.getElementById('lessonText').innerHTML = `<span class="current-char">${firstChar}</span>${restOfText}`;
+      }
     }
 
     function handleTyping(e) {
@@ -745,13 +810,30 @@
       const progress = Math.min((input.length / currentText.length) * 100, 100);
       document.getElementById('progressFill').style.width = progress + '%';
       
-      // Calculate errors for entire lesson
+      // Calculate errors and update visual feedback
       gameState.errors = 0;
-      for (let i = 0; i < input.length; i++) {
-        if (input[i] !== currentText[i]) {
-          gameState.errors++;
+      let visualText = '';
+      
+      for (let i = 0; i < currentText.length; i++) {
+        if (i < input.length) {
+          // Character has been typed
+          if (input[i] === currentText[i]) {
+            visualText += `<span class="typed-correct">${currentText[i]}</span>`;
+          } else {
+            visualText += `<span class="typed-incorrect">${currentText[i]}</span>`;
+            gameState.errors++;
+          }
+        } else if (i === input.length) {
+          // Current character to type
+          visualText += `<span class="current-char">${currentText[i]}</span>`;
+        } else {
+          // Future characters
+          visualText += currentText[i];
         }
       }
+      
+      // Update the lesson text with visual feedback
+      document.getElementById('lessonText').innerHTML = visualText;
       
       // Check if lesson is complete
       if (input.length >= currentText.length) {
