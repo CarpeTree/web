@@ -323,15 +323,35 @@
       </div>
 
       <div class="lesson-selector">
-        <button class="lesson-btn active" data-lesson="home-row">Home Row</button>
-        <button class="lesson-btn" data-lesson="top-row">Top Row</button>
-        <button class="lesson-btn" data-lesson="bottom-row">Bottom Row</button>
-        <button class="lesson-btn" data-lesson="numbers">Numbers</button>
-        <button class="lesson-btn" data-lesson="symbols">Symbols</button>
-        <button class="lesson-btn" data-lesson="forest-words">Forest Words</button>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 15px;">
+          <button class="lesson-btn active" data-lesson="lesson-1">1</button>
+          <button class="lesson-btn" data-lesson="lesson-2">2</button>
+          <button class="lesson-btn" data-lesson="lesson-3">3</button>
+          <button class="lesson-btn" data-lesson="lesson-4">4</button>
+          <button class="lesson-btn" data-lesson="lesson-5">5</button>
+          <button class="lesson-btn" data-lesson="lesson-6">6</button>
+          <button class="lesson-btn" data-lesson="lesson-7">7</button>
+          <button class="lesson-btn" data-lesson="lesson-8">8</button>
+          <button class="lesson-btn" data-lesson="lesson-9">9</button>
+          <button class="lesson-btn" data-lesson="lesson-10">10</button>
+          <button class="lesson-btn" data-lesson="lesson-11">11</button>
+          <button class="lesson-btn" data-lesson="lesson-12">12</button>
+          <button class="lesson-btn" data-lesson="lesson-13">13</button>
+          <button class="lesson-btn" data-lesson="lesson-14">14</button>
+          <button class="lesson-btn" data-lesson="lesson-15">15</button>
+          <button class="lesson-btn" data-lesson="lesson-16">16</button>
+          <button class="lesson-btn" data-lesson="lesson-17">17</button>
+          <button class="lesson-btn" data-lesson="lesson-18">18</button>
+          <button class="lesson-btn" data-lesson="lesson-19">19</button>
+          <button class="lesson-btn" data-lesson="lesson-20">20</button>
+        </div>
       </div>
 
       <div class="lesson-area">
+        <div style="margin-bottom: 15px;">
+          <h3 id="currentLessonName" style="color: var(--deep-forest-green); margin: 0 0 5px 0;">Lesson 1: Home Row Foundation</h3>
+          <p id="lessonDescription" style="color: var(--text-color); font-style: italic; margin: 0;">Master the home row keys - the foundation of touch typing</p>
+        </div>
         <div class="lesson-text" id="lessonText">
           Welcome to the Forest Typing Academy! Start with the home row keys: asdf jkl;
         </div>
@@ -374,7 +394,7 @@
     let userData = {
       username: '',
       progress: {
-        currentLesson: 'home-row',
+        currentLesson: 'lesson-1',
         wpm: 0,
         accuracy: 0,
         streak: 0,
@@ -388,78 +408,246 @@
       }
     };
 
-    // Lesson content
+    // Lesson content - Professional typing progression
     const lessons = {
-      'home-row': {
-        name: 'Home Row Basics',
-        text: 'asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl;',
+      'lesson-1': {
+        name: 'Lesson 1: Home Row Foundation',
+        description: 'Master the home row keys - the foundation of touch typing',
+        keys: ['f', 'j'],
+        chunks: [
+          'f j',
+          'ff jj',
+          'fj fj',
+          'f j f j',
+          'ff jj ff jj'
+        ]
+      },
+      'lesson-2': {
+        name: 'Lesson 2: Left Hand Home Row',
+        description: 'Learn the left hand home row keys: a, s, d, f',
+        keys: ['a', 's', 'd', 'f'],
+        chunks: [
+          'asdf',
+          'as as',
+          'df df',
+          'asdf asdf',
+          'a s d f a s d f'
+        ]
+      },
+      'lesson-3': {
+        name: 'Lesson 3: Right Hand Home Row',
+        description: 'Master the right hand home row: j, k, l, ;',
+        keys: ['j', 'k', 'l', ';'],
+        chunks: [
+          'jkl;',
+          'jk jk',
+          'l; l;',
+          'jkl; jkl;',
+          'j k l ; j k l ;'
+        ]
+      },
+      'lesson-4': {
+        name: 'Lesson 4: Complete Home Row',
+        description: 'Practice the entire home row with simple words',
         keys: ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'],
         chunks: [
           'asdf jkl;',
-          'asdf jkl; asdf jkl;',
-          'asdf jkl; asdf jkl; asdf jkl;',
-          'asdf jkl; asdf jkl; asdf jkl; asdf jkl;',
-          'asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl;'
+          'sad sad',
+          'ask ask',
+          'dad dad',
+          'asdf jkl; asdf jkl;'
         ]
       },
-      'top-row': {
-        name: 'Top Row Adventure',
-        text: 'qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty',
-        keys: ['q', 'w', 'e', 'r', 't', 'y'],
+      'lesson-5': {
+        name: 'Lesson 5: Top Row - Left Hand',
+        description: 'Learn the left hand top row: q, w, e, r',
+        keys: ['q', 'w', 'e', 'r'],
         chunks: [
-          'qwerty',
-          'qwerty qwerty',
-          'qwerty qwerty qwerty',
-          'qwerty qwerty qwerty qwerty',
-          'qwerty qwerty qwerty qwerty qwerty'
+          'qwer',
+          'we we',
+          'er er',
+          'qwer qwer',
+          'q w e r q w e r'
         ]
       },
-      'bottom-row': {
-        name: 'Bottom Row Explorer',
-        text: 'zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn',
-        keys: ['z', 'x', 'c', 'v', 'b', 'n'],
+      'lesson-6': {
+        name: 'Lesson 6: Top Row - Right Hand',
+        description: 'Master the right hand top row: t, y, u, i',
+        keys: ['t', 'y', 'u', 'i'],
         chunks: [
-          'zxcvbn',
-          'zxcvbn zxcvbn',
-          'zxcvbn zxcvbn zxcvbn',
-          'zxcvbn zxcvbn zxcvbn zxcvbn',
-          'zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn'
+          'tyui',
+          'ty ty',
+          'ui ui',
+          'tyui tyui',
+          't y u i t y u i'
         ]
       },
-      'numbers': {
-        name: 'Number Forest',
-        text: '12345 67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 67890',
+      'lesson-7': {
+        name: 'Lesson 7: Complete Top Row',
+        description: 'Practice the entire top row with common words',
+        keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'],
+        chunks: [
+          'qwertyui',
+          'wet wet',
+          'try try',
+          'quit quit',
+          'qwertyui qwertyui'
+        ]
+      },
+      'lesson-8': {
+        name: 'Lesson 8: Bottom Row - Left Hand',
+        description: 'Learn the left hand bottom row: z, x, c, v',
+        keys: ['z', 'x', 'c', 'v'],
+        chunks: [
+          'zxcv',
+          'xc xc',
+          'cv cv',
+          'zxcv zxcv',
+          'z x c v z x c v'
+        ]
+      },
+      'lesson-9': {
+        name: 'Lesson 9: Bottom Row - Right Hand',
+        description: 'Master the right hand bottom row: b, n, m',
+        keys: ['b', 'n', 'm'],
+        chunks: [
+          'bnm',
+          'bn bn',
+          'nm nm',
+          'bnm bnm',
+          'b n m b n m'
+        ]
+      },
+      'lesson-10': {
+        name: 'Lesson 10: Complete Bottom Row',
+        description: 'Practice the entire bottom row with useful words',
+        keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+        chunks: [
+          'zxcvbnm',
+          'box box',
+          'can can',
+          'mix mix',
+          'zxcvbnm zxcvbnm'
+        ]
+      },
+      'lesson-11': {
+        name: 'Lesson 11: Numbers Row',
+        description: 'Learn the number keys: 1, 2, 3, 4, 5, 6, 7, 8, 9, 0',
         keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
         chunks: [
           '12345',
-          '12345 67890',
-          '12345 67890 12345',
-          '12345 67890 12345 67890',
-          '12345 67890 12345 67890 12345'
+          '67890',
+          '123 456',
+          '789 012',
+          '12345 67890'
         ]
       },
-      'symbols': {
-        name: 'Symbol Safari',
-        text: '!@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*()',
+      'lesson-12': {
+        name: 'Lesson 12: Common Symbols',
+        description: 'Master essential symbols: !, @, #, $, %, ^, &, *, (, )',
         keys: ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
         chunks: [
           '!@#$%',
-          '!@#$% ^&*()',
-          '!@#$% ^&*() !@#$%',
-          '!@#$% ^&*() !@#$% ^&*()',
-          '!@#$% ^&*() !@#$% ^&*() !@#$%'
+          '^&*()',
+          '!@# $%^',
+          '&*() !@#',
+          '!@#$% ^&*()'
         ]
       },
-      'forest-words': {
-        name: 'Forest Vocabulary',
-        text: 'tree bark leaf branch root trunk canopy forest nature green growth life earth soil water sun',
-        keys: ['t', 'r', 'e', 'b', 'a', 'k', 'l', 'f', 'n', 'd', 'c', 'h', 'g', 'w', 's'],
+      'lesson-13': {
+        name: 'Lesson 13: Simple Words',
+        description: 'Practice typing common 3-4 letter words',
+        keys: ['all'],
+        chunks: [
+          'the and',
+          'for you',
+          'can get',
+          'will make',
+          'the and for you can get will make'
+        ]
+      },
+      'lesson-14': {
+        name: 'Lesson 14: Forest Vocabulary',
+        description: 'Learn typing with nature and tree-related words',
+        keys: ['all'],
         chunks: [
           'tree bark',
-          'tree bark leaf branch',
-          'tree bark leaf branch root trunk',
-          'tree bark leaf branch root trunk canopy forest',
-          'tree bark leaf branch root trunk canopy forest nature green'
+          'leaf branch',
+          'root trunk',
+          'forest green',
+          'tree bark leaf branch root trunk forest green'
+        ]
+      },
+      'lesson-15': {
+        name: 'Lesson 15: Short Sentences',
+        description: 'Practice typing complete sentences',
+        keys: ['all'],
+        chunks: [
+          'The tree grows tall.',
+          'Birds nest in branches.',
+          'Leaves turn green in spring.',
+          'Roots anchor the tree.',
+          'The tree grows tall. Birds nest in branches. Leaves turn green in spring.'
+        ]
+      },
+      'lesson-16': {
+        name: 'Lesson 16: Punctuation',
+        description: 'Master common punctuation marks',
+        keys: [',', '.', '?', '!', ';', ':', '"', "'"],
+        chunks: [
+          'Hello, world.',
+          'How are you?',
+          'Great! I am fine.',
+          'Yes; that is correct.',
+          'Hello, world. How are you? Great! I am fine.'
+        ]
+      },
+      'lesson-17': {
+        name: 'Lesson 17: Capital Letters',
+        description: 'Practice typing with capital letters and shift key',
+        keys: ['all'],
+        chunks: [
+          'The Tree Company',
+          'Forest Management',
+          'Professional Arborist',
+          'Tree Care Services',
+          'The Tree Company provides Forest Management and Professional Arborist Tree Care Services.'
+        ]
+      },
+      'lesson-18': {
+        name: 'Lesson 18: Speed Building',
+        description: 'Focus on increasing your typing speed',
+        keys: ['all'],
+        chunks: [
+          'Practice makes perfect.',
+          'Speed comes with accuracy.',
+          'Keep your eyes on the screen.',
+          'Use all your fingers.',
+          'Practice makes perfect. Speed comes with accuracy. Keep your eyes on the screen.'
+        ]
+      },
+      'lesson-19': {
+        name: 'Lesson 19: Accuracy Focus',
+        description: 'Concentrate on typing without errors',
+        keys: ['all'],
+        chunks: [
+          'Accuracy is more important than speed.',
+          'Slow down to speed up later.',
+          'Every error slows you down.',
+          'Perfect practice makes perfect.',
+          'Accuracy is more important than speed. Slow down to speed up later.'
+        ]
+      },
+      'lesson-20': {
+        name: 'Lesson 20: Final Challenge',
+        description: 'Put all your skills together in a comprehensive test',
+        keys: ['all'],
+        chunks: [
+          'Congratulations on completing the Forest Typing Academy!',
+          'You have learned touch typing fundamentals.',
+          'Your skills will improve with regular practice.',
+          'Keep practicing to become a typing master.',
+          'Congratulations on completing the Forest Typing Academy! You have learned touch typing fundamentals.'
         ]
       }
     };
@@ -467,11 +655,17 @@
     // Achievements
     const achievements = [
       { id: 'first-lesson', name: 'Forest Guardian', icon: '🌲', description: 'Complete your first lesson' },
+      { id: 'lesson-5', name: 'Home Row Hero', icon: '🏠', description: 'Complete the first 5 lessons (Home Row mastery)' },
+      { id: 'lesson-10', name: 'Top Row Explorer', icon: '🔝', description: 'Complete lessons 1-10 (Top and Bottom rows)' },
+      { id: 'lesson-15', name: 'Word Weaver', icon: '📝', description: 'Complete lessons 1-15 (Words and sentences)' },
+      { id: 'lesson-20', name: 'Forest Master', icon: '👑', description: 'Complete all 20 lessons' },
       { id: 'wpm-20', name: 'Eagle Ace', icon: '🦅', description: 'Reach 20 WPM' },
       { id: 'wpm-40', name: 'Swift Deer', icon: '🦌', description: 'Reach 40 WPM' },
+      { id: 'wpm-60', name: 'Lightning Lynx', icon: '🐆', description: 'Reach 60 WPM' },
       { id: 'accuracy-95', name: 'Precision Owl', icon: '🦉', description: 'Achieve 95% accuracy' },
+      { id: 'accuracy-98', name: 'Perfect Panther', icon: '🐆', description: 'Achieve 98% accuracy' },
       { id: 'streak-7', name: 'Dedicated Beaver', icon: '🦫', description: '7-day practice streak' },
-      { id: 'all-lessons', name: 'Forest Master', icon: '👑', description: 'Complete all lessons' }
+      { id: 'streak-30', name: 'Forest Legend', icon: '🌳', description: '30-day practice streak' }
     ];
 
     // Game state
@@ -551,7 +745,7 @@
         username: username,
         password: password,
         progress: {
-          currentLesson: 'home-row',
+          currentLesson: 'lesson-1',
           wpm: 0,
           accuracy: 0,
           streak: 0,
@@ -625,6 +819,7 @@
       // Update lesson content
       const lesson = lessons[lessonId];
       document.getElementById('currentLessonName').textContent = lesson.name;
+      document.getElementById('lessonDescription').textContent = lesson.description;
       
       // Reset game state
       resetLesson();
@@ -821,6 +1016,20 @@
         newAchievements.push('first-lesson');
       }
       
+      // Lesson progression achievements
+      if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
+        newAchievements.push('lesson-5');
+      }
+      if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
+        newAchievements.push('lesson-10');
+      }
+      if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
+        newAchievements.push('lesson-15');
+      }
+      if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
+        newAchievements.push('lesson-20');
+      }
+      
       // WPM achievements
       if (wpm >= 20 && !userData.achievements.includes('wpm-20')) {
         newAchievements.push('wpm-20');
@@ -828,15 +1037,16 @@
       if (wpm >= 40 && !userData.achievements.includes('wpm-40')) {
         newAchievements.push('wpm-40');
       }
+      if (wpm >= 60 && !userData.achievements.includes('wpm-60')) {
+        newAchievements.push('wpm-60');
+      }
       
-      // Accuracy achievement
+      // Accuracy achievements
       if (accuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
         newAchievements.push('accuracy-95');
       }
-      
-      // All lessons achievement
-      if (userData.progress.completedLessons.length >= Object.keys(lessons).length && !userData.achievements.includes('all-lessons')) {
-        newAchievements.push('all-lessons');
+      if (accuracy >= 98 && !userData.achievements.includes('accuracy-98')) {
+        newAchievements.push('accuracy-98');
       }
       
       // Add new achievements
