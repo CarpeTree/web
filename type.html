@@ -335,10 +335,13 @@
         <div class="lesson-text" id="lessonText">
           Welcome to the Forest Typing Academy! Start with the home row keys: asdf jkl;
         </div>
+        <div id="chunkInfo" style="text-align: center; margin: 10px 0; color: var(--deep-forest-green); font-weight: bold;">
+          Chunk 1 of 5
+        </div>
         <textarea 
           class="typing-input" 
           id="typingInput" 
-          placeholder="Start typing here..."
+          placeholder="Start typing here... Press Enter to advance to next chunk"
           rows="3"
         ></textarea>
         <div class="progress-bar">
@@ -347,6 +350,7 @@
         <div class="controls">
           <button onclick="startLesson()" class="cta-button">Start Lesson</button>
           <button onclick="resetLesson()" class="cta-button">Reset</button>
+          <button onclick="nextChunk()" class="cta-button">Next Chunk</button>
           <button onclick="toggleAchievements()" class="cta-button">View Achievements</button>
         </div>
       </div>
@@ -389,32 +393,74 @@
       'home-row': {
         name: 'Home Row Basics',
         text: 'asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl;',
-        keys: ['a', 's', 'd', 'f', 'j', 'k', 'l', ';']
+        keys: ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'],
+        chunks: [
+          'asdf jkl;',
+          'asdf jkl; asdf jkl;',
+          'asdf jkl; asdf jkl; asdf jkl;',
+          'asdf jkl; asdf jkl; asdf jkl; asdf jkl;',
+          'asdf jkl; asdf jkl; asdf jkl; asdf jkl; asdf jkl;'
+        ]
       },
       'top-row': {
         name: 'Top Row Adventure',
         text: 'qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty',
-        keys: ['q', 'w', 'e', 'r', 't', 'y']
+        keys: ['q', 'w', 'e', 'r', 't', 'y'],
+        chunks: [
+          'qwerty',
+          'qwerty qwerty',
+          'qwerty qwerty qwerty',
+          'qwerty qwerty qwerty qwerty',
+          'qwerty qwerty qwerty qwerty qwerty'
+        ]
       },
       'bottom-row': {
         name: 'Bottom Row Explorer',
         text: 'zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn',
-        keys: ['z', 'x', 'c', 'v', 'b', 'n']
+        keys: ['z', 'x', 'c', 'v', 'b', 'n'],
+        chunks: [
+          'zxcvbn',
+          'zxcvbn zxcvbn',
+          'zxcvbn zxcvbn zxcvbn',
+          'zxcvbn zxcvbn zxcvbn zxcvbn',
+          'zxcvbn zxcvbn zxcvbn zxcvbn zxcvbn'
+        ]
       },
       'numbers': {
         name: 'Number Forest',
         text: '12345 67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 67890',
-        keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        chunks: [
+          '12345',
+          '12345 67890',
+          '12345 67890 12345',
+          '12345 67890 12345 67890',
+          '12345 67890 12345 67890 12345'
+        ]
       },
       'symbols': {
         name: 'Symbol Safari',
         text: '!@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*() !@#$% ^&*()',
-        keys: ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
+        keys: ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
+        chunks: [
+          '!@#$%',
+          '!@#$% ^&*()',
+          '!@#$% ^&*() !@#$%',
+          '!@#$% ^&*() !@#$% ^&*()',
+          '!@#$% ^&*() !@#$% ^&*() !@#$%'
+        ]
       },
       'forest-words': {
         name: 'Forest Vocabulary',
         text: 'tree bark leaf branch root trunk canopy forest nature green growth life earth soil water sun',
-        keys: ['t', 'r', 'e', 'b', 'a', 'k', 'l', 'f', 'n', 'd', 'c', 'h', 'g', 'w', 's']
+        keys: ['t', 'r', 'e', 'b', 'a', 'k', 'l', 'f', 'n', 'd', 'c', 'h', 'g', 'w', 's'],
+        chunks: [
+          'tree bark',
+          'tree bark leaf branch',
+          'tree bark leaf branch root trunk',
+          'tree bark leaf branch root trunk canopy forest',
+          'tree bark leaf branch root trunk canopy forest nature green'
+        ]
       }
     };
 
@@ -435,7 +481,9 @@
       currentText: '',
       typedText: '',
       errors: 0,
-      totalCharacters: 0
+      totalCharacters: 0,
+      currentChunk: 0,
+      totalChunks: 0
     };
 
     // Initialize the game
@@ -577,10 +625,16 @@
       // Update lesson content
       const lesson = lessons[lessonId];
       document.getElementById('currentLessonName').textContent = lesson.name;
-      document.getElementById('lessonText').textContent = lesson.text;
       
       // Reset game state
       resetLesson();
+      
+      // Set up chunk system
+      gameState.currentChunk = 0;
+      gameState.totalChunks = lesson.chunks.length;
+      
+      // Display first chunk
+      displayCurrentChunk();
       
       // Update user progress
       if (currentUser) {
@@ -589,15 +643,32 @@
       }
     }
 
+    function displayCurrentChunk() {
+      const lesson = lessons[userData.progress.currentLesson];
+      if (!lesson || gameState.currentChunk >= lesson.chunks.length) return;
+      
+      const currentText = lesson.chunks[gameState.currentChunk];
+      document.getElementById('lessonText').textContent = currentText;
+      
+      // Update chunk indicator
+      const chunkInfo = document.getElementById('chunkInfo');
+      if (chunkInfo) {
+        chunkInfo.textContent = `Chunk ${gameState.currentChunk + 1} of ${gameState.totalChunks}`;
+      }
+    }
+
     function startLesson() {
       if (gameState.isActive) return;
       
       gameState.isActive = true;
       gameState.startTime = new Date();
-      gameState.currentText = document.getElementById('lessonText').textContent;
+      gameState.currentChunk = 0;
       gameState.typedText = '';
       gameState.errors = 0;
       gameState.totalCharacters = 0;
+      
+      // Display first chunk
+      displayCurrentChunk();
       
       document.getElementById('typingInput').value = '';
       document.getElementById('typingInput').focus();
@@ -610,44 +681,101 @@
       gameState.typedText = '';
       gameState.errors = 0;
       gameState.totalCharacters = 0;
+      gameState.currentChunk = 0;
+      
+      // Reset to first chunk
+      displayCurrentChunk();
       
       document.getElementById('typingInput').value = '';
       document.getElementById('progressFill').style.width = '0%';
+    }
+
+    function nextChunk() {
+      if (!gameState.isActive) {
+        alert('Please start the lesson first!');
+        return;
+      }
+      
+      const lesson = lessons[userData.progress.currentLesson];
+      if (gameState.currentChunk < lesson.chunks.length - 1) {
+        completeChunk();
+      } else {
+        alert('You\'re already on the last chunk! Complete it to finish the lesson.');
+      }
     }
 
     function handleTyping(e) {
       if (!gameState.isActive) return;
       
       const input = e.target.value;
-      const targetText = gameState.currentText;
+      const lesson = lessons[userData.progress.currentLesson];
+      const currentChunkText = lesson.chunks[gameState.currentChunk];
       
       gameState.typedText = input;
-      gameState.totalCharacters = input.length;
+      gameState.totalCharacters += input.length - gameState.typedText.length;
       
-      // Calculate progress
-      const progress = Math.min((input.length / targetText.length) * 100, 100);
+      // Calculate progress for current chunk
+      const progress = Math.min((input.length / currentChunkText.length) * 100, 100);
       document.getElementById('progressFill').style.width = progress + '%';
       
-      // Calculate errors
+      // Calculate errors for current chunk
       gameState.errors = 0;
       for (let i = 0; i < input.length; i++) {
-        if (input[i] !== targetText[i]) {
+        if (input[i] !== currentChunkText[i]) {
           gameState.errors++;
         }
       }
       
-      // Check if lesson is complete
-      if (input.length >= targetText.length) {
-        completeLesson();
+      // Check if current chunk is complete
+      if (input.length >= currentChunkText.length) {
+        completeChunk();
       }
     }
 
     function handleKeyDown(e) {
       if (!gameState.isActive) return;
       
+      // Allow Enter key to advance to next chunk
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const lesson = lessons[userData.progress.currentLesson];
+        const currentChunkText = lesson.chunks[gameState.currentChunk];
+        const input = document.getElementById('typingInput').value;
+        
+        // If current chunk is complete, advance to next
+        if (input.length >= currentChunkText.length) {
+          completeChunk();
+        } else {
+          // Show hint to complete current chunk
+          alert('Complete the current text before pressing Enter, or press Enter to skip to next chunk.');
+        }
+        return;
+      }
+      
       // Prevent backspace from going beyond start
       if (e.key === 'Backspace' && gameState.typedText.length === 0) {
         e.preventDefault();
+      }
+    }
+
+    function completeChunk() {
+      const lesson = lessons[userData.progress.currentLesson];
+      
+      // Move to next chunk
+      gameState.currentChunk++;
+      
+      // Clear input
+      document.getElementById('typingInput').value = '';
+      gameState.typedText = '';
+      
+      // Check if lesson is complete
+      if (gameState.currentChunk >= lesson.chunks.length) {
+        completeLesson();
+      } else {
+        // Display next chunk
+        displayCurrentChunk();
+        document.getElementById('progressFill').style.width = '0%';
+        document.getElementById('typingInput').focus();
       }
     }
 
