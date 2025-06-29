@@ -355,13 +355,10 @@
         <div class="lesson-text" id="lessonText">
           Welcome to the Forest Typing Academy! Start with the home row keys: asdf jkl;
         </div>
-        <div id="chunkInfo" style="text-align: center; margin: 10px 0; color: var(--deep-forest-green); font-weight: bold;">
-          Chunk 1 of 5
-        </div>
         <textarea 
           class="typing-input" 
           id="typingInput" 
-          placeholder="Start typing here... Press Enter to advance to next chunk"
+          placeholder="Start typing here... Type the entire lesson to complete it"
           rows="3"
         ></textarea>
         <div class="progress-bar">
@@ -370,7 +367,6 @@
         <div class="controls">
           <button onclick="startLesson()" class="cta-button">Start Lesson</button>
           <button onclick="resetLesson()" class="cta-button">Reset</button>
-          <button onclick="nextChunk()" class="cta-button">Next Chunk</button>
           <button onclick="toggleAchievements()" class="cta-button">View Achievements</button>
         </div>
       </div>
@@ -414,241 +410,121 @@
         name: 'Lesson 1: Home Row Foundation',
         description: 'Master the home row keys - the foundation of touch typing',
         keys: ['f', 'j'],
-        chunks: [
-          'f j',
-          'ff jj',
-          'fj fj',
-          'f j f j',
-          'ff jj ff jj'
-        ]
+        text: 'f j ff jj fj fj f j f j ff jj ff jj f j ff jj fj fj f j f j ff jj ff jj'
       },
       'lesson-2': {
         name: 'Lesson 2: Left Hand Home Row',
         description: 'Learn the left hand home row keys: a, s, d, f',
         keys: ['a', 's', 'd', 'f'],
-        chunks: [
-          'asdf',
-          'as as',
-          'df df',
-          'asdf asdf',
-          'a s d f a s d f'
-        ]
+        text: 'asdf as as df df asdf asdf a s d f a s d f asdf as as df df asdf asdf'
       },
       'lesson-3': {
         name: 'Lesson 3: Right Hand Home Row',
         description: 'Master the right hand home row: j, k, l, ;',
         keys: ['j', 'k', 'l', ';'],
-        chunks: [
-          'jkl;',
-          'jk jk',
-          'l; l;',
-          'jkl; jkl;',
-          'j k l ; j k l ;'
-        ]
+        text: 'jkl; jk jk l; l; jkl; jkl; j k l ; j k l ; jkl; jk jk l; l; jkl; jkl;'
       },
       'lesson-4': {
         name: 'Lesson 4: Complete Home Row',
         description: 'Practice the entire home row with simple words',
         keys: ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'],
-        chunks: [
-          'asdf jkl;',
-          'sad sad',
-          'ask ask',
-          'dad dad',
-          'asdf jkl; asdf jkl;'
-        ]
+        text: 'asdf jkl; sad sad ask ask dad dad asdf jkl; asdf jkl; sad sad ask ask dad dad'
       },
       'lesson-5': {
         name: 'Lesson 5: Top Row - Left Hand',
         description: 'Learn the left hand top row: q, w, e, r',
         keys: ['q', 'w', 'e', 'r'],
-        chunks: [
-          'qwer',
-          'we we',
-          'er er',
-          'qwer qwer',
-          'q w e r q w e r'
-        ]
+        text: 'qwer we we er er qwer qwer q w e r q w e r qwer we we er er qwer qwer'
       },
       'lesson-6': {
         name: 'Lesson 6: Top Row - Right Hand',
         description: 'Master the right hand top row: t, y, u, i',
         keys: ['t', 'y', 'u', 'i'],
-        chunks: [
-          'tyui',
-          'ty ty',
-          'ui ui',
-          'tyui tyui',
-          't y u i t y u i'
-        ]
+        text: 'tyui ty ty ui ui tyui tyui t y u i t y u i tyui ty ty ui ui tyui tyui'
       },
       'lesson-7': {
         name: 'Lesson 7: Complete Top Row',
         description: 'Practice the entire top row with common words',
         keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'],
-        chunks: [
-          'qwertyui',
-          'wet wet',
-          'try try',
-          'quit quit',
-          'qwertyui qwertyui'
-        ]
+        text: 'qwertyui wet wet try try quit quit qwertyui qwertyui wet wet try try quit quit'
       },
       'lesson-8': {
         name: 'Lesson 8: Bottom Row - Left Hand',
         description: 'Learn the left hand bottom row: z, x, c, v',
         keys: ['z', 'x', 'c', 'v'],
-        chunks: [
-          'zxcv',
-          'xc xc',
-          'cv cv',
-          'zxcv zxcv',
-          'z x c v z x c v'
-        ]
+        text: 'zxcv xc xc cv cv zxcv zxcv z x c v z x c v zxcv xc xc cv cv zxcv zxcv'
       },
       'lesson-9': {
         name: 'Lesson 9: Bottom Row - Right Hand',
         description: 'Master the right hand bottom row: b, n, m',
         keys: ['b', 'n', 'm'],
-        chunks: [
-          'bnm',
-          'bn bn',
-          'nm nm',
-          'bnm bnm',
-          'b n m b n m'
-        ]
+        text: 'bnm bn bn nm nm bnm bnm b n m b n m bnm bn bn nm nm bnm bnm'
       },
       'lesson-10': {
         name: 'Lesson 10: Complete Bottom Row',
         description: 'Practice the entire bottom row with useful words',
         keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
-        chunks: [
-          'zxcvbnm',
-          'box box',
-          'can can',
-          'mix mix',
-          'zxcvbnm zxcvbnm'
-        ]
+        text: 'zxcvbnm box box can can mix mix zxcvbnm zxcvbnm box box can can mix mix'
       },
       'lesson-11': {
         name: 'Lesson 11: Numbers Row',
         description: 'Learn the number keys: 1, 2, 3, 4, 5, 6, 7, 8, 9, 0',
         keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-        chunks: [
-          '12345',
-          '67890',
-          '123 456',
-          '789 012',
-          '12345 67890'
-        ]
+        text: '12345 67890 123 456 789 012 12345 67890 123 456 789 012'
       },
       'lesson-12': {
         name: 'Lesson 12: Common Symbols',
         description: 'Master essential symbols: !, @, #, $, %, ^, &, *, (, )',
         keys: ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')'],
-        chunks: [
-          '!@#$%',
-          '^&*()',
-          '!@# $%^',
-          '&*() !@#',
-          '!@#$% ^&*()'
-        ]
+        text: '!@#$% ^&*() !@# $%^ &*() !@# !@#$% ^&*() !@# $%^ &*() !@#'
       },
       'lesson-13': {
         name: 'Lesson 13: Simple Words',
         description: 'Practice typing common 3-4 letter words',
         keys: ['all'],
-        chunks: [
-          'the and',
-          'for you',
-          'can get',
-          'will make',
-          'the and for you can get will make'
-        ]
+        text: 'the and for you can get will make the and for you can get will make'
       },
       'lesson-14': {
         name: 'Lesson 14: Forest Vocabulary',
         description: 'Learn typing with nature and tree-related words',
         keys: ['all'],
-        chunks: [
-          'tree bark',
-          'leaf branch',
-          'root trunk',
-          'forest green',
-          'tree bark leaf branch root trunk forest green'
-        ]
+        text: 'tree bark leaf branch root trunk forest green tree bark leaf branch root trunk forest green'
       },
       'lesson-15': {
         name: 'Lesson 15: Short Sentences',
         description: 'Practice typing complete sentences',
         keys: ['all'],
-        chunks: [
-          'The tree grows tall.',
-          'Birds nest in branches.',
-          'Leaves turn green in spring.',
-          'Roots anchor the tree.',
-          'The tree grows tall. Birds nest in branches. Leaves turn green in spring.'
-        ]
+        text: 'The tree grows tall. Birds nest in branches. Leaves turn green in spring. Roots anchor the tree.'
       },
       'lesson-16': {
         name: 'Lesson 16: Punctuation',
         description: 'Master common punctuation marks',
         keys: [',', '.', '?', '!', ';', ':', '"', "'"],
-        chunks: [
-          'Hello, world.',
-          'How are you?',
-          'Great! I am fine.',
-          'Yes; that is correct.',
-          'Hello, world. How are you? Great! I am fine.'
-        ]
+        text: 'Hello, world. How are you? Great! I am fine. Yes; that is correct. Hello, world. How are you?'
       },
       'lesson-17': {
         name: 'Lesson 17: Capital Letters',
         description: 'Practice typing with capital letters and shift key',
         keys: ['all'],
-        chunks: [
-          'The Tree Company',
-          'Forest Management',
-          'Professional Arborist',
-          'Tree Care Services',
-          'The Tree Company provides Forest Management and Professional Arborist Tree Care Services.'
-        ]
+        text: 'The Tree Company Forest Management Professional Arborist Tree Care Services The Tree Company provides Forest Management.'
       },
       'lesson-18': {
         name: 'Lesson 18: Speed Building',
         description: 'Focus on increasing your typing speed',
         keys: ['all'],
-        chunks: [
-          'Practice makes perfect.',
-          'Speed comes with accuracy.',
-          'Keep your eyes on the screen.',
-          'Use all your fingers.',
-          'Practice makes perfect. Speed comes with accuracy. Keep your eyes on the screen.'
-        ]
+        text: 'Practice makes perfect. Speed comes with accuracy. Keep your eyes on the screen. Use all your fingers. Practice makes perfect.'
       },
       'lesson-19': {
         name: 'Lesson 19: Accuracy Focus',
         description: 'Concentrate on typing without errors',
         keys: ['all'],
-        chunks: [
-          'Accuracy is more important than speed.',
-          'Slow down to speed up later.',
-          'Every error slows you down.',
-          'Perfect practice makes perfect.',
-          'Accuracy is more important than speed. Slow down to speed up later.'
-        ]
+        text: 'Accuracy is more important than speed. Slow down to speed up later. Every error slows you down. Perfect practice makes perfect.'
       },
       'lesson-20': {
         name: 'Lesson 20: Final Challenge',
         description: 'Put all your skills together in a comprehensive test',
         keys: ['all'],
-        chunks: [
-          'Congratulations on completing the Forest Typing Academy!',
-          'You have learned touch typing fundamentals.',
-          'Your skills will improve with regular practice.',
-          'Keep practicing to become a typing master.',
-          'Congratulations on completing the Forest Typing Academy! You have learned touch typing fundamentals.'
-        ]
+        text: 'Congratulations on completing the Forest Typing Academy! You have learned touch typing fundamentals. Your skills will improve with regular practice.'
       }
     };
 
@@ -675,9 +551,7 @@
       currentText: '',
       typedText: '',
       errors: 0,
-      totalCharacters: 0,
-      currentChunk: 0,
-      totalChunks: 0
+      totalCharacters: 0
     };
 
     // Initialize the game
@@ -820,16 +694,10 @@
       const lesson = lessons[lessonId];
       document.getElementById('currentLessonName').textContent = lesson.name;
       document.getElementById('lessonDescription').textContent = lesson.description;
+      document.getElementById('lessonText').textContent = lesson.text;
       
       // Reset game state
       resetLesson();
-      
-      // Set up chunk system
-      gameState.currentChunk = 0;
-      gameState.totalChunks = lesson.chunks.length;
-      
-      // Display first chunk
-      displayCurrentChunk();
       
       // Update user progress
       if (currentUser) {
@@ -838,32 +706,14 @@
       }
     }
 
-    function displayCurrentChunk() {
-      const lesson = lessons[userData.progress.currentLesson];
-      if (!lesson || gameState.currentChunk >= lesson.chunks.length) return;
-      
-      const currentText = lesson.chunks[gameState.currentChunk];
-      document.getElementById('lessonText').textContent = currentText;
-      
-      // Update chunk indicator
-      const chunkInfo = document.getElementById('chunkInfo');
-      if (chunkInfo) {
-        chunkInfo.textContent = `Chunk ${gameState.currentChunk + 1} of ${gameState.totalChunks}`;
-      }
-    }
-
     function startLesson() {
       if (gameState.isActive) return;
       
       gameState.isActive = true;
       gameState.startTime = new Date();
-      gameState.currentChunk = 0;
       gameState.typedText = '';
       gameState.errors = 0;
       gameState.totalCharacters = 0;
-      
-      // Display first chunk
-      displayCurrentChunk();
       
       document.getElementById('typingInput').value = '';
       document.getElementById('typingInput').focus();
@@ -876,27 +726,9 @@
       gameState.typedText = '';
       gameState.errors = 0;
       gameState.totalCharacters = 0;
-      gameState.currentChunk = 0;
-      
-      // Reset to first chunk
-      displayCurrentChunk();
       
       document.getElementById('typingInput').value = '';
       document.getElementById('progressFill').style.width = '0%';
-    }
-
-    function nextChunk() {
-      if (!gameState.isActive) {
-        alert('Please start the lesson first!');
-        return;
-      }
-      
-      const lesson = lessons[userData.progress.currentLesson];
-      if (gameState.currentChunk < lesson.chunks.length - 1) {
-        completeChunk();
-      } else {
-        alert('You\'re already on the last chunk! Complete it to finish the lesson.');
-      }
     }
 
     function handleTyping(e) {
@@ -904,73 +736,35 @@
       
       const input = e.target.value;
       const lesson = lessons[userData.progress.currentLesson];
-      const currentChunkText = lesson.chunks[gameState.currentChunk];
+      const currentText = lesson.text;
       
       gameState.typedText = input;
-      gameState.totalCharacters += input.length - gameState.typedText.length;
+      gameState.totalCharacters = input.length;
       
-      // Calculate progress for current chunk
-      const progress = Math.min((input.length / currentChunkText.length) * 100, 100);
+      // Calculate progress for entire lesson
+      const progress = Math.min((input.length / currentText.length) * 100, 100);
       document.getElementById('progressFill').style.width = progress + '%';
       
-      // Calculate errors for current chunk
+      // Calculate errors for entire lesson
       gameState.errors = 0;
       for (let i = 0; i < input.length; i++) {
-        if (input[i] !== currentChunkText[i]) {
+        if (input[i] !== currentText[i]) {
           gameState.errors++;
         }
       }
       
-      // Check if current chunk is complete
-      if (input.length >= currentChunkText.length) {
-        completeChunk();
+      // Check if lesson is complete
+      if (input.length >= currentText.length) {
+        completeLesson();
       }
     }
 
     function handleKeyDown(e) {
       if (!gameState.isActive) return;
       
-      // Allow Enter key to advance to next chunk
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const lesson = lessons[userData.progress.currentLesson];
-        const currentChunkText = lesson.chunks[gameState.currentChunk];
-        const input = document.getElementById('typingInput').value;
-        
-        // If current chunk is complete, advance to next
-        if (input.length >= currentChunkText.length) {
-          completeChunk();
-        } else {
-          // Show hint to complete current chunk
-          alert('Complete the current text before pressing Enter, or press Enter to skip to next chunk.');
-        }
-        return;
-      }
-      
       // Prevent backspace from going beyond start
       if (e.key === 'Backspace' && gameState.typedText.length === 0) {
         e.preventDefault();
-      }
-    }
-
-    function completeChunk() {
-      const lesson = lessons[userData.progress.currentLesson];
-      
-      // Move to next chunk
-      gameState.currentChunk++;
-      
-      // Clear input
-      document.getElementById('typingInput').value = '';
-      gameState.typedText = '';
-      
-      // Check if lesson is complete
-      if (gameState.currentChunk >= lesson.chunks.length) {
-        completeLesson();
-      } else {
-        // Display next chunk
-        displayCurrentChunk();
-        document.getElementById('progressFill').style.width = '0%';
-        document.getElementById('typingInput').focus();
       }
     }
 
@@ -979,7 +773,7 @@
       
       // Calculate WPM and accuracy
       const timeElapsed = (new Date() - gameState.startTime) / 1000 / 60; // minutes
-      const wpm = Math.round(gameState.totalCharacters / 5 / timeElapsed);
+      const wpm = Math.round((gameState.totalCharacters / 5) / timeElapsed);
       const accuracy = Math.round(((gameState.totalCharacters - gameState.errors) / gameState.totalCharacters) * 100);
       
       // Update user progress
