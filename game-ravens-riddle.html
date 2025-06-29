@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raven's Riddle - Typing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: url('images/mystic-forest.svg') no-repeat center center/cover;
+            text-align: center;
+             margin-top: -100px;
+        }
+        #raven {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        #riddle-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 80%;
+            max-width: 600px;
+        }
+        .riddle-text {
+            font-size: 48px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+         #game-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 22px;
+            text-align: center;
+        }
+         .score-board {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(44, 95, 45, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+         .start-screen, .end-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links" style="justify-content: center; width: 100%;">
+                <a href="typing-home.html">Dashboard</a>
+                <a href="type.html">Lessons</a>
+                <a href="typing-games.html">Games</a>
+            </div>
+        </div>
+    </nav>
+    <div class="game-container">
+        <img src="images/raven.svg" id="raven" alt="Raven">
+        <div id="riddle-container">
+            <div class="riddle-text" id="riddle-text">R_V_N</div>
+            <input type="text" id="game-input" placeholder="Solve the riddle...">
+        </div>
+    </div>
+     <div class="score-board">
+        Score: <span id="score">0</span><br>
+        Time Left: <span id="timer">15</span>s
+    </div>
+     <div class="start-screen" id="start-screen">
+        <h1>Raven's Riddle</h1>
+        <p>A clever raven has a riddle for you. Type the full word to solve it!</p>
+        <button class="cta-button" id="start-button">I'm Ready</button>
+    </div>
+
+    <div class="end-screen" id="end-screen" style="display: none;">
+        <h1>Game Over</h1>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <button class="cta-button" id="restart-button">Play Again</button>
+    </div>
+    <script>
+        const riddleText = document.getElementById('riddle-text');
+        const gameInput = document.getElementById('game-input');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        const WORDS = ["raven", "salmon", "spirit", "whistler", "vancouver", "kootenay", "okanagan", "grizzly", "caribou", "pika"];
+        
+        let score = 0;
+        let timeLeft = 15;
+        let currentWord = "";
+        let gameInterval;
+
+        function newRiddle() {
+            currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            let displayWord = "";
+            // Make 40% of the letters blanks
+            for(let char of currentWord) {
+                displayWord += Math.random() < 0.4 ? "_" : char;
+            }
+            // Ensure at least one blank
+            if (!displayWord.includes("_")) {
+                 const i = Math.floor(Math.random() * displayWord.length);
+                 displayWord = displayWord.substring(0, i) + "_" + displayWord.substring(i + 1);
+            }
+            riddleText.innerText = displayWord.toUpperCase();
+            gameInput.value = '';
+            timeLeft = 15;
+            timerDisplay.innerText = timeLeft;
+        }
+
+        function handleInput() {
+            if(gameInput.value.toLowerCase() === currentWord) {
+                score += 10;
+                scoreDisplay.innerText = score;
+                newRiddle();
+            }
+        }
+        
+        function gameLoop() {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.innerText = score;
+            startScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            gameInput.disabled = false;
+            gameInput.focus();
+            
+            newRiddle();
+            gameInput.addEventListener('input', handleInput);
+            gameInterval = setInterval(gameLoop, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            gameInput.removeEventListener('input', handleInput);
+            gameInput.disabled = true;
+            finalScoreDisplay.innerText = score;
+            endScreen.style.display = 'block';
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forest Typing Games - Carpe Tree'em</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  
+  <style>
+    .typing-container {
+      max-width: 1200px;
+      margin: 150px auto 40px;
+      padding: 20px;
+    }
+    .games-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: linear-gradient(135deg, var(--deep-forest-green), var(--muted-golden-amber));
+      color: white;
+      border-radius: 10px;
+    }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    .game-card {
+      background: var(--background-color);
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .game-card.unlocked:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(44, 95, 45, 0.2);
+      cursor: pointer;
+    }
+    .game-card.locked {
+      background: #e0e0e0;
+      border-color: var(--soft-bark-gray);
+      color: #888;
+      opacity: 0.7;
+    }
+    .game-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: var(--deep-forest-green);
+    }
+    .game-card.locked .game-icon {
+      color: var(--soft-bark-gray);
+    }
+    .game-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--deep-forest-green);
+      margin-bottom: 10px;
+    }
+    .game-card.locked .game-title {
+       color: #666;
+    }
+    .game-description {
+      color: var(--text-color);
+      margin-bottom: 15px;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+    .game-card.locked .game-description {
+        color: #777;
+    }
+    .unlock-criteria {
+      font-size: 13px;
+      font-style: italic;
+      color: #555;
+      margin-top: auto;
+    }
+    .lock-icon {
+      font-size: 24px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation and Header -->
+  <div class="contact-header">
+    <a href="tel:250-555-0123"><i class="fas fa-phone"></i> 250-555-0123</a>
+    <a href="mailto:info@carpetreeem.ca"><i class="fas fa-envelope"></i> info@carpetreeem.ca</a>
+    <a href="lets-talk.html"><i class="fas fa-comments"></i> Get a Quote</a>
+  </div>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-logo">
+        <a href="index.html">
+          <img src="images/logo.png" alt="Carpe Tree'em Logo" class="nav-logo-img">
+        </a>
+      </div>
+      <div class="nav-links">
+        <a href="typing-home.html">Dashboard</a>
+        <a href="type.html">Lessons</a>
+        <a href="typing-games.html">Games</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="typing-container">
+    <div class="games-header">
+      <h1><i class="fas fa-gamepad"></i> Typing Games</h1>
+      <p>Unlock fun, themed games by completing lessons and earning achievements!</p>
+    </div>
+
+    <div class="games-grid" id="gamesGrid">
+      <!-- Game cards will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let userData = null;
+
+    const themedGames = [
+      {
+        id: 'eagle-flight',
+        name: 'Eagle Flight',
+        icon: '🦅',
+        description: 'Type letters on soaring eagles. Accuracy and speed control your altitude.',
+        unlockCriteria: 'Unlock by reaching 20 WPM.',
+        url: 'game-eagle-flight.html'
+      },
+      {
+        id: 'bear-cub-rescue',
+        name: 'Bear Cub Rescue',
+        icon: '🐻',
+        description: 'Type key patterns to lead cubs safely through the wilderness.',
+        unlockCriteria: 'Unlock by completing Lesson 5.',
+        url: 'game-bear-cub-rescue.html'
+      },
+      {
+        id: 'salmon-swim',
+        name: 'Salmon Swim',
+        icon: '🐟',
+        description: 'As letters float down river, type them to guide salmon upstream.',
+        unlockCriteria: 'Unlock by completing Lesson 10.',
+        url: 'game-salmon-swim.html'
+      },
+       {
+        id: 'forest-fire-watch',
+        name: 'Forest Fire Watch',
+        icon: '🔥',
+        description: 'Type target words quickly to alert fire crews in BC forests.',
+        unlockCriteria: 'Unlock by reaching 40 WPM.',
+        url: 'game-forest-fire-watch.html'
+      },
+      {
+        id: 'whale-watch',
+        name: 'Whale Watch',
+        icon: '🐋',
+        description: 'Type species names (orca, humpback) correctly to photograph whales.',
+        unlockCriteria: 'Unlock by achieving 95% accuracy.',
+        url: 'game-whale-watch.html'
+      },
+      {
+        id: 'ravens-riddle',
+        name: 'Raven\'s Riddle',
+        icon: '🐦',
+        description: 'Fill in the missing letters in animal and place names for bonus points.',
+        unlockCriteria: 'Unlock by completing Lesson 15.',
+        url: 'game-ravens-riddle.html'
+      },
+      {
+        id: 'mount-baker-climb',
+        name: 'Mount Baker Climb',
+        icon: '🏔️',
+        description: 'A story passage about climbing Mt. Baker, focusing on endurance.',
+        unlockCriteria: 'Unlock by completing all 20 lessons.',
+        url: 'game-mount-baker-climb.html'
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+    });
+    
+    function checkLoginStatus() {
+      const lastUser = localStorage.getItem('lastLoggedInUser');
+      if (lastUser) {
+        currentUser = lastUser;
+        const users = JSON.parse(localStorage.getItem('typingUsers') || '{}');
+        userData = users[currentUser];
+        if (userData) {
+          loadGames();
+        } else {
+          window.location.href = 'typing-home.html';
+        }
+      } else {
+        // Redirect to login/dashboard if not logged in
+         window.location.href = 'typing-home.html';
+      }
+    }
+
+    function loadGames() {
+      const grid = document.getElementById('gamesGrid');
+      grid.innerHTML = '';
+      const unlockedGames = userData.progress.unlockedGames || [];
+
+      themedGames.forEach(game => {
+        const card = document.createElement('div');
+        const isUnlocked = unlockedGames.includes(game.id);
+        
+        card.className = isUnlocked ? 'game-card unlocked' : 'game-card locked';
+        
+        if (isUnlocked) {
+          card.onclick = () => { window.location.href = game.url; };
+          card.innerHTML = `
+            <div class="game-icon">${game.icon}</div>
+            <div class="game-title">${game.name}</div>
+            <div class="game-description">${game.description}</div>
+            <div class="unlock-criteria">Status: <span style="color: green; font-weight: bold;">Unlocked!</span></div>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="game-icon">${game.icon}</div>
+            <div class="game-title">${game.name}</div>
+            <div class="game-description">${game.description}</div>
+            <div class="unlock-criteria">${game.unlockCriteria}</div>
+            <div class="lock-icon"><i class="fas fa-lock"></i></div>
+          `;
+        }
+        grid.appendChild(card);
+      });
+    }
+    
+    function logout() {
+      localStorage.removeItem('lastLoggedInUser');
+      window.location.href = 'typing-home.html';
+    }
+  </script>
+</body>
+</html> 

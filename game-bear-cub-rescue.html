@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear Cub Rescue - Typing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: url('images/forest-path-background.svg') no-repeat center center/cover;
+            margin-top: -100px;
+        }
+        #path-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 10px;
+        }
+        .path-stone {
+            width: 120px;
+            height: 120px;
+            background-color: #a9a9a9;
+            border: 3px solid #696969;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            font-family: monospace;
+            color: white;
+            text-shadow: 1px 1px 2px #000;
+            cursor: pointer;
+        }
+        .path-stone.cleared {
+            background-color: #8B5E3B; /* Warm Earth Brown */
+            border-color: #2C5F2D; /* Deep Forest Green */
+        }
+        .path-stone.active {
+            box-shadow: 0 0 20px yellow;
+        }
+        #game-input {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            padding: 15px;
+            font-size: 22px;
+            text-align: center;
+        }
+        .character {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        #cub {
+            background-image: url('images/bear-cub.svg');
+            left: 50px;
+            bottom: 50%;
+        }
+        #mother-bear {
+            background-image: url('images/mother-bear.svg');
+            right: 50px;
+            bottom: 50%;
+        }
+         .start-screen, .end-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+     <nav>
+        <div class="nav-container">
+            <div class="nav-links" style="justify-content: center; width: 100%;">
+                <a href="typing-home.html">Dashboard</a>
+                <a href="type.html">Lessons</a>
+                <a href="typing-games.html">Games</a>
+            </div>
+        </div>
+    </nav>
+    <div class="game-container" id="game-container">
+        <div id="path-container"></div>
+        <div id="cub" class="character"></div>
+        <div id="mother-bear" class="character"></div>
+        <input type="text" id="game-input" placeholder="Type the sequence on a stone...">
+    </div>
+     <div class="start-screen" id="start-screen">
+        <h1>Bear Cub Rescue</h1>
+        <p>Type the letters on the stones to clear a path for the cub to reach its mother!</p>
+        <button class="cta-button" id="start-button">Start Rescue</button>
+    </div>
+
+    <div class="end-screen" id="end-screen" style="display: none;">
+        <h1>You did it!</h1>
+        <p>The cub is safe! Your time: <span id="final-time">0</span>s</p>
+        <button class="cta-button" id="restart-button">Play Again</button>
+    </div>
+
+    <script>
+        const pathContainer = document.getElementById('path-container');
+        const gameInput = document.getElementById('game-input');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const finalTimeDisplay = document.getElementById('final-time');
+
+        const PATH_LENGTH = 5;
+        let path = [];
+        let currentStone = 0;
+        let startTime;
+
+        function generatePath() {
+            pathContainer.innerHTML = '';
+            path = [];
+            currentStone = 0;
+            for (let i = 0; i < PATH_LENGTH; i++) {
+                const sequence = generateSequence(i + 3);
+                path.push({ sequence, cleared: false });
+                const stoneDiv = document.createElement('div');
+                stoneDiv.className = 'path-stone';
+                stoneDiv.innerText = sequence;
+                stoneDiv.id = `stone-${i}`;
+                pathContainer.appendChild(stoneDiv);
+            }
+            document.getElementById('stone-0').classList.add('active');
+        }
+
+        function generateSequence(length) {
+            const chars = 'asdfjkl;';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function handleInput() {
+            const typedText = gameInput.value.toLowerCase();
+            if (path[currentStone] && typedText === path[currentStone].sequence) {
+                path[currentStone].cleared = true;
+                const currentStoneDiv = document.getElementById(`stone-${currentStone}`);
+                currentStoneDiv.classList.remove('active');
+                currentStoneDiv.classList.add('cleared');
+                
+                gameInput.value = '';
+                currentStone++;
+
+                if (currentStone >= PATH_LENGTH) {
+                    endGame();
+                } else {
+                    document.getElementById(`stone-${currentStone}`).classList.add('active');
+                }
+            }
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            gameInput.disabled = false;
+            gameInput.focus();
+            generatePath();
+            gameInput.addEventListener('input', handleInput);
+            startTime = new Date();
+        }
+
+        function endGame() {
+            gameInput.removeEventListener('input', handleInput);
+            gameInput.disabled = true;
+            const endTime = new Date();
+            const timeTaken = ((endTime - startTime) / 1000).toFixed(1);
+            finalTimeDisplay.innerText = timeTaken;
+            endScreen.style.display = 'block';
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html> 

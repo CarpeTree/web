@@ -449,7 +449,8 @@
         accuracy: 0,
         streak: 0,
         completedLessons: [],
-        weakKeys: {}
+        weakKeys: {},
+        unlockedGames: []
       },
       achievements: [],
       settings: {
@@ -678,7 +679,8 @@
           accuracy: 0,
           streak: 0,
           completedLessons: [],
-          weakKeys: {}
+          weakKeys: {},
+          unlockedGames: []
         },
         achievements: [],
         settings: {
@@ -889,43 +891,45 @@
 
     function checkAchievements(wpm, accuracy) {
       const newAchievements = [];
+      const previouslyUnlockedGames = userData.progress.unlockedGames.length;
       
       // First lesson achievement
       if (userData.progress.completedLessons.length === 1) {
         newAchievements.push('first-lesson');
       }
       
-      // Lesson progression achievements
-      if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
-        newAchievements.push('lesson-5');
-      }
-      if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
-        newAchievements.push('lesson-10');
-      }
-      if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
-        newAchievements.push('lesson-15');
-      }
-      if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
-        newAchievements.push('lesson-20');
-      }
-      
-      // WPM achievements
+      // WPM achievements & Game Unlocks
       if (wpm >= 20 && !userData.achievements.includes('wpm-20')) {
         newAchievements.push('wpm-20');
+        unlockGame('eagle-flight');
       }
       if (wpm >= 40 && !userData.achievements.includes('wpm-40')) {
         newAchievements.push('wpm-40');
-      }
-      if (wpm >= 60 && !userData.achievements.includes('wpm-60')) {
-        newAchievements.push('wpm-60');
+        unlockGame('forest-fire-watch');
       }
       
-      // Accuracy achievements
+      // Accuracy achievements & Game Unlocks
       if (accuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
         newAchievements.push('accuracy-95');
+        unlockGame('whale-watch');
       }
-      if (accuracy >= 98 && !userData.achievements.includes('accuracy-98')) {
-        newAchievements.push('accuracy-98');
+
+      // Lesson progression achievements & Game Unlocks
+      if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
+        newAchievements.push('lesson-5');
+        unlockGame('bear-cub-rescue');
+      }
+      if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
+        newAchievements.push('lesson-10');
+        unlockGame('salmon-swim');
+      }
+      if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
+        newAchievements.push('lesson-15');
+        unlockGame('ravens-riddle');
+      }
+      if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
+        newAchievements.push('lesson-20');
+        unlockGame('mount-baker-climb');
       }
       
       // Add new achievements
@@ -944,6 +948,19 @@
           }, 200);
         }
       });
+
+      // Show game unlock notification
+      if (userData.progress.unlockedGames.length > previouslyUnlockedGames) {
+         setTimeout(() => {
+            alert(`🎮 New Game Unlocked! Check your homepage to play.`);
+          }, 300);
+      }
+    }
+
+    function unlockGame(gameId) {
+      if (!userData.progress.unlockedGames.includes(gameId)) {
+        userData.progress.unlockedGames.push(gameId);
+      }
     }
 
     function checkDailyStreak() {

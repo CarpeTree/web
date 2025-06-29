@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Fire Watch - Typing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: url('images/bc-forest-map.svg') no-repeat center center/cover;
+            margin-top: -100px;
+        }
+        .fire-report {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px red;
+            text-align: center;
+        }
+        .fire-icon {
+            font-size: 30px;
+            color: red;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .location-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .score-board {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(44, 95, 45, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+        }
+        #game-input {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            padding: 15px;
+            font-size: 22px;
+            text-align: center;
+            border-radius: 10px;
+            border: 3px solid var(--deep-forest-green);
+        }
+         .start-screen, .end-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links" style="justify-content: center; width: 100%;">
+                <a href="typing-home.html">Dashboard</a>
+                <a href="type.html">Lessons</a>
+                <a href="typing-games.html">Games</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="game-container" id="game-container">
+        <div class="score-board">
+            Fires Reported: <span id="score">0</span><br>
+            Time Left: <span id="timer">60</span>s
+        </div>
+        <input type="text" id="game-input" placeholder="Type location name to report fire...">
+    </div>
+    
+    <div class="start-screen" id="start-screen">
+        <h1>Forest Fire Watch</h1>
+        <p>A fire has been spotted! Type the name of the location to report it to the fire crew.</p>
+        <button class="cta-button" id="start-button">Start Watch</button>
+    </div>
+
+    <div class="end-screen" id="end-screen" style="display: none;">
+        <h1>Time's Up!</h1>
+        <p>You reported <span id="final-score">0</span> fires.</p>
+        <button class="cta-button" id="restart-button">Play Again</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const gameInput = document.getElementById('game-input');
+        const startScreen = document.getElementById('start-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        const LOCATIONS = ["Manning Park", "Golden Ears", "Squamish", "Whistler", "Pemberton", "Lillooet", "Hope", "Chilliwack", "Kelowna", "Vernon", "Kamloops", "Revelstoke", "Nelson", "Cranbrook"];
+        
+        let score = 0;
+        let timeLeft = 60;
+        let gameInterval;
+        let activeFires = {};
+
+        function spawnFire() {
+            const locationIndex = Math.floor(Math.random() * LOCATIONS.length);
+            const location = LOCATIONS[locationIndex].toLowerCase();
+
+            if (activeFires[location]) return; // Don't spawn if already active
+
+            const fireReport = document.createElement('div');
+            fireReport.className = 'fire-report';
+            fireReport.innerHTML = `<div class="fire-icon">🔥</div><div class="location-name">${LOCATIONS[locationIndex]}</div>`;
+            
+            fireReport.style.left = `${10 + Math.random() * 80}%`;
+            fireReport.style.top = `${20 + Math.random() * 60}%`;
+
+            activeFires[location] = fireReport;
+            gameContainer.appendChild(fireReport);
+        }
+
+        function handleInput() {
+            const typedText = gameInput.value.toLowerCase();
+            if (activeFires[typedText]) {
+                gameContainer.removeChild(activeFires[typedText]);
+                delete activeFires[typedText];
+                score++;
+                scoreDisplay.innerText = score;
+                gameInput.value = '';
+                spawnFire(); // Spawn a new one immediately
+            }
+        }
+
+        function gameLoop() {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            scoreDisplay.innerText = score;
+            timerDisplay.innerText = timeLeft;
+            gameInput.value = '';
+            
+            // Clear old fires
+            Object.values(activeFires).forEach(fire => gameContainer.removeChild(fire));
+            activeFires = {};
+
+            startScreen.style.display = 'none';
+            endScreen.style.display = 'none';
+            gameInput.disabled = false;
+            gameInput.focus();
+
+            gameInput.addEventListener('input', handleInput);
+            gameInterval = setInterval(gameLoop, 1000);
+            
+            // Initial fires
+            spawnFire();
+            setTimeout(spawnFire, 1000);
+            setTimeout(spawnFire, 2000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            gameInput.removeEventListener('input', handleInput);
+            gameInput.disabled = true;
+            finalScoreDisplay.innerText = score;
+            endScreen.style.display = 'block';
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html> 
