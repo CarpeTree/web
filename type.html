@@ -420,6 +420,7 @@
         <div class="controls">
           <button onclick="startLesson()" class="cta-button">Start Lesson</button>
           <button onclick="resetLesson()" class="cta-button">Reset</button>
+          <button onclick="finishLesson()" class="cta-button" id="finishBtn" style="display: none;">Finish Lesson</button>
           <button onclick="toggleAchievements()" class="cta-button">View Achievements</button>
         </div>
       </div>
@@ -878,9 +879,11 @@
       // Save progress
       saveUserProgress();
       
-      // Show completion message
+      // Show completion message and finish button
       setTimeout(() => {
         alert(`Lesson completed!\nWPM: ${wpm}\nAccuracy: ${accuracy}%\nGreat job, forest friend!`);
+        document.getElementById('finishBtn').style.display = 'inline-block';
+        document.getElementById('typingInput').disabled = true;
       }, 100);
     }
 
@@ -1022,6 +1025,20 @@
     function toggleAchievements() {
       const panel = document.getElementById('achievementsPanel');
       panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function finishLesson() {
+      // Hide the lesson area
+      document.querySelector('.lesson-area').style.display = 'none';
+      
+      // Show completion message
+      const lessonName = document.getElementById('currentLessonName').textContent;
+      alert(`Congratulations! You've completed ${lessonName}!`);
+      
+      // Reset for next lesson
+      document.getElementById('finishBtn').style.display = 'none';
+      document.getElementById('typingInput').disabled = false;
+      resetLesson();
     }
   </script>
 </body>
