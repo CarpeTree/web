@@ -281,6 +281,57 @@
         flex-direction: column;
       }
     }
+
+    .passage-text span.incorrect { color: red; background-color: #ffdddd; }
+  </style>
+  <style>
+    /* Game Unlock Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: modal-appear 0.3s ease-out;
+    }
+    @keyframes modal-appear {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--deep-forest-green);
+      margin-bottom: 15px;
+    }
+    .modal-description {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: var(--text-color);
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
   </style>
 </head>
 <body>
@@ -430,6 +481,19 @@
         <div class="achievements-grid" id="achievementsGrid">
           <!-- Achievements will be populated by JavaScript -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Unlock Modal -->
+  <div class="modal-overlay" id="gameUnlockModal">
+    <div class="modal-content">
+      <div class="modal-icon" id="gameUnlockIcon">🎮</div>
+      <h2 class="modal-title">New Game Unlocked!</h2>
+      <p class="modal-description">You've unlocked the <strong id="gameUnlockName">...</strong> game!</p>
+      <div class="modal-buttons">
+        <a href="#" class="cta-button" id="playNowBtn">Play Now</a>
+        <button class="cta-button" onclick="closeGameUnlockModal()">Keep Learning</button>
       </div>
     </div>
   </div>
@@ -597,6 +661,16 @@
       { id: 'accuracy-98', name: 'Perfect Panther', icon: '🐆', description: 'Achieve 98% accuracy' },
       { id: 'streak-7', name: 'Dedicated Beaver', icon: '🦫', description: '7-day practice streak' },
       { id: 'streak-30', name: 'Forest Legend', icon: '🌳', description: '30-day practice streak' }
+    ];
+
+    const themedGames = [
+      { id: 'eagle-flight', name: 'Eagle Flight', icon: '🦅', url: 'game-eagle-flight.html' },
+      { id: 'bear-cub-rescue', name: 'Bear Cub Rescue', icon: '🐻', url: 'game-bear-cub-rescue.html' },
+      { id: 'salmon-swim', name: 'Salmon Swim', icon: '🐟', url: 'game-salmon-swim.html' },
+      { id: 'forest-fire-watch', name: 'Forest Fire Watch', icon: '🔥', url: 'game-forest-fire-watch.html' },
+      { id: 'whale-watch', name: 'Whale Watch', icon: '🐋', url: 'game-whale-watch.html' },
+      { id: 'ravens-riddle', name: "Raven's Riddle", icon: '🐦', url: 'game-ravens-riddle.html' },
+      { id: 'mount-baker-climb', name: 'Mount Baker Climb', icon: '🏔️', url: 'game-mount-baker-climb.html' }
     ];
 
     // Game state
@@ -891,7 +965,7 @@
 
     function checkAchievements(wpm, accuracy) {
       const newAchievements = [];
-      const previouslyUnlockedGames = userData.progress.unlockedGames.length;
+      let newlyUnlockedGameId = null;
       
       // First lesson achievement
       if (userData.progress.completedLessons.length === 1) {
@@ -901,35 +975,35 @@
       // WPM achievements & Game Unlocks
       if (wpm >= 20 && !userData.achievements.includes('wpm-20')) {
         newAchievements.push('wpm-20');
-        unlockGame('eagle-flight');
+        if (unlockGame('eagle-flight')) newlyUnlockedGameId = 'eagle-flight';
       }
       if (wpm >= 40 && !userData.achievements.includes('wpm-40')) {
         newAchievements.push('wpm-40');
-        unlockGame('forest-fire-watch');
+        if (unlockGame('forest-fire-watch')) newlyUnlockedGameId = 'forest-fire-watch';
       }
       
       // Accuracy achievements & Game Unlocks
       if (accuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
         newAchievements.push('accuracy-95');
-        unlockGame('whale-watch');
+        if (unlockGame('whale-watch')) newlyUnlockedGameId = 'whale-watch';
       }
 
       // Lesson progression achievements & Game Unlocks
       if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
         newAchievements.push('lesson-5');
-        unlockGame('bear-cub-rescue');
+        if (unlockGame('bear-cub-rescue')) newlyUnlockedGameId = 'bear-cub-rescue';
       }
       if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
         newAchievements.push('lesson-10');
-        unlockGame('salmon-swim');
+        if (unlockGame('salmon-swim')) newlyUnlockedGameId = 'salmon-swim';
       }
       if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
         newAchievements.push('lesson-15');
-        unlockGame('ravens-riddle');
+        if (unlockGame('ravens-riddle')) newlyUnlockedGameId = 'ravens-riddle';
       }
       if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
         newAchievements.push('lesson-20');
-        unlockGame('mount-baker-climb');
+        if (unlockGame('mount-baker-climb')) newlyUnlockedGameId = 'mount-baker-climb';
       }
       
       // Add new achievements
@@ -949,18 +1023,32 @@
         }
       });
 
-      // Show game unlock notification
-      if (userData.progress.unlockedGames.length > previouslyUnlockedGames) {
-         setTimeout(() => {
-            alert(`🎮 New Game Unlocked! Check your homepage to play.`);
-          }, 300);
+      // Show game unlock modal if a game was unlocked
+      if (newlyUnlockedGameId) {
+        const game = themedGames.find(g => g.id === newlyUnlockedGameId);
+        if (game) {
+            setTimeout(() => showGameUnlockModal(game), 500);
+        }
       }
     }
 
     function unlockGame(gameId) {
       if (!userData.progress.unlockedGames.includes(gameId)) {
         userData.progress.unlockedGames.push(gameId);
+        return true;
       }
+      return false;
+    }
+
+    function showGameUnlockModal(game) {
+        document.getElementById('gameUnlockIcon').innerText = game.icon;
+        document.getElementById('gameUnlockName').innerText = game.name;
+        document.getElementById('playNowBtn').href = game.url;
+        document.getElementById('gameUnlockModal').style.display = 'flex';
+    }
+
+    function closeGameUnlockModal() {
+        document.getElementById('gameUnlockModal').style.display = 'none';
     }
 
     function checkDailyStreak() {
