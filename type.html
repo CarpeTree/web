@@ -772,9 +772,9 @@
       loginUser(username, newUser);
     }
 
-    function loginUser(username, userData) {
+    function loginUser(username, userDataParam) {
       currentUser = username;
-      userData = userData;
+      userData = userDataParam;
       
       // Update display
       document.getElementById('userDisplayName').textContent = username;
