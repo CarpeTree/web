@@ -102,9 +102,9 @@
         </a>
       </div>
       <div class="nav-links">
-        <a href="typing-home.html">Dashboard</a>
         <a href="type.html">Lessons</a>
         <a href="typing-games.html">Games</a>
+        <a href="index.html">Home</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
@@ -197,11 +197,11 @@
         if (userData) {
           loadGames();
         } else {
-          window.location.href = 'typing-home.html';
+          window.location.href = 'type.html';
         }
       } else {
         // Redirect to login/dashboard if not logged in
-         window.location.href = 'typing-home.html';
+         window.location.href = 'type.html';
       }
     }
 
@@ -239,7 +239,7 @@
     
     function logout() {
       localStorage.removeItem('lastLoggedInUser');
-      window.location.href = 'typing-home.html';
+      window.location.href = 'type.html';
     }
   </script>
 </body>
