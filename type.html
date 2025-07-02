@@ -781,14 +781,14 @@
       document.getElementById('loginSection').style.display = 'none';
       document.getElementById('typingGame').style.display = 'block';
       
-      // Load user progress
+      // Load user progress and achievements
       loadUserProgress();
-      
-      // Select the next uncompleted lesson instead of the saved current lesson
-      selectNextUncompletedLesson();
       
       // Check for daily streak
       checkDailyStreak();
+      
+      // Select the next uncompleted lesson
+      selectNextUncompletedLesson();
     }
 
     function logout() {
@@ -1078,41 +1078,19 @@
     }
 
     function checkExistingAchievements() {
-      // Check for WPM-based achievements and game unlocks
-      const bestWpm = userData.progress.wpm;
-      if (bestWpm >= 20 && !userData.achievements.includes('wpm-20')) {
-        userData.achievements.push('wpm-20');
-        unlockGame('eagle-flight');
-      }
-      if (bestWpm >= 40 && !userData.achievements.includes('wpm-40')) {
-        userData.achievements.push('wpm-40');
-        unlockGame('forest-fire-watch');
-      }
+      // FOR TESTING: Unlock all games immediately
+      const allGames = ['eagle-flight', 'bear-cub-rescue', 'salmon-swim', 'forest-fire-watch', 'whale-watch', 'ravens-riddle', 'mount-baker-climb'];
+      allGames.forEach(gameId => {
+        unlockGame(gameId);
+      });
       
-      // Check for accuracy-based achievements and game unlocks
-      const bestAccuracy = userData.progress.accuracy;
-      if (bestAccuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
-        userData.achievements.push('accuracy-95');
-        unlockGame('whale-watch');
-      }
-      
-      // Check for lesson-based achievements and game unlocks
-      if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
-        userData.achievements.push('lesson-5');
-        unlockGame('bear-cub-rescue');
-      }
-      if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
-        userData.achievements.push('lesson-10');
-        unlockGame('salmon-swim');
-      }
-      if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
-        userData.achievements.push('lesson-15');
-        unlockGame('ravens-riddle');
-      }
-      if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
-        userData.achievements.push('lesson-20');
-        unlockGame('mount-baker-climb');
-      }
+      // Add all achievements for testing
+      const allAchievements = ['first-lesson', 'lesson-5', 'lesson-10', 'lesson-15', 'lesson-20', 'wpm-20', 'wpm-40', 'wpm-60', 'accuracy-95', 'accuracy-98', 'streak-7', 'streak-30'];
+      allAchievements.forEach(achievementId => {
+        if (!userData.achievements.includes(achievementId)) {
+          userData.achievements.push(achievementId);
+        }
+      });
       
       // Save the updated progress
       saveUserProgress();
@@ -1160,7 +1138,10 @@
     function loadUserProgress() {
       const users = JSON.parse(localStorage.getItem('typingUsers') || '{}');
       if (users[currentUser]) {
-        userData = users[currentUser];
+        // Only override userData if it's not already set
+        if (!userData || !userData.username) {
+          userData = users[currentUser];
+        }
         
         // Update display
         document.getElementById('wpmDisplay').textContent = userData.progress.wpm;
