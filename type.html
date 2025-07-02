@@ -783,7 +783,9 @@
       
       // Load user progress
       loadUserProgress();
-      selectLesson(userData.progress.currentLesson);
+      
+      // Select the next uncompleted lesson instead of the saved current lesson
+      selectNextUncompletedLesson();
       
       // Check for daily streak
       checkDailyStreak();
@@ -809,6 +811,27 @@
           loginUser(lastUser, users[lastUser]);
         }
       }
+    }
+
+    function selectNextUncompletedLesson() {
+      const lessonKeys = Object.keys(lessons);
+      const completedLessons = userData.progress.completedLessons || [];
+      let nextLessonId = null;
+
+      // Find the first uncompleted lesson
+      for (const key of lessonKeys) {
+        if (!completedLessons.includes(key)) {
+          nextLessonId = key;
+          break;
+        }
+      }
+
+      // If all lessons are completed, default to lesson-1 for practice
+      if (!nextLessonId) {
+        nextLessonId = 'lesson-1';
+      }
+
+      selectLesson(nextLessonId);
     }
 
     function selectLesson(lessonId) {
