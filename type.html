@@ -454,7 +454,7 @@
         </div>
         
         <div class="lesson-instructions">
-          <i class="fas fa-keyboard"></i> Type the text below exactly as shown. Focus on accuracy first, then speed!
+          <i class="fas fa-keyboard"></i> Type the text below exactly as shown. Focus on accuracy first, then speed! Press Enter to finish the lesson.
         </div>
         
         <div class="lesson-text" id="lessonText">
@@ -930,6 +930,12 @@
       if (e.key === 'Backspace' && gameState.typedText.length === 0) {
         e.preventDefault();
       }
+      
+      // End lesson when Enter/Return is pressed
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        completeLesson();
+      }
     }
 
     function completeLesson() {
@@ -963,12 +969,10 @@
       // Save progress
       saveUserProgress();
       
-      // Show completion message and finish button
-      setTimeout(() => {
-        alert(`Lesson completed!\nWPM: ${wpm}\nAccuracy: ${accuracy}%\nGreat job, forest friend!`);
-        document.getElementById('finishBtn').style.display = 'inline-block';
-        document.getElementById('typingInput').disabled = true;
-      }, 100);
+      // Show completion message and finish button immediately
+      alert(`Lesson completed!\nWPM: ${wpm}\nAccuracy: ${accuracy}%\nGreat job, forest friend!`);
+      document.getElementById('finishBtn').style.display = 'inline-block';
+      document.getElementById('typingInput').disabled = true;
     }
 
     function checkAchievements(wpm, accuracy) {
@@ -980,18 +984,20 @@
         newAchievements.push('first-lesson');
       }
       
-      // WPM achievements & Game Unlocks
-      if (wpm >= 20 && !userData.achievements.includes('wpm-20')) {
+      // WPM achievements & Game Unlocks - Check user's best WPM
+      const bestWpm = userData.progress.wpm;
+      if (bestWpm >= 20 && !userData.achievements.includes('wpm-20')) {
         newAchievements.push('wpm-20');
         if (unlockGame('eagle-flight')) newlyUnlockedGameId = 'eagle-flight';
       }
-      if (wpm >= 40 && !userData.achievements.includes('wpm-40')) {
+      if (bestWpm >= 40 && !userData.achievements.includes('wpm-40')) {
         newAchievements.push('wpm-40');
         if (unlockGame('forest-fire-watch')) newlyUnlockedGameId = 'forest-fire-watch';
       }
       
-      // Accuracy achievements & Game Unlocks
-      if (accuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
+      // Accuracy achievements & Game Unlocks - Check user's best accuracy
+      const bestAccuracy = userData.progress.accuracy;
+      if (bestAccuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
         newAchievements.push('accuracy-95');
         if (unlockGame('whale-watch')) newlyUnlockedGameId = 'whale-watch';
       }
@@ -1048,6 +1054,47 @@
       return false;
     }
 
+    function checkExistingAchievements() {
+      // Check for WPM-based achievements and game unlocks
+      const bestWpm = userData.progress.wpm;
+      if (bestWpm >= 20 && !userData.achievements.includes('wpm-20')) {
+        userData.achievements.push('wpm-20');
+        unlockGame('eagle-flight');
+      }
+      if (bestWpm >= 40 && !userData.achievements.includes('wpm-40')) {
+        userData.achievements.push('wpm-40');
+        unlockGame('forest-fire-watch');
+      }
+      
+      // Check for accuracy-based achievements and game unlocks
+      const bestAccuracy = userData.progress.accuracy;
+      if (bestAccuracy >= 95 && !userData.achievements.includes('accuracy-95')) {
+        userData.achievements.push('accuracy-95');
+        unlockGame('whale-watch');
+      }
+      
+      // Check for lesson-based achievements and game unlocks
+      if (userData.progress.completedLessons.length >= 5 && !userData.achievements.includes('lesson-5')) {
+        userData.achievements.push('lesson-5');
+        unlockGame('bear-cub-rescue');
+      }
+      if (userData.progress.completedLessons.length >= 10 && !userData.achievements.includes('lesson-10')) {
+        userData.achievements.push('lesson-10');
+        unlockGame('salmon-swim');
+      }
+      if (userData.progress.completedLessons.length >= 15 && !userData.achievements.includes('lesson-15')) {
+        userData.achievements.push('lesson-15');
+        unlockGame('ravens-riddle');
+      }
+      if (userData.progress.completedLessons.length >= 20 && !userData.achievements.includes('lesson-20')) {
+        userData.achievements.push('lesson-20');
+        unlockGame('mount-baker-climb');
+      }
+      
+      // Save the updated progress
+      saveUserProgress();
+    }
+
     function showGameUnlockModal(game) {
         document.getElementById('gameUnlockIcon').innerText = game.icon;
         document.getElementById('gameUnlockName').innerText = game.name;
@@ -1099,6 +1146,9 @@
         
         // Update lesson buttons to show completed status
         updateLessonButtons();
+        
+        // Check for existing achievements and game unlocks
+        checkExistingAchievements();
       }
     }
 
