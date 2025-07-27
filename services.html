@@ -492,8 +492,70 @@
         }
     </style>
     <style>
-        /* Force desktop layout for services page */
+        /* Mobile menu toggle button */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--deep-forest-green);
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* Mobile responsive design */
         @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                position: relative;
+            }
+            
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--background-color);
+                border: 2px solid var(--deep-forest-green);
+                border-radius: 4px;
+                padding: 20px 0;
+                margin-top: 10px;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1000;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links a {
+                padding: 15px 20px;
+                border: none;
+                text-align: center;
+                width: 100%;
+                border-bottom: 1px solid var(--deep-forest-green);
+            }
+            
+            .nav-links a:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+    <style>
+        /* Force desktop layout for services page - DISABLED */
+        @media (max-width: 768px) and (min-width: 0px) {
             body.force-desktop-layout .nav-container {
                 padding: 0 !important;
                 position: static !important; /* Revert mobile positioning */
@@ -569,7 +631,7 @@
         }
     </style>
 </head>
-<body class="force-desktop-layout">
+<body>
     <div class="contact-header">
         <a href="tel:7786553741">778-655-3741</a> |
         <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
@@ -577,8 +639,14 @@
 
     <nav>
         <div class="nav-container">
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <div class="nav-links">
                 <a href="index.html">Home</a>
+                <a href="quote.html">Get Quote</a>
                 <a href="philosophy.html">Philosophy</a>
                 <a href="services.html">Services</a>
                 <a href="root-knowledge.html">Root Knowledge</a>
@@ -874,6 +942,39 @@
             if (serviceItems.length === 0) console.warn('No service items found');
             if (!centerLogo) console.warn('Center logo not found');
             if (summaries.length === 0) console.warn('No service summaries found');
+            
+            // Mobile menu functionality
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                    document.body.classList.toggle('menu-open');
+                });
+            }
+            
+            // Close menu when a link is clicked
+            const navItems = document.querySelectorAll('.nav-links a');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        navLinks.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                        document.body.classList.remove('menu-open');
+                    }
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (navLinks && menuToggle && !navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                    navLinks.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                    document.body.classList.remove('menu-open');
+                }
+            });
         });
     </script>
 </body>
