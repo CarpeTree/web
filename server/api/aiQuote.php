@@ -22,7 +22,7 @@ try {
         SELECT q.*, c.email, c.name, c.phone 
         FROM quotes q 
         JOIN customers c ON q.customer_id = c.id 
-        WHERE q.id = ? AND q.status = 'processing'
+        WHERE q.id = ? AND q.quote_status = 'ai_processing'
     ");
     $stmt->execute([$quote_id]);
     $quote = $stmt->fetch();
@@ -35,7 +35,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT * FROM media 
         WHERE quote_id = ?
-        ORDER BY created_at ASC
+        ORDER BY id ASC
     ");
     $stmt->execute([$quote_id]);
     $media_files = $stmt->fetchAll();
@@ -145,9 +145,9 @@ try {
     // Update quote with AI analysis
     $stmt = $pdo->prepare("
         UPDATE quotes 
-        SET status = 'draft_ready', 
+        SET quote_status = 'draft_ready', 
             total_estimate = ?, 
-            ai_analysis_json = ?
+            ai_response_json = ?
         WHERE id = ?
     ");
     $stmt->execute([
