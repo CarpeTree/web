@@ -12,9 +12,9 @@ if (php_sapi_name() === 'cli' && isset($argv[1])) {
     die("Quote ID required\n");
 }
 
-require_once '../config/database-simple.php';
-require_once '../config/config.php';
-require_once '../utils/mailer.php';
+require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../utils/mailer.php';
 
 try {
     // Get quote and customer information

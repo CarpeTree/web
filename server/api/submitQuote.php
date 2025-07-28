@@ -142,8 +142,8 @@ try {
     $pdo->commit();
 
     // Trigger AI processing asynchronously
-    $ai_script = realpath('../api/aiQuote.php');
-    $command = "php $ai_script $quote_id > /dev/null 2>&1 &";
+    $ai_script = __DIR__ . '/aiQuote.php';
+    $command = "cd " . dirname(__DIR__) . " && php api/aiQuote.php $quote_id > /dev/null 2>&1 &";
     exec($command);
 
     // Return success response
