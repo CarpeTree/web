@@ -638,7 +638,7 @@
         },
 
         canProceedStep1() {
-          return this.uploadedFiles.length > 0;
+          return true; // TEMP: Allow proceeding without files for testing
         },
 
         toggleService(serviceId) {

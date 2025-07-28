@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Skip file upload requirements for this test
+    $_FILES = []; // Clear any file uploads
+    
     echo json_encode(['debug' => 'Starting test...']);
     flush();
     
