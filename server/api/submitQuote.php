@@ -75,9 +75,9 @@ try {
     // Insert quote
     $stmt = $pdo->prepare("
         INSERT INTO quotes (
-            customer_id, quote_status, selected_services, 
-            gps_lat, gps_lng, exif_lat, exif_lng, notes
-        ) VALUES (?, 'submitted', ?, ?, ?, ?, ?, ?)
+            customer_id, status, services_requested, 
+            gps_lat, gps_lng, exif_lat, exif_lng, location_description
+        ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?)
     ");
 
     $selected_services = isset($_POST['selectedServices']) ? $_POST['selectedServices'] : '[]';
@@ -135,7 +135,7 @@ try {
     }
 
     // Update quote status to indicate files are ready for AI processing
-    $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE quotes SET status = 'processing' WHERE id = ?");
     $stmt->execute([$quote_id]);
 
     // Commit transaction
