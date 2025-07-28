@@ -652,14 +652,26 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-            const response = await fetch('/server/api/submitQuote.php', {
-              method: 'POST',
-              body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.success) {
+                      const response = await fetch('/server/api/submitQuote.php', {
+            method: 'POST',
+            body: formData
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          const responseText = await response.text();
+          console.log('Raw response:', responseText);
+          
+          let result;
+          try {
+            result = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            throw new Error('Invalid response from server: ' + responseText.substring(0, 100));
+          }
+          
+          if (response.ok && result.success) {
               console.log('Quote submitted successfully:', result);
               this.submitted = true;
               this.currentStep = 4; // Show success
@@ -670,6 +682,11 @@
             }
           } catch (error) {
             console.error('Quote submission failed:', error);
+            console.error('Error details:', {
+              message: error.message,
+              stack: error.stack,
+              response: response
+            });
             alert('Error submitting quote: ' + error.message + '. Please try again or call us at 778-655-3741');
           }
           
