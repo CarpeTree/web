@@ -536,11 +536,7 @@
             name: 'Tree Pruning',
             description: 'Professional pruning for health, safety, and aesthetics'
           },
-          {
-            id: 'stump_grinding',
-            name: 'Stump Grinding',
-            description: 'Complete removal of tree stumps'
-          },
+
           {
             id: 'planting',
             name: 'Tree Planting',
@@ -559,7 +555,7 @@
           {
             id: 'emergency',
             name: 'Emergency Service',
-            description: 'Storm damage cleanup and emergency tree removal'
+            description: '🚨 Immediate callback required - Storm damage cleanup and urgent tree removal'
           },
           {
             id: 'not_sure',
@@ -650,6 +646,11 @@
             this.selectedServices = this.selectedServices.filter(id => id !== serviceId);
           } else {
             this.selectedServices.push(serviceId);
+            
+            // Special handling for emergency service
+            if (serviceId === 'emergency') {
+              alert('🚨 EMERGENCY SERVICE SELECTED\n\nFor immediate assistance, please call us directly at:\n778-655-3741\n\nWe will also prioritize your quote request for urgent review.');
+            }
           }
         },
 
