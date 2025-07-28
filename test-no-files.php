@@ -15,17 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$debug_messages = [];
+
 try {
     // Skip file upload requirements for this test
     $_FILES = []; // Clear any file uploads
     
-    echo json_encode(['debug' => 'Starting test...']);
-    flush();
+    $debug_messages[] = 'Starting test...';
     
     // Load config
     require_once 'server/config/database-simple.php';
-    echo json_encode(['debug' => 'Config loaded']);
-    flush();
+    $debug_messages[] = 'Config loaded';
     
     // Validate email
     if (empty($_POST['email'])) {
@@ -36,13 +36,11 @@ try {
         throw new Exception('Invalid email format');
     }
     
-    echo json_encode(['debug' => 'Email validated']);
-    flush();
+    $debug_messages[] = 'Email validated';
     
     // Start transaction
     $pdo->beginTransaction();
-    echo json_encode(['debug' => 'Transaction started']);
-    flush();
+    $debug_messages[] = 'Transaction started';
     
     // Insert customer
     $stmt = $pdo->prepare("
@@ -64,8 +62,7 @@ try {
         isset($_POST['newsletterOptIn']) && $_POST['newsletterOptIn'] === 'true' ? 1 : 0
     ]);
     
-    echo json_encode(['debug' => 'Customer inserted']);
-    flush();
+    $debug_messages[] = 'Customer inserted';
     
     // Get customer ID
     $customer_id = $pdo->lastInsertId();
@@ -75,8 +72,7 @@ try {
         $customer_id = $stmt->fetchColumn();
     }
     
-    echo json_encode(['debug' => 'Customer ID: ' . $customer_id]);
-    flush();
+    $debug_messages[] = 'Customer ID: ' . $customer_id;
     
     // Insert quote (WITHOUT files)
     $stmt = $pdo->prepare("
@@ -99,28 +95,30 @@ try {
     ]);
     
     $quote_id = $pdo->lastInsertId();
-    echo json_encode(['debug' => 'Quote inserted with ID: ' . $quote_id]);
-    flush();
+    $debug_messages[] = 'Quote inserted with ID: ' . $quote_id;
     
     // Commit transaction
     $pdo->commit();
-    echo json_encode(['debug' => 'Transaction committed']);
-    flush();
+    $debug_messages[] = 'Transaction committed';
     
     // Return success
     echo json_encode([
         'success' => true,
         'quote_id' => $quote_id,
         'customer_id' => $customer_id,
-        'message' => 'Quote submitted successfully (no files processed)'
+        'message' => 'Quote submitted successfully (no files processed)',
+        'debug_messages' => $debug_messages
     ]);
     
 } catch (Exception $e) {
-    if ($pdo && $pdo->inTransaction()) {
+    if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollback();
     }
     
     http_response_code(400);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode([
+        'error' => $e->getMessage(),
+        'debug_messages' => $debug_messages ?? []
+    ]);
 }
 ?> 
