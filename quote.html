@@ -638,7 +638,8 @@
         },
 
         canProceedStep1() {
-          return this.uploadedFiles.length > 0;
+          // Temporarily allow proceeding without files for testing
+          return true; // Original: this.uploadedFiles.length > 0;
         },
 
         toggleService(serviceId) {
