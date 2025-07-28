@@ -652,7 +652,7 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-            const response = await fetch('/server/api/submitQuote.php', {
+            const response = await fetch('/server/test-submit.php', { // DEBUG: Using test endpoint
               method: 'POST',
               body: formData
             });
