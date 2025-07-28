@@ -652,7 +652,7 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-            const response = await fetch('/server/test-submit.php?debug=' + Date.now(), { // DEBUG: Using test endpoint with cache bypass
+            const response = await fetch('/server/api/submitQuote.php', {
               method: 'POST',
               body: formData
             });
