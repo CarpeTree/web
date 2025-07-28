@@ -1,0 +1,11 @@
+# Protect configuration files
+<Files "*.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Additional security
+<Files "config.*">
+    Order allow,deny
+    Deny from all
+</Files> 
