@@ -657,14 +657,20 @@
               body: formData
             });
             
-            if (response.ok) {
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+              console.log('Quote submitted successfully:', result);
               this.submitted = true;
               this.currentStep = 4; // Show success
             } else {
-              throw new Error('Submission failed');
+              const errorMsg = result.error || 'Submission failed';
+              console.error('Quote submission error:', errorMsg);
+              throw new Error(errorMsg);
             }
           } catch (error) {
-            alert('Error submitting quote. Please try again or call us at 778-655-3741');
+            console.error('Quote submission failed:', error);
+            alert('Error submitting quote: ' + error.message + '. Please try again or call us at 778-655-3741');
           }
           
           this.submitting = false;

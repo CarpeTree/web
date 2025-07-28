@@ -80,7 +80,8 @@ function loadEmailTemplate($template, $data) {
     $html = str_replace('{company_name}', 'Carpe Tree\'em', $html);
     $html = str_replace('{company_phone}', '778-655-3741', $html);
     $html = str_replace('{company_email}', 'sapport@carpetree.com', $html);
-    $html = str_replace('{logo_url}', $_ENV['SITE_URL'] . '/images/carpeclear.png', $html);
+    global $SITE_URL;
+    $html = str_replace('{logo_url}', $SITE_URL . '/images/carpeclear.png', $html);
     
     return $html;
 }
@@ -96,14 +97,25 @@ function logEmail($recipient, $subject, $template, $status, $error = '', $data =
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         
+        // Handle quote_id - only save if it's numeric
+        $quote_id = null;
+        if (isset($data['quote_id']) && is_numeric($data['quote_id'])) {
+            $quote_id = (int)$data['quote_id'];
+        }
+        
+        $invoice_id = null;
+        if (isset($data['invoice_id']) && is_numeric($data['invoice_id'])) {
+            $invoice_id = (int)$data['invoice_id'];
+        }
+        
         $stmt->execute([
             $recipient,
             $subject,
             $template,
             $status,
             $error,
-            $data['quote_id'] ?? null,
-            $data['invoice_id'] ?? null
+            $quote_id,
+            $invoice_id
         ]);
         
     } catch (Exception $e) {
