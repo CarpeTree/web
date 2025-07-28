@@ -94,8 +94,13 @@ try {
 
     $quote_id = $pdo->lastInsertId();
 
-    // Create upload directory
-    $upload_dir = "../../uploads/$quote_id";
+    // Create upload directory with full path
+    $uploads_base = dirname(dirname(__DIR__)) . '/uploads';
+    if (!file_exists($uploads_base)) {
+        mkdir($uploads_base, 0755, true);
+    }
+    
+    $upload_dir = "$uploads_base/$quote_id";
     if (!file_exists($upload_dir)) {
         mkdir($upload_dir, 0755, true);
     }
