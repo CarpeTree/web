@@ -103,10 +103,13 @@ try {
                     if (move_uploaded_file($files['tmp_name'][$i], $file_path)) {
                         $file_count++;
                         
-                        // Log file in database
+                        // Log file in database (using correct media table schema)
+                        $file_type = strpos($files['type'][$i], 'image/') === 0 ? 'image' : 
+                                   (strpos($files['type'][$i], 'video/') === 0 ? 'video' : 'audio');
+                        
                         $file_stmt = $pdo->prepare("
-                            INSERT INTO uploaded_files (quote_id, original_filename, stored_filename, file_path, file_size, mime_type, uploaded_at)
-                            VALUES (?, ?, ?, ?, ?, ?, NOW())
+                            INSERT INTO media (quote_id, original_filename, filename, file_path, file_size, mime_type, file_type, uploaded_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
                         ");
                         $file_stmt->execute([
                             $quote_id,
@@ -114,7 +117,8 @@ try {
                             $file_name,
                             $file_path,
                             $files['size'][$i],
-                            $files['type'][$i]
+                            $files['type'][$i],
+                            $file_type
                         ]);
                     }
                 }
