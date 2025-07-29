@@ -19,8 +19,8 @@ try {
     
     // Simple customer creation (no duplicate detection)
     $stmt = $pdo->prepare("
-        INSERT INTO customers (email, name, phone, address, how_did_you_hear, additional_notes, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO customers (email, name, phone, address, referral_source, referrer_name)
+        VALUES (?, ?, ?, ?, ?, ?)
     ");
     
     $stmt->execute([
@@ -28,24 +28,25 @@ try {
         $_POST['name'] ?? '',
         $_POST['phone'] ?? '',
         $_POST['address'] ?? '',
-        $_POST['how_did_you_hear'] ?? '',
-        $_POST['additional_notes'] ?? ''
+        $_POST['howDidYouHear'] ?? null,
+        $_POST['referrerName'] ?? null
     ]);
     
     $customer_id = $pdo->lastInsertId();
     
     // Create quote record
     $stmt = $pdo->prepare("
-        INSERT INTO quotes (customer_id, tree_services, quote_status, created_at)
-        VALUES (?, ?, 'pending', NOW())
+        INSERT INTO quotes (customer_id, selected_services, notes)
+        VALUES (?, ?, ?)
     ");
     
-    $services = $_POST['tree_services'] ?? [];
-    if (is_array($services)) {
-        $services = implode(',', $services);
-    }
+    $services = $_POST['selectedServices'] ?? '[]';
     
-    $stmt->execute([$customer_id, $services]);
+    $stmt->execute([
+        $customer_id, 
+        $services,
+        $_POST['notes'] ?? null
+    ]);
     $quote_id = $pdo->lastInsertId();
     
     // Commit transaction
