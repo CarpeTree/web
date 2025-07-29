@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Test - Carpe Tree'em</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .btn { background: #2D5A27; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🌳 Carpe Tree'em Dashboard Test</h1>
+    
+    <div class="test-section">
+        <h3>Dashboard Access Test</h3>
+        <p>Testing access to admin dashboard...</p>
+        <a href="/admin-dashboard.html" class="btn">Try Admin Dashboard</a>
+        <a href="/admin-dashboard.html?v=2" class="btn">Try Dashboard (Cache Bypass)</a>
+    </div>
+
+    <div class="test-section">
+        <h3>API Test</h3>
+        <p>Testing API connection...</p>
+        <div id="api-test">Testing...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>File Check</h3>
+        <p>Checking if dashboard file exists...</p>
+        <div id="file-check">Checking...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Alternative Access</h3>
+        <p>If dashboard doesn't load, try these:</p>
+        <ul>
+            <li>Clear browser cache (Ctrl+F5 or Cmd+Shift+R)</li>
+            <li>Try incognito/private browsing mode</li>
+            <li>Check browser console for JavaScript errors</li>
+        </ul>
+    </div>
+
+    <script>
+        // Test API connection
+        fetch('/server/api/admin-quotes.php')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('api-test').innerHTML = `
+                    <div class="success">
+                        ✅ API Working! Found ${data.quotes ? data.quotes.length : 0} quotes
+                    </div>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('api-test').innerHTML = `
+                    <div class="error">
+                        ❌ API Error: ${error.message}
+                    </div>
+                `;
+            });
+
+        // Test file access
+        fetch('/admin-dashboard.html', { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('file-check').innerHTML = `
+                        <div class="success">
+                            ✅ Dashboard file exists and is accessible
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('file-check').innerHTML = `
+                        <div class="error">
+                            ❌ Dashboard file not accessible (${response.status})
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('file-check').innerHTML = `
+                    <div class="error">
+                        ❌ File check failed: ${error.message}
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html> 
