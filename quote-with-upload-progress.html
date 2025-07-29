@@ -592,7 +592,7 @@
             }
             
             const fileData = {
-              id: Date.now() + Math.random(),
+              id: Date.now().toString() + '_' + Math.random().toString().substr(2),
               data: file,
               name: file.name,
               size: file.size,

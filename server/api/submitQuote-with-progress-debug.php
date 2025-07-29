@@ -1,13 +1,16 @@
 <?php
-// Debug version of quote submission with pre-uploaded files
+// Quote submission with pre-uploaded files - Debug version with clean JSON output
+ob_start(); // Start output buffering to catch any stray output
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Enable error reporting
+// Enable error logging but disable display to prevent JSON corruption
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 function debugLog($message) {
     error_log("[SUBMIT-DEBUG] " . $message);
@@ -261,6 +264,9 @@ try {
     ];
     
     debugLog("Returning success response: " . json_encode($response, JSON_PARTIAL_OUTPUT_ON_ERROR));
+    
+    // Clear any output buffer content and send clean JSON
+    ob_clean();
     echo json_encode($response);
     
 } catch (Exception $e) {
@@ -272,6 +278,8 @@ try {
         debugLog("Transaction rolled back");
     }
     
+    // Clear any output buffer content
+    ob_clean();
     http_response_code(400);
     echo json_encode([
         'success' => false,
