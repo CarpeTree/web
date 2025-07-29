@@ -105,12 +105,12 @@ try {
         ]
     ];
 
-    // Call OpenAI ChatGPT o3 - your proven tree care specialist
+    // Call OpenAI ChatGPT o3-mini - tree care specialist (fallback until o3 verification)
     $openai_request = [
-        'model' => 'o3',
+        'model' => 'o3-mini',
         'messages' => $messages,
         'temperature' => 0.2,
-        'max_tokens' => 1500
+        'max_completion_tokens' => 1500  // o3 models use max_completion_tokens, not max_tokens
     ];
 
     $curl = curl_init();
