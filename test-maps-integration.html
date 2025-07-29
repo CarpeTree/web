@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-case { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .maps-btn { 
+            display: inline-flex; align-items: center; gap: 5px; 
+            padding: 8px 16px; margin: 5px; background: #4285f4; color: white; 
+            text-decoration: none; border-radius: 4px; font-size: 14px; 
+        }
+        .maps-btn:hover { background: #3367d6; }
+        .street-view-btn { background: #34a853; }
+        .street-view-btn:hover { background: #2d8a47; }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Google Maps Integration Test</h1>
+    
+    <div class="test-case">
+        <h3>Test Case 1: Address Only</h3>
+        <p><strong>Address:</strong> 123 Baker Street, Nelson, BC</p>
+        <a href="#" onclick="testAddressOnly()" class="maps-btn">🗺️ Get Directions (Address)</a>
+        <a href="#" onclick="testStreetView('123 Baker Street, Nelson, BC')" class="maps-btn street-view-btn">👁️ Street View</a>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 2: GPS Coordinates</h3>
+        <p><strong>GPS:</strong> 49.4928, -117.2948 (±10m accuracy)</p>
+        <a href="#" onclick="testGPSCoords()" class="maps-btn">🗺️ Get Directions (GPS)</a>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 3: Mixed Data (GPS + Address)</h3>
+        <p><strong>Address:</strong> 456 Vernon Street, Nelson, BC</p>
+        <p><strong>GPS:</strong> 49.4950, -117.2900 (±5m accuracy)</p>
+        <p><em>Should prefer GPS coordinates for higher accuracy</em></p>
+        <a href="#" onclick="testMixedData()" class="maps-btn">🗺️ Get Directions (Mixed)</a>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 4: Your Business Location</h3>
+        <p><strong>Starting Point:</strong> 4530 Blewitt Rd, Nelson, BC V1L 6X1</p>
+        <a href="https://www.google.com/maps/place/4530+Blewitt+Rd,+Nelson,+BC+V1L+6X1" target="_blank" class="maps-btn">📍 View Business Location</a>
+    </div>
+
+    <script>
+        // Base location: 4530 Blewitt Rd, Nelson, BC V1L 6X1
+        const businessCoords = '49.4928,-117.2948';
+        
+        function testAddressOnly() {
+            const quote = { address: '123 Baker Street, Nelson, BC' };
+            const url = getGoogleMapsUrl(quote);
+            console.log('Address-only URL:', url);
+            window.open(url, '_blank');
+        }
+        
+        function testGPSCoords() {
+            const quote = { 
+                geo_latitude: 49.4950, 
+                geo_longitude: -117.2900,
+                address: '456 Vernon Street, Nelson, BC'
+            };
+            const url = getGoogleMapsUrl(quote);
+            console.log('GPS coordinates URL:', url);
+            window.open(url, '_blank');
+        }
+        
+        function testMixedData() {
+            const quote = {
+                address: '456 Vernon Street, Nelson, BC',
+                geo_latitude: 49.4950,
+                geo_longitude: -117.2900,
+                geo_accuracy: 5
+            };
+            const url = getGoogleMapsUrl(quote);
+            console.log('Mixed data URL (should use GPS):', url);
+            window.open(url, '_blank');
+        }
+        
+        function testStreetView(address) {
+            const url = getStreetViewUrl(address);
+            console.log('Street View URL:', url);
+            window.open(url, '_blank');
+        }
+        
+        // Same functions as in admin dashboard
+        function getGoogleMapsUrl(quote) {
+            const origin = businessCoords;
+            let destination;
+            
+            // Use GPS coordinates if available for higher accuracy
+            if (quote.geo_latitude && quote.geo_longitude) {
+                destination = `${quote.geo_latitude},${quote.geo_longitude}`;
+                console.log('Using GPS coordinates for directions:', destination);
+            } else if (quote.address) {
+                destination = encodeURIComponent(quote.address);
+                console.log('Using address for directions:', quote.address);
+            } else {
+                return '#';
+            }
+            
+            return `https://www.google.com/maps/dir/${origin}/${destination}`;
+        }
+        
+        function getStreetViewUrl(address) {
+            if (!address) return '#';
+            const encodedAddress = encodeURIComponent(address);
+            return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodedAddress}`;
+        }
+        
+        // Test all functions on page load
+        window.onload = function() {
+            console.log('🗺️ Google Maps Integration Test Loaded');
+            console.log('Business coordinates:', businessCoords);
+            
+            // Test various scenarios
+            console.log('\n=== Testing URLs ===');
+            
+            const testQuote1 = { address: '123 Test Street, Nelson, BC' };
+            console.log('Address only:', getGoogleMapsUrl(testQuote1));
+            
+            const testQuote2 = { geo_latitude: 49.4950, geo_longitude: -117.2900 };
+            console.log('GPS only:', getGoogleMapsUrl(testQuote2));
+            
+            const testQuote3 = { 
+                address: '456 Main St, Nelson, BC', 
+                geo_latitude: 49.4960, 
+                geo_longitude: -117.2910 
+            };
+            console.log('Both (should use GPS):', getGoogleMapsUrl(testQuote3));
+        };
+    </script>
+</body>
+</html> 

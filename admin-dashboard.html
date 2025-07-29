@@ -326,22 +326,52 @@
                     </div>
                     
                     <div class="quote-info">
-                        <div class="info-item">
-                            <span class="info-label">Customer</span>
-                            <span class="info-value" x-text="quote.customer_name"></span>
+                        <h3 x-text="quote.customer_name"></h3>
+                        <p><strong>Email:</strong> <span x-text="quote.customer_email"></span></p>
+                        <p x-show="quote.customer_phone"><strong>Phone:</strong> <span x-text="quote.customer_phone"></span></p>
+                        <p x-show="quote.address"><strong>Address:</strong> <span x-text="quote.address"></span></p>
+                        
+                        <!-- Enhanced location info with Google Maps link -->
+                        <div x-show="quote.address" class="location-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <strong>📍 Location & Distance:</strong>
+                                <span x-text="quote.distance + 'km away'"></span>
+                            </div>
+                            
+                            <!-- Google Maps Driving Directions Button -->
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                                                        <a :href="getGoogleMapsUrl(quote)" 
+                                           target="_blank" 
+                                           class="maps-btn"
+                                           style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; transition: background 0.2s;"
+                                           onmouseover="this.style.background='#3367d6'"
+                                           onmouseout="this.style.background='#4285f4'">
+                                            🗺️ Get Directions
+                                        </a>
+                                
+                                <!-- Street View Link -->
+                                <a :href="getStreetViewUrl(quote.address)" 
+                                   target="_blank" 
+                                   style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #34a853; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; transition: background 0.2s;"
+                                   onmouseover="this.style.background='#2d8a47'"
+                                   onmouseout="this.style.background='#34a853'">
+                                    👁️ Street View
+                                </a>
+                                
+                                                                 <!-- Location coordinates and IP info if available -->
+                                 <div x-show="quote.geo_latitude || quote.ip_address" style="font-size: 11px; color: #666; padding: 6px;">
+                                     <div x-show="quote.geo_latitude">
+                                         📍 GPS: <span x-text="quote.geo_latitude?.toFixed(4)"></span>, <span x-text="quote.geo_longitude?.toFixed(4)"></span>
+                                         <span x-show="quote.geo_accuracy"> (±<span x-text="Math.round(quote.geo_accuracy)"></span>m)</span>
+                                     </div>
+                                     <div x-show="quote.ip_address && quote.ip_address !== 'Unknown'">
+                                         🌐 IP: <span x-text="quote.ip_address"></span>
+                                     </div>
+                                 </div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Email</span>
-                            <span class="info-value" x-text="quote.customer_email"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Phone</span>
-                            <span class="info-value" x-text="quote.phone"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Address</span>
-                            <span class="info-value" x-text="quote.address"></span>
-                        </div>
+                        
+                        <p><strong>Service:</strong> <span x-text="quote.service_type"></span></p>
                     </div>
 
                     <!-- AI Analysis Controls -->
@@ -717,6 +747,33 @@
                         quote.ai_regenerating = false;
                         alert('❌ Error regenerating AI analysis: ' + error.message);
                     }
+                },
+
+                getGoogleMapsUrl(quote) {
+                    // Starting point: 4530 Blewitt Rd, Nelson, BC V1L 6X1 (49.4928, -117.2948)
+                    const origin = '49.4928,-117.2948';
+                    
+                    let destination;
+                    
+                    // Use GPS coordinates if available for higher accuracy
+                    if (quote.geo_latitude && quote.geo_longitude) {
+                        destination = `${quote.geo_latitude},${quote.geo_longitude}`;
+                        console.log('Using GPS coordinates for directions:', destination);
+                    } else if (quote.address) {
+                        destination = encodeURIComponent(quote.address);
+                        console.log('Using address for directions:', quote.address);
+                    } else {
+                        return '#';
+                    }
+                    
+                    // Use Google Maps directions URL with origin and destination
+                    return `https://www.google.com/maps/dir/${origin}/${destination}`;
+                },
+
+                getStreetViewUrl(address) {
+                    if (!address) return '#';
+                    const encodedAddress = encodeURIComponent(address);
+                    return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodedAddress}`;
                 }
             }
         }

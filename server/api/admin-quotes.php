@@ -18,18 +18,20 @@ try {
     // Set execution time limit to prevent timeouts
     set_time_limit(30);
     
-    // Get all quotes that need admin review (limit to most recent 50 for performance)
+    // Get quotes with customer information
     $stmt = $pdo->prepare("
         SELECT 
-            q.*,
-            c.name as customer_name,
-            c.email as customer_email,
-            c.phone,
-            c.address
+            q.id, q.customer_id, q.service_type, q.property_details, q.urgency, 
+            q.budget_range, q.quote_status, q.created_at, q.ai_response_json,
+            c.name as customer_name, c.email as customer_email, c.phone as customer_phone, 
+            c.address, c.referral_source, c.referrer_name,
+            c.geo_latitude, c.geo_longitude, c.geo_accuracy, c.ip_address,
+            COUNT(m.id) as media_count
         FROM quotes q
         JOIN customers c ON q.customer_id = c.id
-        WHERE q.quote_status IN ('submitted', 'draft_ready', 'ai_processing', 'admin_review')
-        ORDER BY q.quote_created_at DESC
+        LEFT JOIN media m ON q.id = m.quote_id
+        GROUP BY q.id
+        ORDER BY q.created_at DESC
         LIMIT 50
     ");
     $stmt->execute();
@@ -121,7 +123,7 @@ try {
             'status' => $quote['quote_status'],
             'customer_name' => $quote['customer_name'],
             'customer_email' => $quote['customer_email'],
-            'phone' => $quote['phone'],
+            'phone' => $quote['customer_phone'], // Changed from $quote['phone']
             'address' => $quote['address'],
             'distance_km' => $distance_km,
             'vehicle_type' => 'truck', // Default
@@ -134,7 +136,11 @@ try {
             'discount_amount' => 0,
             'discount_type' => 'dollar',
             'discount_value' => 0,
-            'final_total' => 0
+            'final_total' => 0,
+            'geo_latitude' => $quote['geo_latitude'], // Added GPS latitude
+            'geo_longitude' => $quote['geo_longitude'], // Added GPS longitude
+            'geo_accuracy' => $quote['geo_accuracy'], // Added GPS accuracy
+            'ip_address' => $quote['ip_address'] // Added IP address
         ];
     }
 
