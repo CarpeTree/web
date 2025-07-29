@@ -317,24 +317,40 @@ try {
             $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
             $stmt->execute([$quote_id]);
             
-            // Trigger AI analysis
-            $ai_url = 'https://carpetree.com/server/api/simple-ai-analysis.php?quote_id=' . $quote_id;
+            // Trigger context assessment first
+            require_once __DIR__ . '/../utils/context-assessor.php';
+            $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
+            error_log("Context assessment for quote $quote_id: " . json_encode($context_assessment));
             
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $ai_url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 2,
-                CURLOPT_CONNECTTIMEOUT => 1,
-                CURLOPT_NOSIGNAL => 1
+            // Trigger AI analysis
+            $ai_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
+                     '://' . $_SERVER['HTTP_HOST'] . '/server/api/simple-ai-analysis.php';
+            
+            $post_data = http_build_query(['quote_id' => $quote_id]);
+            
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => 'Content-Type: application/x-www-form-urlencoded',
+                    'content' => $post_data,
+                    'timeout' => 2
+                ]
             ]);
             
-            $result = curl_exec($curl);
-            curl_close($curl);
+            // Non-blocking call
+            @file_get_contents($ai_url, false, $context);
             
-            error_log("Triggered AI processing for quote $quote_id with " . count($uploaded_files) . " files");
         } catch (Exception $e) {
             error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
+        }
+    } else {
+        // Even without files, assess the text-based context
+        try {
+            require_once __DIR__ . '/../utils/context-assessor.php';
+            $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
+            error_log("Text-only context assessment for quote $quote_id: " . json_encode($context_assessment));
+        } catch (Exception $e) {
+            error_log("Failed context assessment for quote $quote_id: " . $e->getMessage());
         }
     }
     

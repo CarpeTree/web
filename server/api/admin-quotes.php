@@ -50,6 +50,26 @@ try {
         $exif_stmt->execute([$quote['id']]);
         $exif_locations = $exif_stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Get context assessment for this quote
+        $assessment_stmt = $pdo->prepare("SELECT * FROM context_assessments WHERE quote_id = ? ORDER BY assessed_at DESC LIMIT 1");
+        $assessment_stmt->execute([$quote['id']]);
+        $assessment = $assessment_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $formatted_assessment = null;
+        if ($assessment) {
+            $formatted_assessment = [
+                'confidence_score' => (int)$assessment['confidence_score'],
+                'overall_rating' => $assessment['overall_rating'],
+                'estimate_accuracy' => $assessment['estimate_accuracy'],
+                'can_provide_accurate_estimate' => (bool)$assessment['can_provide_accurate_estimate'],
+                'missing_elements' => json_decode($assessment['missing_elements'], true) ?: [],
+                'strengths' => json_decode($assessment['strengths'], true) ?: [],
+                'recommendations' => json_decode($assessment['recommendations'], true) ?: [],
+                'reasoning' => $assessment['reasoning'],
+                'assessed_at' => $assessment['assessed_at']
+            ];
+        }
+        
         // Match EXIF data with media files
         $formatted_exif = [];
         foreach ($exif_locations as $exif) {
@@ -167,7 +187,8 @@ try {
             'geo_longitude' => $quote['geo_longitude'], // Added GPS longitude
             'geo_accuracy' => $quote['geo_accuracy'], // Added GPS accuracy
             'ip_address' => $quote['ip_address'], // Added IP address
-            'exif_locations' => $formatted_exif // Added EXIF location data
+            'exif_locations' => $formatted_exif, // Added EXIF location data
+            'context_assessment' => $formatted_assessment // Added context assessment data
         ];
     }
 
