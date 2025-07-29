@@ -11,7 +11,7 @@ ini_set('display_errors', 1);
 
 function debugLog($message) {
     error_log("[SUBMIT-DEBUG] " . $message);
-    echo "<!-- DEBUG: " . htmlspecialchars($message) . " -->";
+    // Don't echo HTML comments as they corrupt JSON response
 }
 
 debugLog("Starting submission process");

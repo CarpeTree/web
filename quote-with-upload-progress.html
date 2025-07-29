@@ -795,7 +795,17 @@
               body: formData
             });
             
-            const result = await response.json();
+            const responseText = await response.text();
+            console.log('Raw server response:', responseText);
+            
+            let result;
+            try {
+              result = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error('JSON parse error:', parseError);
+              console.error('Response that failed to parse:', responseText);
+              throw new Error('Server returned invalid JSON: ' + parseError.message);
+            }
             
             if (response.ok && result.success) {
               this.submitted = true;
