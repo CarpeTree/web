@@ -229,7 +229,7 @@
   </nav>
 
   <!-- Upload Progress Overlay (blocks everything during upload) -->
-  <div x-show="uploadProgress.visible" class="upload-progress-overlay" x-transition>
+      <div x-show="uploadProgress.visible && uploadProgress.files.length > 0" class="upload-progress-overlay" x-transition>
     <div class="upload-progress-container">
       <h3>📤 Uploading Files...</h3>
       
@@ -265,7 +265,7 @@
     </div>
   </div>
 
-  <div class="quote-wizard" x-data="improvedQuoteWizard()" :class="{ 'form-disabled': uploadProgress.visible }">
+  <div class="quote-wizard" x-data="improvedQuoteWizard()" :class="{ 'form-disabled': uploadProgress.visible && uploadProgress.files.length > 0 }">
     <h1 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 30px;">
       🌳 Get Your Tree Service Quote
     </h1>
@@ -492,6 +492,12 @@
           files: [],
           overall: 0,
           eta: ''
+        },
+        
+        init() {
+          // Ensure upload progress is hidden on start
+          this.uploadProgress.visible = false;
+          this.uploadProgress.files = [];
         },
         
         services: [
