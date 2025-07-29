@@ -319,10 +319,12 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
 function sendEmailWithAttachments($to, $subject, $html_body, $files, $quote_id) {
     $boundary = md5(uniqid(time()));
     
-    // Headers
+    // Headers - improved to avoid spam
     $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "From: Carpe Tree'em System <quotes@carpetree.com>\r\n";
-    $headers .= "Reply-To: sapport@carpetree.com\r\n";
+    $headers .= "From: Carpe Tree'em <quotes@carpetree.com>\r\n";
+    $headers .= "Reply-To: phil.bajenski@gmail.com\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+    $headers .= "X-Priority: 1\r\n";
     $headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\r\n";
     
     // Email body
