@@ -47,7 +47,7 @@ try {
     
     // Check if there are any email logs
     echo "=== EMAIL LOG ===\n";
-    $stmt = $pdo->prepare("SELECT * FROM email_log ORDER BY created_at DESC LIMIT 5");
+    $stmt = $pdo->prepare("SELECT * FROM email_log ORDER BY sent_at DESC LIMIT 5");
     $stmt->execute();
     $emails = $stmt->fetchAll();
     
@@ -61,7 +61,7 @@ try {
             echo "Status: {$email['status']}\n";
             echo "Template: {$email['template_used']}\n";
             echo "Quote ID: {$email['quote_id']}\n";
-            echo "Created: {$email['created_at']}\n";
+            echo "Sent: {$email['sent_at']}\n";
             if ($email['error_message']) {
                 echo "Error: {$email['error_message']}\n";
             }
