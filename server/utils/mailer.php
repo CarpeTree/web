@@ -110,10 +110,25 @@ function logEmail($recipient, $subject, $template, $status, $error = '', $data =
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         
-        // Handle quote_id - only save if it's numeric
+        // Handle quote_id - only save if it's numeric and exists in database
         $quote_id = null;
         if (isset($data['quote_id']) && is_numeric($data['quote_id'])) {
-            $quote_id = (int)$data['quote_id'];
+            $check_quote_id = (int)$data['quote_id'];
+            // Check if quote exists (unless it's a test)
+            if (isset($data['test_mode']) || $check_quote_id <= 0) {
+                $quote_id = null; // Don't reference non-existent quotes
+            } else {
+                try {
+                    $check_stmt = $pdo->prepare("SELECT id FROM quotes WHERE id = ?");
+                    $check_stmt->execute([$check_quote_id]);
+                    if ($check_stmt->fetch()) {
+                        $quote_id = $check_quote_id;
+                    }
+                } catch (Exception $e) {
+                    // If check fails, don't reference the quote
+                    $quote_id = null;
+                }
+            }
         }
         
         $invoice_id = null;

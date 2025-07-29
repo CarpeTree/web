@@ -500,13 +500,32 @@
 
                 async loadQuotes() {
                     try {
-                        const response = await fetch('/server/api/admin-quotes.php');
+                        // Try relative path first, then absolute
+                        let response;
+                        try {
+                            response = await fetch('./server/api/admin-quotes.php');
+                        } catch (e) {
+                            // Fallback to absolute path
+                            response = await fetch('/server/api/admin-quotes.php');
+                        }
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
                         const data = await response.json();
+                        
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        
                         this.quotes = data.quotes || [];
                         this.loading = false;
                     } catch (error) {
                         console.error('Error loading quotes:', error);
                         this.loading = false;
+                        // Show user-friendly error
+                        alert('Failed to load quotes: ' + error.message + '\n\nPlease check that the server is running and the database is accessible.');
                     }
                 },
 

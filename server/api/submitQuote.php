@@ -257,8 +257,19 @@ try {
         'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}"
     ]);
     
-    // TEMPORARILY DISABLED: Send admin notification asynchronously (after response sent)
-    error_log("Core quote submission successful for quote $quote_id - admin notifications temporarily disabled for debugging");
+    // Send admin notification asynchronously (after response sent)
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+    
+    // Send admin notification without blocking user
+    try {
+        require_once __DIR__ . '/admin-notification.php';
+        $admin_notification_sent = sendAdminNotification($quote_id);
+        error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
+    } catch (Exception $e) {
+        error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
+    }
     
 } catch (Exception $e) {
     // Rollback transaction on error

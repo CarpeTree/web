@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Test</title>
+</head>
+<body>
+    <h1>Admin Dashboard API Test</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                statusDiv.textContent = 'Loading quotes...';
+                
+                // Try relative path first, then absolute
+                let response;
+                try {
+                    response = await fetch('./server/api/admin-quotes.php');
+                } catch (e) {
+                    // Fallback to absolute path
+                    response = await fetch('/server/api/admin-quotes.php');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                statusDiv.textContent = 'Success! ✅';
+                statusDiv.style.color = 'green';
+                resultDiv.innerHTML = `
+                    <p><strong>Loaded ${data.quotes?.length || 0} quotes</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                statusDiv.textContent = 'Error! ❌';
+                statusDiv.style.color = 'red';
+                resultDiv.innerHTML = `
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>This test confirms the admin dashboard should work when served from a proper web server with PHP support.</p>
+                `;
+            }
+        }
+
+        // Run test when page loads
+        testAPI();
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
 require_once '../config/database-simple.php';
+require_once __DIR__ . '/ai-distance-calculator.php';
 
 try {
     // Get all quotes that need admin review
@@ -37,13 +38,25 @@ try {
             ];
         }, $files);
 
-        // Parse AI response
-        $ai_response = json_decode($quote['ai_response_json'], true);
-        $services = json_decode($quote['selected_services'], true) ?: [];
+        // Parse AI response - fix null issue
+        $ai_response = null;
+        if (!empty($quote['ai_response_json'])) {
+            $ai_response = json_decode($quote['ai_response_json'], true);
+        }
+        
+        // Parse services - fix null issue
+        $services = [];
+        if (!empty($quote['selected_services'])) {
+            $services = json_decode($quote['selected_services'], true) ?: [];
+        }
 
         // Calculate distance using AI (O3 workhorse)
-        require_once __DIR__ . '/ai-distance-calculator.php';
-        $distance_km = calculateDistanceWithAI($quote['address']);
+        try {
+            $distance_km = calculateDistanceWithAI($quote['address'] ?? '');
+        } catch (Exception $e) {
+            // Fallback if AI distance calculation fails
+            $distance_km = fallbackDistanceEstimate($quote['address'] ?? '');
+        }
         
         // Generate line items based on services and AI analysis
         $line_items = generateLineItems($services, $ai_response, count($files) > 0);

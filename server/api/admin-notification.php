@@ -37,9 +37,17 @@ function sendAdminNotification($quote_id) {
         $file_stmt->execute([$quote_id]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Parse AI response
-        $ai_response = json_decode($quote['ai_response_json'], true);
-        $services = json_decode($quote['selected_services'], true) ?: [];
+        // Parse AI response - fix null issue
+        $ai_response = null;
+        if (!empty($quote['ai_response_json'])) {
+            $ai_response = json_decode($quote['ai_response_json'], true);
+        }
+        
+        // Parse services - fix null issue  
+        $services = [];
+        if (!empty($quote['selected_services'])) {
+            $services = json_decode($quote['selected_services'], true) ?: [];
+        }
         
         // Calculate distance using AI (O3 workhorse) with timeout protection
         require_once __DIR__ . '/ai-distance-calculator.php';
@@ -68,10 +76,10 @@ function sendAdminNotification($quote_id) {
             if (!empty($quote['phone'])) $match_types[] = 'phone';
             if (!empty($quote['name'])) $match_types[] = 'name';
             if (!empty($quote['address'])) $match_types[] = 'address';
-            $duplicate_match_info = implode('/or ', $match_types);
+            $duplicate_match_info = implode(' or ', $match_types);
         }
         
-        $html_body = generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km);
+        $html_body = generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km, $duplicate_match_info);
         
         // Send email using proper iCloud SMTP (not basic mail function)
         $attachments = [];
@@ -99,7 +107,7 @@ function sendAdminNotification($quote_id) {
     }
 }
 
-function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km) {
+function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km, $duplicate_match_info) {
     $services_text = implode(', ', array_map('ucfirst', $services));
     $has_media = !empty($files);
     
