@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Tree Service Quote - Carpe Tree'em</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2D5A27, #4a7c59);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .quote-id {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .customer-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2D5A27;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item h4 {
+            color: #2D5A27;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .services-section {
+            margin-bottom: 2rem;
+        }
+
+        .service-item {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .service-item:hover {
+            border-color: #2D5A27;
+            box-shadow: 0 4px 16px rgba(45, 90, 39, 0.1);
+        }
+
+        .service-item.selected {
+            border-color: #2D5A27;
+            background: #f8fff8;
+        }
+
+        .service-item.optional {
+            border-style: dashed;
+            opacity: 0.8;
+        }
+
+        .service-item.optional.selected {
+            opacity: 1;
+            background: #fff8e1;
+            border-color: #ff9800;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .service-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2D5A27;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .service-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .service-checkbox {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .optional-badge {
+            background: #ff9800;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            background: #333;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -120px;
+            width: 240px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .totals-section {
+            background: linear-gradient(135deg, #2D5A27, #4a7c59);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .total-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .final-total {
+            border-top: 2px solid rgba(255,255,255,0.3);
+            padding-top: 1rem;
+            margin-top: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .disclaimers {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .disclaimers h3 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .disclaimers ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .disclaimers li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .disclaimers li:before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #2D5A27;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .analytics-section {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 12px;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .totals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" x-data="customerQuote()">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌳 Your Tree Service Quote</h1>
+            <p class="subtitle">Carpe Tree'em - Serving communities on unceded Sinixt əmxʷúlaʔx territory</p>
+            <div class="quote-id" x-text="`Quote #${quote.id}`"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Customer Information -->
+            <div class="customer-info">
+                <h3 style="margin-bottom: 1rem;">📋 Quote Details</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h4>Customer</h4>
+                        <p x-text="quote.customer_name"></p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Location</h4>
+                        <p x-text="quote.address"></p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Distance</h4>
+                        <p x-text="`${quote.distance_km} km from Nelson`"></p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Analysis Method</h4>
+                        <p x-text="quote.analysis_method"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div class="services-section">
+                <h3 style="margin-bottom: 1rem;">🛠️ Recommended Services</h3>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    Below are the services I recommend based on your request. 
+                    <strong>Optional services</strong> are suggestions you can add or remove by checking the boxes.
+                </p>
+
+                <template x-for="(service, index) in quote.services" :key="index">
+                    <div class="service-item" 
+                         :class="{ 'selected': service.selected, 'optional': service.optional }"
+                         @click="toggleService(index)">
+                        
+                        <template x-if="service.optional">
+                            <div class="optional-badge">Optional</div>
+                        </template>
+                        
+                        <input type="checkbox" 
+                               class="service-checkbox"
+                               x-model="service.selected"
+                               @click.stop
+                               @change="updateTotals(); trackSelection(service)">
+                        
+                        <div class="service-name">
+                            <span x-text="service.name"></span>
+                            <template x-if="service.explanation">
+                                <span class="tooltip">
+                                    <span style="color: #2D5A27; margin-left: 0.5rem;">ℹ️</span>
+                                    <span class="tooltip-text" x-text="service.explanation"></span>
+                                </span>
+                            </template>
+                        </div>
+                        
+                        <div class="service-description" x-text="service.description"></div>
+                        
+                        <template x-if="service.prescription">
+                            <div style="font-size: 0.9rem; color: #2D5A27; margin-bottom: 0.5rem;">
+                                📋 <span x-text="service.prescription"></span>
+                            </div>
+                        </template>
+                        
+                        <div class="service-price" x-text="`$${service.price.toFixed(2)}`"></div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Totals Section -->
+            <div class="totals-section">
+                <h3 style="margin-bottom: 1rem; text-align: center;">💰 Quote Summary</h3>
+                
+                <div class="totals-grid">
+                    <div class="total-item">
+                        <span>Services Subtotal:</span>
+                        <span x-text="`$${quote.subtotal.toFixed(2)}`"></span>
+                    </div>
+                    <div class="total-item">
+                        <span>Travel Cost:</span>
+                        <span x-text="`$${quote.travel_cost.toFixed(2)}`"></span>
+                    </div>
+                    <template x-if="quote.discount > 0">
+                        <div class="total-item">
+                            <span>Discount:</span>
+                            <span x-text="`-$${quote.discount.toFixed(2)}`"></span>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="final-total">
+                    <div>Total Estimate: <span x-text="`$${quote.total.toFixed(2)}`"></span></div>
+                </div>
+            </div>
+
+            <!-- Important Disclaimers -->
+            <div class="disclaimers">
+                <h3>📹 Important Information</h3>
+                <ul>
+                    <li>This quote is based on analysis of provided photos/videos</li>
+                    <li>Not all tree conditions are visible from the ground or in media</li>
+                    <li>Final pricing may change if hidden conditions are discovered</li>
+                    <li>I will communicate any price changes before beginning work when possible</li>
+                    <li>Trees can have hidden defects that only become apparent during work</li>
+                    <li>This quote is valid for 30 days</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" @click="requestChanges()">📝 Request Changes</button>
+                <button class="btn btn-primary" @click="acceptQuote()">✅ Accept Quote</button>
+            </div>
+
+            <!-- Analytics Note -->
+            <div class="analytics-section">
+                <p>Your service selections help me improve future recommendations for other customers.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        function customerQuote() {
+            return {
+                quote: {
+                    id: 0,
+                    customer_name: '',
+                    address: '',
+                    distance_km: 0,
+                    analysis_method: '',
+                    services: [],
+                    subtotal: 0,
+                    travel_cost: 0,
+                    discount: 0,
+                    total: 0
+                },
+                
+                async init() {
+                    await this.loadQuote();
+                    this.updateTotals();
+                },
+
+                async loadQuote() {
+                    try {
+                        // Get quote ID from URL parameter
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const quoteId = urlParams.get('id');
+                        
+                        if (!quoteId) {
+                            alert('No quote ID provided');
+                            return;
+                        }
+
+                        const response = await fetch(`/server/api/customer-quote.php?id=${quoteId}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.quote = data.quote;
+                        } else {
+                            alert('Error loading quote: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error loading quote:', error);
+                        alert('Error loading quote');
+                    }
+                },
+
+                toggleService(index) {
+                    this.quote.services[index].selected = !this.quote.services[index].selected;
+                    this.updateTotals();
+                    this.trackSelection(this.quote.services[index]);
+                },
+
+                updateTotals() {
+                    this.quote.subtotal = this.quote.services
+                        .filter(service => service.selected)
+                        .reduce((total, service) => total + service.price, 0);
+                    
+                    this.quote.total = this.quote.subtotal + this.quote.travel_cost - this.quote.discount;
+                },
+
+                async trackSelection(service) {
+                    try {
+                        await fetch('/server/api/track-selection.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                quote_id: this.quote.id,
+                                service_name: service.name,
+                                action: service.selected ? 'added' : 'removed',
+                                is_optional: service.optional
+                            })
+                        });
+                    } catch (error) {
+                        console.error('Error tracking selection:', error);
+                    }
+                },
+
+                async acceptQuote() {
+                    if (confirm('Accept this quote and proceed with scheduling?')) {
+                        try {
+                            const response = await fetch('/server/api/accept-quote.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    quote_id: this.quote.id,
+                                    selected_services: this.quote.services.filter(s => s.selected),
+                                    final_total: this.quote.total
+                                })
+                            });
+                            
+                            const result = await response.json();
+                            if (result.success) {
+                                alert('Quote accepted! I will contact you soon to schedule the work.');
+                                window.location.href = '/thank-you.html';
+                            } else {
+                                alert('Error accepting quote: ' + result.error);
+                            }
+                        } catch (error) {
+                            console.error('Error accepting quote:', error);
+                            alert('Error accepting quote');
+                        }
+                    }
+                },
+
+                async requestChanges() {
+                    const changes = prompt('What changes would you like to request?');
+                    if (changes) {
+                        try {
+                            const response = await fetch('/server/api/request-changes.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    quote_id: this.quote.id,
+                                    requested_changes: changes,
+                                    current_selections: this.quote.services.filter(s => s.selected)
+                                })
+                            });
+                            
+                            const result = await response.json();
+                            if (result.success) {
+                                alert('Change request sent! I will review and get back to you.');
+                            } else {
+                                alert('Error sending request: ' + result.error);
+                            }
+                        } catch (error) {
+                            console.error('Error requesting changes:', error);
+                            alert('Error sending request');
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

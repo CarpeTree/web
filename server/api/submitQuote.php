@@ -172,6 +172,15 @@ try {
         $message = 'Quote submitted successfully. We will contact you to schedule an in-person assessment.';
     }
 
+    // Send admin notification email with attachments
+    try {
+        require_once __DIR__ . '/admin-notification.php';
+        $admin_notification_sent = sendAdminNotification($quote_id);
+        error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
+    } catch (Exception $e) {
+        error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
+    }
+
     // Return success response
     echo json_encode([
         'success' => true,

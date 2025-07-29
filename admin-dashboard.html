@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Review Dashboard - Carpe Tree'em</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2D5A27, #4a7c59);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .quote-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .quote-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .quote-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #2D5A27;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .distance-calculator {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .distance-result {
+            font-weight: 600;
+            color: #2D5A27;
+            margin-top: 0.5rem;
+        }
+
+        .media-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .media-item {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .ai-assessment {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .ai-badge {
+            background: #6c5ce7;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-section {
+            padding: 1.5rem;
+        }
+
+        .line-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 100px 80px;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: white;
+        }
+
+        .line-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #2D5A27;
+        }
+
+        .service-details {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .price-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .price-range {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .add-item-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .totals-section {
+            background: #2D5A27;
+            color: white;
+            padding: 1.5rem;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .total-item {
+            text-align: center;
+        }
+
+        .total-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .discount-section {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .discount-input {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #2D5A27;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-review {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status-ready {
+            background: #28a745;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .line-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌳 Quote Review Dashboard</h1>
+        <p>Carpe Tree'em - Serving communities on unceded Sinixt əmxʷúlaʔx territory</p>
+    </div>
+
+    <div class="container" x-data="quoteDashboard()">
+        <!-- Quote Loading -->
+        <template x-if="loading">
+            <div style="text-align: center; padding: 3rem;">
+                <h3>Loading quotes...</h3>
+            </div>
+        </template>
+
+        <!-- Quotes List -->
+        <template x-for="quote in quotes" :key="quote.id">
+            <div class="quote-card">
+                <!-- Quote Header -->
+                <div class="quote-header">
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                        <h2 x-text="`Quote #${quote.id}`"></h2>
+                        <span class="status-badge status-review" x-text="quote.status"></span>
+                    </div>
+                    
+                    <div class="quote-info">
+                        <div class="info-item">
+                            <span class="info-label">Customer</span>
+                            <span class="info-value" x-text="quote.customer_name"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" x-text="quote.customer_email"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value" x-text="quote.phone"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value" x-text="quote.address"></span>
+                        </div>
+                    </div>
+
+                    <!-- Distance Calculator -->
+                    <div class="distance-calculator">
+                        <div class="info-label">🚗 Travel Distance & Cost</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: #666;">Distance (km)</label>
+                                <div class="distance-result" x-text="`${quote.distance_km} km`"></div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: #666;">Vehicle Type</label>
+                                <select x-model="quote.vehicle_type" @change="updateTravelCost(quote)" style="width: 100%; padding: 0.25rem;">
+                                    <option value="truck">🚛 Truck ($1.00/km + time)</option>
+                                    <option value="car">🚗 Car ($0.35/km + time)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: #666;">Travel Cost</label>
+                                <div class="distance-result" x-text="`$${quote.travel_cost.toFixed(2)}`"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Section -->
+                <div class="media-section">
+                    <h3>📹 Uploaded Media</h3>
+                    <div class="media-grid">
+                        <template x-for="file in quote.files" :key="file.id">
+                            <div class="media-item">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;" x-text="file.filename"></div>
+                                <div style="font-size: 0.8rem; color: #666;" x-text="file.type"></div>
+                                <a :href="file.download_url" target="_blank" style="color: #2D5A27; text-decoration: none; font-size: 0.8rem;">
+                                    📥 Download
+                                </a>
+                            </div>
+                        </template>
+                        <template x-if="quote.files.length === 0">
+                            <div class="media-item">
+                                <div style="color: #666;">No media files uploaded</div>
+                                <div style="font-size: 0.8rem; color: #999;">In-person assessment recommended</div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- AI Assessment -->
+                <div class="ai-assessment">
+                    <div class="ai-badge">🤖 AI Analysis</div>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; white-space: pre-line;" x-text="quote.ai_summary"></div>
+                </div>
+
+                <!-- Pricing Section -->
+                <div class="pricing-section">
+                    <h3 style="margin-bottom: 1rem;">💰 Line Items & Pricing</h3>
+                    
+                    <!-- Existing Line Items -->
+                    <template x-for="(item, index) in quote.line_items" :key="index">
+                        <div class="line-item">
+                            <div>
+                                <div class="service-name" x-text="item.service_name"></div>
+                                <div class="service-details" x-text="item.description"></div>
+                                <template x-if="item.prescription">
+                                    <div style="font-size: 0.8rem; color: #2D5A27; margin-top: 0.25rem;">
+                                        📋 <span x-text="item.prescription"></span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="price-range" x-text="`$${item.min_price} - $${item.max_price}`"></div>
+                            <div>
+                                <input type="number" 
+                                       class="price-input" 
+                                       x-model="item.price" 
+                                       @input="updateTotals(quote)"
+                                       :placeholder="`$${item.suggested_price}`">
+                            </div>
+                            <div style="text-align: center;">
+                                <input type="checkbox" x-model="item.included" @change="updateTotals(quote)">
+                                <label style="font-size: 0.8rem; margin-left: 0.25rem;">Include</label>
+                            </div>
+                            <button class="remove-btn" @click="removeLineItem(quote, index)">Remove</button>
+                        </div>
+                    </template>
+
+                    <!-- Add New Line Item -->
+                    <button class="add-item-btn" @click="addLineItem(quote)">+ Add Custom Item</button>
+
+                    <!-- Discount Section -->
+                    <div class="discount-section">
+                        <h4 style="margin-bottom: 1rem;">🎯 Optional Discount</h4>
+                        <div class="discount-input">
+                            <input type="text" 
+                                   x-model="quote.discount_name" 
+                                   placeholder="Discount name (e.g., Senior, Repeat Customer)"
+                                   style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <input type="number" 
+                                   x-model="quote.discount_amount" 
+                                   @input="updateTotals(quote)"
+                                   placeholder="Amount"
+                                   style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <select x-model="quote.discount_type" @change="updateTotals(quote)" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="dollar">$ Dollar Amount</option>
+                                <option value="percent">% Percentage</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Totals Section -->
+                <div class="totals-section">
+                    <div class="totals-grid">
+                        <div class="total-item">
+                            <div class="total-label">Subtotal</div>
+                            <div class="total-value" x-text="`$${quote.subtotal.toFixed(2)}`"></div>
+                        </div>
+                        <div class="total-item">
+                            <div class="total-label">Travel</div>
+                            <div class="total-value" x-text="`$${quote.travel_cost.toFixed(2)}`"></div>
+                        </div>
+                        <div class="total-item" x-show="quote.discount_amount > 0">
+                            <div class="total-label">Discount</div>
+                            <div class="total-value" x-text="`-$${quote.discount_value.toFixed(2)}`"></div>
+                        </div>
+                        <div class="total-item">
+                            <div class="total-label">TOTAL</div>
+                            <div class="total-value" x-text="`$${quote.final_total.toFixed(2)}`"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" @click="saveQuote(quote)">💾 Save Changes</button>
+                    <button class="btn btn-primary" @click="sendToCustomer(quote)">📧 Send to Customer</button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        function quoteDashboard() {
+            return {
+                quotes: [],
+                loading: true,
+
+                async init() {
+                    await this.loadQuotes();
+                },
+
+                async loadQuotes() {
+                    try {
+                        const response = await fetch('/server/api/admin-quotes.php');
+                        const data = await response.json();
+                        this.quotes = data.quotes || [];
+                        this.loading = false;
+                    } catch (error) {
+                        console.error('Error loading quotes:', error);
+                        this.loading = false;
+                    }
+                },
+
+                updateTravelCost(quote) {
+                    const rate = quote.vehicle_type === 'truck' ? 1.00 : 0.35;
+                    quote.travel_cost = quote.distance_km * rate;
+                    this.updateTotals(quote);
+                },
+
+                updateTotals(quote) {
+                    // Calculate subtotal from included line items
+                    quote.subtotal = quote.line_items
+                        .filter(item => item.included)
+                        .reduce((total, item) => total + (parseFloat(item.price) || 0), 0);
+
+                    // Calculate discount
+                    if (quote.discount_amount > 0) {
+                        quote.discount_value = quote.discount_type === 'percent' 
+                            ? (quote.subtotal * quote.discount_amount / 100)
+                            : quote.discount_amount;
+                    } else {
+                        quote.discount_value = 0;
+                    }
+
+                    // Calculate final total
+                    quote.final_total = quote.subtotal + quote.travel_cost - quote.discount_value;
+                },
+
+                addLineItem(quote) {
+                    quote.line_items.push({
+                        service_name: 'Custom Service',
+                        description: 'Custom line item',
+                        price: 0,
+                        min_price: 0,
+                        max_price: 1000,
+                        suggested_price: 100,
+                        included: true,
+                        prescription: ''
+                    });
+                },
+
+                removeLineItem(quote, index) {
+                    quote.line_items.splice(index, 1);
+                    this.updateTotals(quote);
+                },
+
+                async saveQuote(quote) {
+                    try {
+                        const response = await fetch('/server/api/save-quote.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(quote)
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('Quote saved successfully!');
+                        }
+                    } catch (error) {
+                        console.error('Error saving quote:', error);
+                        alert('Error saving quote');
+                    }
+                },
+
+                async sendToCustomer(quote) {
+                    if (confirm('Send this quote to the customer?')) {
+                        try {
+                            const response = await fetch('/server/api/send-customer-quote.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(quote)
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                alert('Quote sent to customer successfully!');
+                                quote.status = 'sent_to_customer';
+                            }
+                        } catch (error) {
+                            console.error('Error sending quote:', error);
+                            alert('Error sending quote');
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

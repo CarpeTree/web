@@ -53,7 +53,7 @@
                 Dear {{customer_name}},
             </div>
             
-            <p>Thank you for choosing Carpe Tree'em for your tree care needs! We've completed the analysis of your request and are pleased to provide your personalized quote.</p>
+            <p>Thank you for choosing Carpe Tree'em! I'm based in the Kootenays on unceded Sinixt əmxʷúlaʔx territory and travel with my equipment to serve communities in need. I've completed analysis of your request and am pleased to provide your personalized quote.</p>
             
             <!-- Quote Summary -->
             <div class="quote-summary">
@@ -93,17 +93,22 @@
             </div>
             {{/has_recommendations}}
             
-            <!-- Next Steps -->
+            <!-- Important Disclaimers -->
             <div class="next-steps">
-                <h4>🚀 Next Steps</h4>
-                {{#requires_assessment}}
-                <p>📋 <strong>In-Person Assessment:</strong> This preliminary estimate is based on the information provided. We recommend scheduling a site visit for a detailed assessment and final quote.</p>
-                {{/requires_assessment}}
-                {{^requires_assessment}}
-                <p>✅ <strong>Ready to Proceed:</strong> Based on our analysis, we can move forward with scheduling your tree services.</p>
-                {{/requires_assessment}}
-                <p>🗓️ <strong>Scheduling:</strong> Once approved, we can typically begin work within 1-2 weeks depending on weather and our schedule.</p>
-                <p>📞 <strong>Questions?</strong> Don't hesitate to reach out with any questions or concerns.</p>
+                <h4>📹 Video Quote Limitations</h4>
+                {{#has_files}}
+                <p><strong>Media Analysis Completed:</strong> This quote is based on the photos/videos provided. However, please note:</p>
+                {{/has_files}}
+                {{^has_files}}
+                <p><strong>Text-Only Analysis:</strong> This preliminary quote is based on your description. Please note:</p>
+                {{/has_files}}
+                <ul style="margin: 10px 0 10px 20px;">
+                    <li>🔍 <strong>Visibility Limitations:</strong> Not all tree conditions are visible from the ground or in media</li>
+                    <li>⚠️ <strong>Price Changes:</strong> If I discover conditions not visible in photos/videos, the price may change</li>
+                    <li>💬 <strong>Communication:</strong> I will communicate any price changes before beginning work when possible</li>
+                    <li>🌳 <strong>Tree Nature:</strong> Trees can have hidden defects that only become apparent during work</li>
+                </ul>
+                <p><strong>At this point, I will come to your property to complete the work.</strong> This quote represents my best assessment based on available information.</p>
             </div>
         </div>
         
@@ -119,9 +124,10 @@
         <div class="footer">
             <p><strong>Carpe Tree'em - Professional Tree Care Services</strong></p>
             <p>📞 778-655-3741 | 📧 sapport@carpetree.com</p>
-            <p>Serving the Greater Vancouver Area with expert tree care since 2020</p>
+            <p>Based in the Kootenays on unceded Sinixt əmxʷúlaʔx territory</p>
+            <p>Serving communities throughout the region with professional tree care</p>
             <br>
-            <p>This quote is valid for 30 days. Prices may vary based on site conditions discovered during in-person assessment.</p>
+            <p>This quote is valid for 30 days. Final pricing confirmed on-site before work begins.</p>
         </div>
     </div>
 </body>
