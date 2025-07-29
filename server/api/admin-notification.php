@@ -1,5 +1,8 @@
 <?php
-header('Content-Type: application/json');
+// Only set header if called directly
+if (basename($_SERVER['SCRIPT_NAME']) === 'admin-notification.php') {
+    header('Content-Type: application/json');
+}
 require_once __DIR__ . '/../config/database-simple.php';
 require_once __DIR__ . '/../config/config.php';
 
@@ -396,7 +399,7 @@ function calculateDistanceFromNelson($address) {
 }
 
 // If called directly, send notification for a specific quote
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (basename($_SERVER['SCRIPT_NAME']) === 'admin-notification.php' && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $quote_id = $input['quote_id'] ?? $_GET['quote_id'] ?? null;
     
