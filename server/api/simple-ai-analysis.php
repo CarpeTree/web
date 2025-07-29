@@ -105,12 +105,12 @@ try {
         ]
     ];
 
-    // TEMPORARY: Using gpt-4o until o3 access is verified (will switch back to o3 when available)
+    // ChatGPT o3 - Your proven tree care specialist with minimal editing required
     $openai_request = [
-        'model' => 'gpt-4o',
+        'model' => 'o3',
         'messages' => $messages,
         'temperature' => 0.2,
-        'max_tokens' => 1500
+        'max_completion_tokens' => 2000  // o3 uses max_completion_tokens for longer, detailed analysis
     ];
 
     $curl = curl_init();
@@ -143,7 +143,7 @@ try {
     $ai_analysis = $ai_result['choices'][0]['message']['content'];
 
     // Format the analysis  
-    $analysis_summary = "🤖 Professional Tree Analysis (Temporary GPT-4o until o3 verification)\n\n";
+    $analysis_summary = "🤖 ChatGPT o3 Professional Tree Analysis Complete\n\n";
     $analysis_summary .= "📁 Media analyzed: " . implode(', ', $media_summary) . "\n\n";
     $analysis_summary .= "🔍 AI Analysis:\n" . $ai_analysis;
 
