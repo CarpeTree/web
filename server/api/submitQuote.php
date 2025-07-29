@@ -1,12 +1,18 @@
 <?php
 // Quick fix version - admin notifications made async
 header('Content-Type: application/json');
+file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Script started\n", FILE_APPEND);
 require_once __DIR__ . '/../config/database-simple.php';
+file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Database loaded\n", FILE_APPEND);
+$pdo_id = spl_object_hash($pdo);
+file_put_contents('debug.log', date('Y-m-d H:i:s') . " - PDO object ID: $pdo_id\n", FILE_APPEND);
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../utils/fileHandler.php';
 require_once __DIR__ . '/../utils/mailer.php';
+file_put_contents('debug.log', date('Y-m-d H:i:s') . " - All includes loaded\n", FILE_APPEND);
 
 try {
+    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Inside try block\n", FILE_APPEND);
     // Validate required fields
     if (empty($_POST['email'])) {
         throw new Exception('Email is required');
@@ -28,7 +34,9 @@ try {
     }
     
     // Start database transaction
+    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to start transaction. PDO ID: " . spl_object_hash($pdo) . "\n", FILE_APPEND);
     $pdo->beginTransaction();
+    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Transaction started. inTransaction(): " . ($pdo->inTransaction() ? 'true' : 'false') . "\n", FILE_APPEND);
     
     // Enhanced location and IP tracking
     $ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
@@ -50,41 +58,16 @@ try {
     // Log comprehensive submission data
     $location_info = '';
     if ($geo_latitude && $geo_longitude) {
-        $accuracy_text = $geo_accuracy ? " (±${geo_accuracy}m)" : '';
+        $accuracy_text = $geo_accuracy ? " (±{$geo_accuracy}m)" : '';
         $location_info = " | GPS: $geo_latitude,$geo_longitude$accuracy_text";
     }
     error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . $location_info);
     
-    // Insert customer with enhanced location data
-    $stmt = $pdo->prepare("
-        INSERT INTO customers (
-            name, email, phone, address, referral_source, referrer_name, newsletter_opt_in, 
-            ip_address, user_agent, geo_latitude, geo_longitude, geo_accuracy, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    
-    $stmt->execute([
-        $_POST['name'] ?? '',
-        $_POST['email'],
-        $_POST['phone'] ?? null,
-        $_POST['address'] ?? null,
-        $_POST['referral_source'] ?? null,
-        $_POST['referrer_name'] ?? null,
-        isset($_POST['newsletter_opt_in']) ? 1 : 0,
-        $ip_address,
-        $user_agent,
-        $geo_latitude ? (float)$geo_latitude : null,
-        $geo_longitude ? (float)$geo_longitude : null,
-        $geo_accuracy ? (float)$geo_accuracy : null,
-        $timestamp
-    ]);
-    
-    $customer_id = $pdo->lastInsertId();
-    
-    // Enhanced duplicate customer detection by email, phone, name, AND address
+    // Enhanced duplicate customer detection by email, phone, name, AND address (check FIRST)
     $customer = null;
     $is_duplicate = false;
     $duplicate_match_type = '';
+    $customer_id = null;
     
     // First check by email
     $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
@@ -92,6 +75,7 @@ try {
     $customer = $stmt->fetch();
     if ($customer) {
         $duplicate_match_type = 'email';
+        $customer_id = $customer['id'];
     }
     
     // If not found by email, check by phone (if provided)
@@ -105,6 +89,7 @@ try {
         $customer = $stmt->fetch();
         if ($customer) {
             $duplicate_match_type = 'phone';
+            $customer_id = $customer['id'];
         }
     }
     
@@ -118,11 +103,12 @@ try {
         $stmt->execute([$_POST['name'], $_POST['address']]);
         $customer = $stmt->fetch();
         if ($customer) {
-            $duplicate_match_type = 'name_and_address';
+            $duplicate_match_type = 'name+address';
+            $customer_id = $customer['id'];
         }
     }
     
-    // If still not found, check by address only (same property, different person?)
+    // If not found by exact match, check by address only (broader match)
     if (!$customer && !empty($_POST['address'])) {
         $stmt = $pdo->prepare("
             SELECT * FROM customers 
@@ -132,12 +118,11 @@ try {
         $customer = $stmt->fetch();
         if ($customer) {
             $duplicate_match_type = 'address';
+            $customer_id = $customer['id'];
         }
     }
     
     if ($customer) {
-        $customer_id = $customer['id'];
-        
         // Check if this is a returning customer (has previous quotes)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM quotes WHERE customer_id = ?");
         $stmt->execute([$customer_id]);
@@ -171,16 +156,24 @@ try {
     } else {
         // Create new customer
         $stmt = $pdo->prepare("
-            INSERT INTO customers (email, name, phone, address, referral_source, referrer_name) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO customers (
+                email, name, phone, address, referral_source, referrer_name, newsletter_opt_in,
+                ip_address, user_agent, geo_latitude, geo_longitude, geo_accuracy, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $_POST['email'],
             $_POST['name'] ?? '',
-            $_POST['phone'] ?? '',
-            $_POST['address'] ?? '',
+            $_POST['phone'] ?? null,
+            $_POST['address'] ?? null,
             $_POST['howDidYouHear'] ?? null,
-            $_POST['referrerName'] ?? null
+            $_POST['referrerName'] ?? null,
+            isset($_POST['newsletter_opt_in']) ? 1 : 0,
+            $ip_address,
+            $user_agent,
+            $geo_latitude ? (float)$geo_latitude : null,
+            $geo_longitude ? (float)$geo_longitude : null,
+            $geo_accuracy ? (float)$geo_accuracy : null
         ]);
         $customer_id = $pdo->lastInsertId();
         $is_duplicate = false;
@@ -280,6 +273,12 @@ try {
         $stmt->execute([$quote_id]);
     }
     
+    // Update status for AI processing if files were uploaded (before commit)
+    if (!empty($uploaded_files)) {
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+        $stmt->execute([$quote_id]);
+    }
+    
     // Ensure compatibility view for legacy code (uploaded_files)
     try {
         $pdo->exec("CREATE OR REPLACE VIEW uploaded_files AS 
@@ -301,6 +300,8 @@ try {
     }
     
     // Commit transaction FIRST
+    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to commit. PDO ID: " . spl_object_hash($pdo) . "\n", FILE_APPEND);
+    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to commit transaction. inTransaction(): " . ($pdo->inTransaction() ? 'true' : 'false') . "\n", FILE_APPEND);
     $pdo->commit();
     
     // Send immediate confirmation email (quick)
@@ -359,10 +360,6 @@ try {
     // Trigger AI processing for quotes with media files (asynchronous)
     if (!empty($uploaded_files)) {
         try {
-            // Update status to indicate AI processing has started
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-            
             // Trigger context assessment first
             require_once __DIR__ . '/../utils/context-assessor.php';
             $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
@@ -402,12 +399,19 @@ try {
     
 } catch (Exception $e) {
     // Rollback transaction on error
+    error_log("Exception caught in submitQuote.php: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
     if ($pdo->inTransaction()) {
+        error_log("Rolling back active transaction");
         $pdo->rollback();
+    } else {
+        error_log("No active transaction to rollback");
     }
     
     http_response_code(400);
     echo json_encode([
-        'error' => $e->getMessage()
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
     ]);
 } 
