@@ -41,9 +41,14 @@ function sendAdminNotification($quote_id) {
         $ai_response = json_decode($quote['ai_response_json'], true);
         $services = json_decode($quote['selected_services'], true) ?: [];
         
-        // Calculate distance using AI (O3 workhorse)
+        // Calculate distance using AI (O3 workhorse) with timeout protection
         require_once __DIR__ . '/ai-distance-calculator.php';
-        $distance_km = calculateDistanceWithAI($quote['address']);
+        try {
+            $distance_km = calculateDistanceWithAI($quote['address']);
+        } catch (Exception $e) {
+            error_log("Distance calculation failed in admin notification: " . $e->getMessage());
+            $distance_km = 40; // Fallback distance
+        }
         
         // Check if media files exist
         $has_media = !empty($files);
