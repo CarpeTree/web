@@ -475,6 +475,11 @@
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
+                    <a :href="`/customer-crm-dashboard.html?customer_id=${quote.customer_id}&email=${encodeURIComponent(quote.customer_email)}`" 
+                       class="btn btn-secondary" 
+                       style="text-decoration: none; display: inline-block;">
+                        👤 Edit Customer
+                    </a>
                     <button class="btn btn-secondary" @click="saveQuote(quote)">💾 Save Changes</button>
                     <button class="btn btn-primary" @click="sendToCustomer(quote)">📧 Send to Customer</button>
                 </div>

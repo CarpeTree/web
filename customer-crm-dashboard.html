@@ -331,19 +331,37 @@
                     <div class="customer-info">
                         <div class="info-item">
                             <span class="info-label">Name</span>
-                            <span class="info-value" x-text="customer.name || 'No name provided'"></span>
+                            <template x-if="!customer.editing">
+                                <span class="info-value" x-text="customer.name || 'No name provided'"></span>
+                            </template>
+                            <template x-if="customer.editing">
+                                <input type="text" x-model="customer.name" 
+                                       style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 300px;">
+                            </template>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Email</span>
-                            <span class="info-value">
-                                <a :href="`mailto:${customer.email}`" x-text="customer.email"></a>
-                            </span>
+                            <template x-if="!customer.editing">
+                                <span class="info-value">
+                                    <a :href="`mailto:${customer.email}`" x-text="customer.email"></a>
+                                </span>
+                            </template>
+                            <template x-if="customer.editing">
+                                <input type="email" x-model="customer.email" 
+                                       style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 300px;">
+                            </template>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Phone</span>
-                            <span class="info-value">
-                                <a :href="`tel:${customer.phone}`" x-text="customer.phone || 'No phone provided'"></a>
-                            </span>
+                            <template x-if="!customer.editing">
+                                <span class="info-value">
+                                    <a :href="`tel:${customer.phone}`" x-text="customer.phone || 'No phone provided'"></a>
+                                </span>
+                            </template>
+                            <template x-if="customer.editing">
+                                <input type="tel" x-model="customer.phone" 
+                                       style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 300px;">
+                            </template>
                         </div>
                         <div class="info-item">
                             <span class="info-label">First Contact</span>
@@ -355,8 +373,29 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Last Address</span>
-                            <span class="info-value" x-text="customer.address || 'No address provided'"></span>
+                            <template x-if="!customer.editing">
+                                <span class="info-value" x-text="customer.address || 'No address provided'"></span>
+                            </template>
+                            <template x-if="customer.editing">
+                                <textarea x-model="customer.address" rows="2"
+                                         style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 400px; resize: vertical;"></textarea>
+                            </template>
                         </div>
+                    </div>
+
+                    <!-- Edit Customer Button -->
+                    <div style="margin: 1rem 0;">
+                        <button class="btn btn-secondary" 
+                                @click="customer.editing = !customer.editing"
+                                x-text="customer.editing ? '❌ Cancel Edit' : '✏️ Edit Customer Info'">
+                        </button>
+                        <template x-if="customer.editing">
+                            <button class="btn btn-primary" 
+                                    @click="saveCustomer(customer)"
+                                    style="margin-left: 0.5rem;">
+                                💾 Save Changes
+                            </button>
+                        </template>
                     </div>
 
                     <!-- Duplicate Customer Alert -->
@@ -526,6 +565,33 @@
                         return services.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ') || 'No services specified';
                     } catch (e) {
                         return 'No services specified';
+                    }
+                },
+
+                async saveCustomer(customer) {
+                    try {
+                        const response = await fetch('/server/api/update-customer.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id: customer.id,
+                                name: customer.name,
+                                email: customer.email,
+                                phone: customer.phone,
+                                address: customer.address
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            customer.editing = false;
+                            alert('✅ Customer information updated successfully!');
+                        } else {
+                            alert('❌ Error updating customer: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error saving customer:', error);
+                        alert('❌ Error saving customer information');
                     }
                 },
 
