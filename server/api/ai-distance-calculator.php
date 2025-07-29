@@ -59,8 +59,14 @@ Consider:
         return fallbackDistanceEstimate($customer_address);
     }
 
-    // Parse AI response
+    // Parse AI response (handle markdown code blocks)
     $ai_content = $result['choices'][0]['message']['content'];
+    
+    // Remove markdown code blocks if present
+    $ai_content = preg_replace('/```json\s*/', '', $ai_content);
+    $ai_content = preg_replace('/```\s*$/', '', $ai_content);
+    $ai_content = trim($ai_content);
+    
     $ai_data = json_decode($ai_content, true);
     
     if (isset($ai_data['distance_km']) && is_numeric($ai_data['distance_km'])) {
