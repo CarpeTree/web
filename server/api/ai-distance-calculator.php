@@ -39,7 +39,7 @@ Consider:
             'Authorization: Bearer ' . $OPENAI_API_KEY,
             'Content-Type: application/json'
         ],
-        CURLOPT_TIMEOUT => 30
+        CURLOPT_TIMEOUT => 5
     ]);
 
     $response = curl_exec($curl);
