@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quote Confirmation - Carpe Tree'em</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #2D5A27; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+        .button { background: #2D5A27; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Carpe Tree'em</h1>
+            <h2>Quote Received!</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{customer_name}},</p>
+            
+            <p>Thank you for submitting your tree service quote request! We've received your submission and will get back to you soon.</p>
+            
+            <h3>Quote Details:</h3>
+            <ul>
+                <li><strong>Quote ID:</strong> #{{quote_id}}</li>
+                <li><strong>Services Requested:</strong> {{services}}</li>
+                <li><strong>Files Uploaded:</strong> {{files_count}} file(s)</li>
+            </ul>
+            
+            {{#has_files}}
+            <p>🎯 <strong>Good news!</strong> Your photos/videos will help us provide a more accurate estimate. Our AI analysis will begin shortly, and we'll send you a detailed quote within 24 hours.</p>
+            {{/has_files}}
+            
+            {{^has_files}}
+            <p>📞 <strong>Next Steps:</strong> Since no photos were uploaded, we'll contact you to schedule an in-person assessment. This ensures we can provide the most accurate quote for your specific needs.</p>
+            {{/has_files}}
+            
+            <h3>What happens next?</h3>
+            <ol>
+                <li>We analyze your request and any uploaded media</li>
+                <li>Our certified arborists prepare a detailed quote</li>
+                <li>You receive your personalized estimate via email</li>
+                <li>We schedule your service at your convenience</li>
+            </ol>
+            
+            <p>Questions? Contact us:</p>
+            <ul>
+                <li>📞 Phone: <strong>{company_phone}</strong></li>
+                <li>📧 Email: <strong>{company_email}</strong></li>
+            </ul>
+            
+            <p>Thank you for choosing Carpe Tree'em!</p>
+            
+            <p>Best regards,<br>
+            The Carpe Tree'em Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>Carpe Tree'em - Professional Tree Care Services<br>
+            Phone: {company_phone} | Email: {company_email}</p>
+        </div>
+    </div>
+</body>
+</html> 

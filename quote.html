@@ -638,8 +638,8 @@
         },
 
         canProceedStep1() {
-          // Temporarily allow proceeding without files for testing
-          return true; // Original: this.uploadedFiles.length > 0;
+          // Allow proceeding with or without files
+          return true; // Files are now optional
         },
 
         toggleService(serviceId) {
@@ -697,7 +697,7 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-                      const response = await fetch('/server/api/submitQuote-no-files.php', {
+                      const response = await fetch('/server/api/submitQuote.php', {
             method: 'POST',
             body: formData
           });
