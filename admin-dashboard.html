@@ -344,6 +344,30 @@
                         </div>
                     </div>
 
+                    <!-- AI Analysis Controls -->
+                    <template x-if="quote.files && quote.files.length > 0">
+                        <div class="ai-controls" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin: 0 0 0.5rem 0; color: #495057;">🤖 AI Analysis Controls</h4>
+                            <div style="margin-bottom: 0.5rem;">
+                                <label for="ai-context" style="display: block; font-weight: bold; margin-bottom: 0.25rem;">Additional Context for AI:</label>
+                                <textarea 
+                                    x-model="quote.ai_context" 
+                                    placeholder="Add specific instructions for AI analysis (e.g., 'Focus on the oak tree in the center', 'Customer is concerned about power lines', 'Budget is limited to $2000')"
+                                    style="width: 100%; height: 60px; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; resize: vertical;"
+                                ></textarea>
+                            </div>
+                            <button 
+                                @click="regenerateAIAnalysis(quote)" 
+                                :disabled="quote.ai_regenerating"
+                                style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                                :style="quote.ai_regenerating ? 'background: #6c757d; cursor: not-allowed;' : ''"
+                            >
+                                <span x-show="!quote.ai_regenerating">🔄 Regenerate AI Analysis</span>
+                                <span x-show="quote.ai_regenerating">⏳ Analyzing...</span>
+                            </button>
+                        </div>
+                    </template>
+
                     <!-- Distance Calculator -->
                     <div class="distance-calculator">
                         <div class="info-label">🚗 Travel Distance & Cost</div>
@@ -619,6 +643,35 @@
                             console.error('Error sending quote:', error);
                             alert('Error sending quote');
                         }
+                    }
+                },
+
+                async regenerateAIAnalysis(quote) {
+                    quote.ai_regenerating = true;
+                    try {
+                        const response = await fetch('/server/api/regenerate-ai-analysis.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ quote_id: quote.id, context: quote.ai_context || '' })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            // Update the AI summary
+                            quote.ai_summary = result.analysis;
+                            
+                            // Reload the entire quotes list to get updated line items
+                            await this.loadQuotes();
+                            
+                            quote.ai_regenerating = false;
+                            alert('✅ AI analysis regenerated successfully! Line items have been updated based on the new analysis.');
+                        } else {
+                            quote.ai_regenerating = false;
+                            alert('❌ Failed to regenerate AI analysis: ' + (result.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error regenerating AI analysis:', error);
+                        quote.ai_regenerating = false;
+                        alert('❌ Error regenerating AI analysis: ' + error.message);
                     }
                 }
             }
