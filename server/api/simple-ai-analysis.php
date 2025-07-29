@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0); // Don't show errors in production
 
 try {
-    $quote_id = $_GET['quote_id'] ?? null;
+    $quote_id = $_POST['quote_id'] ?? $_GET['quote_id'] ?? null;
     if (!$quote_id) {
         throw new Exception("Quote ID required");
     }
@@ -107,10 +107,10 @@ try {
 
     // ChatGPT o3 - Your proven tree care specialist with minimal editing required
     $openai_request = [
-        'model' => 'o3',
+        'model' => 'gpt-4o',
         'messages' => $messages,
         'temperature' => 0.2,
-        'max_completion_tokens' => 2000  // o3 uses max_completion_tokens for longer, detailed analysis
+        'max_tokens' => 2000  // gpt-4o uses max_tokens
     ];
 
     $curl = curl_init();
@@ -128,10 +128,12 @@ try {
 
     $response = curl_exec($curl);
     $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    $curl_error = curl_error($curl);
     curl_close($curl);
 
     if ($http_code !== 200) {
-        throw new Exception("OpenAI API error: HTTP $http_code");
+        error_log("OpenAI API error: HTTP $http_code, Response: $response, Curl error: $curl_error");
+        throw new Exception("OpenAI API error: HTTP $http_code - $response");
     }
 
     $ai_result = json_decode($response, true);

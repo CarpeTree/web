@@ -372,7 +372,7 @@ try {
             $ai_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
                      '://' . $_SERVER['HTTP_HOST'] . '/server/api/simple-ai-analysis.php';
             
-            $post_data = http_build_query(['quote_id' => $quote_id]);
+            $post_data = http_build_query(['quote_id' => $quote_id, 'triggered_by' => 'submitQuote']);
             
             $context = stream_context_create([
                 'http' => [

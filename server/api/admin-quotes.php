@@ -21,8 +21,8 @@ try {
     // Get quotes with customer information
     $stmt = $pdo->prepare("
         SELECT 
-            q.id, q.customer_id, q.service_type, q.property_details, q.urgency, 
-            q.budget_range, q.quote_status, q.created_at, q.ai_response_json,
+            q.id, q.customer_id, q.quote_status, q.selected_services, q.notes,
+            q.ai_response_json, q.created_at,
             c.name as customer_name, c.email as customer_email, c.phone as customer_phone, 
             c.address, c.referral_source, c.referrer_name,
             c.geo_latitude, c.geo_longitude, c.geo_accuracy, c.ip_address,
@@ -63,14 +63,24 @@ try {
         }
 
         // Get EXIF location data for this quote
-        $exif_stmt = $pdo->prepare("SELECT exif_latitude, exif_longitude, exif_timestamp, camera_make, camera_model, media_id FROM media_locations WHERE quote_id = ?");
-        $exif_stmt->execute([$quote['id']]);
-        $exif_locations = $exif_stmt->fetchAll(PDO::FETCH_ASSOC);
+        $exif_locations = [];
+        try {
+            $exif_stmt = $pdo->prepare("SELECT exif_latitude, exif_longitude, exif_timestamp, camera_make, camera_model, media_id FROM media_locations WHERE quote_id = ?");
+            $exif_stmt->execute([$quote['id']]);
+            $exif_locations = $exif_stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // Media locations table doesn't exist yet, skip it
+        }
         
         // Get context assessment for this quote
-        $assessment_stmt = $pdo->prepare("SELECT * FROM context_assessments WHERE quote_id = ? ORDER BY assessed_at DESC LIMIT 1");
-        $assessment_stmt->execute([$quote['id']]);
-        $assessment = $assessment_stmt->fetch(PDO::FETCH_ASSOC);
+        $assessment = null;
+        try {
+            $assessment_stmt = $pdo->prepare("SELECT * FROM context_assessments WHERE quote_id = ? ORDER BY assessed_at DESC LIMIT 1");
+            $assessment_stmt->execute([$quote['id']]);
+            $assessment = $assessment_stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // Context assessments table doesn't exist yet, skip it
+        }
         
         $formatted_assessment = null;
         if ($assessment) {
