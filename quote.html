@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Get Your Video Quote - Carpe Tree'em</title>
+  <title>Get Your Tree Service Quote - Carpe Tree'em</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
@@ -230,26 +230,32 @@
       @media (max-width: 768px) {
         .menu-toggle {
           display: flex;
+          position: relative;
+          z-index: 1001;
         }
         
         .nav-container {
-          flex-direction: column;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
           position: relative;
         }
         
         .nav-links {
           display: none;
           flex-direction: column;
-          width: 100%;
+          width: 100vw;
           background: var(--background-color);
           border: 2px solid var(--deep-forest-green);
-          border-radius: 4px;
+          border-radius: 8px;
           padding: 20px 0;
-          margin-top: 10px;
-          position: absolute;
-          top: 60px;
+          margin: 0;
+          position: fixed;
+          top: 80px;
           left: 0;
+          right: 0;
           z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
         .nav-links.active {
@@ -257,15 +263,27 @@
         }
         
         .nav-links a {
-          padding: 15px 20px;
+          padding: 18px 20px;
           border: none;
           text-align: center;
           width: 100%;
           border-bottom: 1px solid var(--deep-forest-green);
+          font-size: 1.1rem;
+          font-weight: 600;
         }
         
         .nav-links a:last-child {
           border-bottom: none;
+        }
+        
+        .nav-links a:hover {
+          background: var(--muted-golden-amber);
+          color: var(--deep-forest-green);
+        }
+        
+        /* Prevent body scroll when menu is open */
+        body.menu-open {
+          overflow: hidden;
         }
         
         .quote-wizard {
@@ -293,14 +311,18 @@
   <!-- Navigation -->
   <nav>
     <div class="nav-container">
-      <button class="menu-toggle" aria-label="Toggle navigation menu">
+      <button class="menu-toggle" 
+              aria-label="Toggle navigation menu" 
+              aria-expanded="false" 
+              aria-controls="nav-links"
+              type="button">
         <span></span>
         <span></span>
         <span></span>
       </button>
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links">
         <a href="index.html">Home</a>
-                    <a href="quote.html">Get Video Quote</a>
+                    <a href="quote.html">Get Quote</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="services.html">Services</a>
         <a href="root-knowledge.html">Root Knowledge</a>
@@ -432,7 +454,7 @@
         <div style="text-align: center; margin-top: 30px;">
           <button type="button" class="btn" @click="prevStep()">Back</button>
           <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
-                            <span x-show="!submitting">Submit Video Quote Request</span>
+                            <span x-show="!submitting">Submit Quote Request</span>
             <span x-show="submitting">Submitting...</span>
           </button>
         </div>
@@ -441,13 +463,13 @@
 
     <!-- Success Message -->
     <div class="step-content" x-show="submitted" x-transition>
-                <h2>🌳 Video Quote Request Submitted!</h2>
+                <h2>🌳 Quote Request Submitted!</h2>
       <p>Thank you! We've received your tree photos and information. Our AI is analyzing your media now.</p>
       <p><strong>What happens next:</strong></p>
       <ul>
         <li>AI analysis of your photos/videos (immediate)</li>
         <li>Professional review and quote preparation (within 24 hours)</li>
-                  <li>Detailed video quote emailed to you with specific recommendations</li>
+                  <li>Detailed quote emailed to you with specific recommendations</li>
         <li>Optional follow-up call to discuss any questions</li>
       </ul>
       <p>Questions? Call us at <a href="tel:7786553741" style="color: var(--deep-forest-green); font-weight: bold;">778-655-3741</a></p>
@@ -462,34 +484,83 @@
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
       
-      if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-          this.classList.toggle('active');
-          navLinks.classList.toggle('active');
-          document.body.classList.toggle('menu-open');
-        });
-      }
+      console.log('Menu elements found:', { menuToggle: !!menuToggle, navLinks: !!navLinks });
       
-      // Close menu when a link is clicked
-      const navItems = document.querySelectorAll('.nav-links a');
-      navItems.forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            navLinks.classList.remove('active');
-            menuToggle.classList.remove('active');
-            document.body.classList.remove('menu-open');
+      if (menuToggle && navLinks) {
+        
+        // Toggle menu on hamburger click
+        menuToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Menu toggle clicked');
+          
+          const isActive = navLinks.classList.contains('active');
+          
+          if (isActive) {
+            closeMenu();
+          } else {
+            openMenu();
           }
         });
-      });
-      
-      // Close menu when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+        
+        // Touch event for mobile
+        menuToggle.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Menu toggle touched');
+          
+          const isActive = navLinks.classList.contains('active');
+          
+          if (isActive) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+        
+        // Close menu when a link is clicked
+        const navItems = document.querySelectorAll('.nav-links a');
+        navItems.forEach(item => {
+          item.addEventListener('click', function() {
+            closeMenu();
+          });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (navLinks.classList.contains('active') && 
+              !navLinks.contains(e.target) && 
+              !menuToggle.contains(e.target)) {
+            closeMenu();
+          }
+        });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            closeMenu();
+          }
+        });
+        
+        function openMenu() {
+          console.log('Opening menu');
+          navLinks.classList.add('active');
+          menuToggle.classList.add('active');
+          document.body.classList.add('menu-open');
+          menuToggle.setAttribute('aria-expanded', 'true');
+        }
+        
+        function closeMenu() {
+          console.log('Closing menu');
           navLinks.classList.remove('active');
           menuToggle.classList.remove('active');
           document.body.classList.remove('menu-open');
+          menuToggle.setAttribute('aria-expanded', 'false');
         }
-      });
+        
+      } else {
+        console.error('Menu elements not found:', { menuToggle, navLinks });
+      }
     });
   </script>
   
