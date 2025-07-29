@@ -105,12 +105,12 @@ try {
         ]
     ];
 
-    // Call OpenAI ChatGPT o3-mini - tree care specialist (fallback until o3 verification)
+    // TEMPORARY: Using gpt-4o until o3 access is verified (will switch back to o3 when available)
     $openai_request = [
-        'model' => 'o3-mini',
+        'model' => 'gpt-4o',
         'messages' => $messages,
         'temperature' => 0.2,
-        'max_completion_tokens' => 1500  // o3 models use max_completion_tokens, not max_tokens
+        'max_tokens' => 1500
     ];
 
     $curl = curl_init();
@@ -143,7 +143,7 @@ try {
     $ai_analysis = $ai_result['choices'][0]['message']['content'];
 
     // Format the analysis  
-    $analysis_summary = "🤖 ChatGPT o3 Tree Analysis Complete\n\n";
+    $analysis_summary = "🤖 Professional Tree Analysis (Temporary GPT-4o until o3 verification)\n\n";
     $analysis_summary .= "📁 Media analyzed: " . implode(', ', $media_summary) . "\n\n";
     $analysis_summary .= "🔍 AI Analysis:\n" . $ai_analysis;
 
