@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Your Tree Service Quote - Carpe Tree'em</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    .quote-wizard {
+      max-width: 800px;
+      margin: 120px auto 40px;
+      padding: 0 20px;
+    }
+    
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    
+    .step {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 10px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    .step.active {
+      background: var(--deep-forest-green);
+      color: var(--background-color);
+    }
+    
+    .step.completed {
+      background: var(--muted-golden-amber);
+      color: var(--deep-forest-green);
+    }
+    
+    .step.inactive {
+      background: #e0e0e0;
+      color: #888;
+    }
+    
+    .step-content {
+      background: var(--background-color);
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 20px;
+      min-height: 400px;
+    }
+    
+    /* Upload Progress Styles */
+    .upload-progress-container {
+      position: sticky;
+      top: 20px;
+      background: white;
+      border: 2px solid var(--deep-forest-green);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+    
+    .upload-progress-item {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid var(--deep-forest-green);
+    }
+    
+    .upload-file-name {
+      font-weight: 600;
+      color: var(--deep-forest-green);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .upload-file-size {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--deep-forest-green), var(--muted-golden-amber));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    .progress-text {
+      font-size: 0.8rem;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+    }
+    
+    .upload-status {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .status-uploading {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-queued {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+    
+    .overall-progress {
+      margin-top: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 8px;
+    }
+    
+    .overall-progress h4 {
+      margin: 0 0 10px 0;
+      color: var(--deep-forest-green);
+    }
+    
+    .file-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .file-preview-item {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #ddd;
+    }
+    
+    .file-preview-item img,
+    .file-preview-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .file-preview-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .file-preview-item:hover .file-preview-overlay {
+      opacity: 1;
+    }
+    
+    .remove-file {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .quote-wizard {
+        margin-top: 150px;
+        padding: 0 15px;
+      }
+      
+      .step-content {
+        padding: 20px;
+      }
+      
+      .upload-progress-container {
+        position: relative;
+        margin: 10px 0;
+        padding: 15px;
+      }
+      
+      .file-preview-item {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Contact Header -->
+  <div class="contact-header">
+    <a href="tel:7786553741">778-655-3741</a> |
+    <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <button class="menu-toggle" 
+              aria-label="Toggle navigation menu" 
+              aria-expanded="false" 
+              aria-controls="nav-links"
+              type="button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="quote.html">Get Quote</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="services.html">Services</a>
+        <a href="root-knowledge.html">Root Knowledge</a>
+        <a href="lets-talk.html">Let's Talk Trees</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="quote-wizard" x-data="quoteWizardWithProgress()">
+    <h1 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 30px;">
+      🌳 Get Your Tree Service Quote
+    </h1>
+    
+    <!-- Upload Progress Display -->
+    <div x-show="uploadProgress.visible" class="upload-progress-container">
+      <h3>📤 Upload Progress</h3>
+      
+      <!-- Individual File Progress -->
+      <template x-for="file in uploadProgress.files" :key="file.id">
+        <div class="upload-progress-item">
+          <div class="upload-file-name">
+            <span x-text="file.name"></span>
+            <span class="upload-status" :class="'status-' + file.status" x-text="file.statusText"></span>
+          </div>
+          <div class="upload-file-size" x-text="file.sizeText"></div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="'width: ' + file.progress + '%'"></div>
+          </div>
+          <div class="progress-text">
+            <span x-text="file.progress + '%'"></span>
+            <span x-text="file.speedText"></span>
+          </div>
+        </div>
+      </template>
+      
+      <!-- Overall Progress -->
+      <div class="overall-progress" x-show="uploadProgress.files.length > 1">
+        <h4>Overall Progress</h4>
+        <div class="progress-bar">
+          <div class="progress-fill" :style="'width: ' + uploadProgress.overall + '%'"></div>
+        </div>
+        <div class="progress-text">
+          <span x-text="uploadProgress.overall + '% Complete'"></span>
+          <span x-text="uploadProgress.eta"></span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step" :class="getStepClass(1)">1</div>
+      <div class="step" :class="getStepClass(2)">2</div>
+      <div class="step" :class="getStepClass(3)">3</div>
+    </div>
+
+    <!-- Step 1: Service Selection -->
+    <div class="step-content" x-show="currentStep === 1" x-transition>
+      <h2>Step 1: What tree services do you need?</h2>
+      <p>Select all services that apply to your property:</p>
+      
+      <div class="service-grid">
+        <template x-for="service in services">
+          <label class="service-option">
+            <input type="checkbox" :value="service.id" x-model="selectedServices">
+            <div class="service-card">
+              <div class="service-icon" x-text="service.icon"></div>
+              <h3 x-text="service.name"></h3>
+              <p x-text="service.description"></p>
+            </div>
+          </label>
+        </template>
+      </div>
+      
+      <div class="navigation-buttons">
+        <button type="button" class="btn btn-primary" @click="nextStep()" :disabled="selectedServices.length === 0">
+          Next: Upload Photos/Videos
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Media Upload with Real-time Progress -->
+    <div class="step-content" x-show="currentStep === 2" x-transition>
+      <h2>Step 2: Upload Photos & Videos</h2>
+      <p>Upload videos and photos of your trees for a detailed quote within 24 hours.</p>
+      
+      <div class="upload-zone" @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
+        <input type="file" id="fileInput" multiple accept="image/*,video/*" @change="handleFileSelect" style="display: none;">
+        <label for="fileInput" class="upload-button">
+          📷 Choose Photos & Videos
+        </label>
+        <p>Or drag and drop files here</p>
+        <p class="upload-note">Supports: JPG, PNG, MP4, MOV (max 100MB each)</p>
+      </div>
+      
+      <!-- File Previews -->
+      <div x-show="uploadedFiles.length > 0" class="file-preview">
+        <template x-for="(file, index) in uploadedFiles" :key="index">
+          <div class="file-preview-item">
+            <img x-show="file.type.startsWith('image/')" :src="file.preview" :alt="file.name">
+            <video x-show="file.type.startsWith('video/')" :src="file.preview" controls muted></video>
+            <div class="file-preview-overlay">
+              <div>
+                <div x-text="file.name"></div>
+                <div x-text="(file.size / 1024 / 1024).toFixed(1) + ' MB'"></div>
+              </div>
+            </div>
+            <button class="remove-file" @click="removeFile(index)" type="button">×</button>
+          </div>
+        </template>
+      </div>
+      
+      <div class="navigation-buttons">
+        <button type="button" class="btn" @click="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" @click="startUploadAndProceed()">
+          <span x-show="!uploadProgress.visible">Next: Contact Information</span>
+          <span x-show="uploadProgress.visible">Uploading...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Contact Information -->
+    <div class="step-content" x-show="currentStep === 3" x-transition>
+      <h2>Step 3: Contact Information</h2>
+      <p>Upload videos and photos of your trees for a detailed quote within 24 hours.</p>
+      
+      <form @submit.prevent="submitQuote()">
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" x-model="formData.email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" x-model="formData.name">
+        </div>
+        
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" x-model="formData.phone">
+        </div>
+        
+        <div class="form-group">
+          <label for="address">Property Address</label>
+          <textarea id="address" x-model="formData.address" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="referralSource">How did you hear about us?</label>
+          <select id="referralSource" x-model="formData.referralSource">
+            <option value="">Select an option</option>
+            <option value="google">Google Search</option>
+            <option value="referral">Friend/Family Referral</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="nextdoor">Nextdoor</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group" x-show="formData.referralSource === 'referral'">
+          <label for="referrerName">Referrer Name</label>
+          <input type="text" id="referrerName" x-model="formData.referrerName">
+        </div>
+        
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" x-model="formData.newsletterOptIn">
+            Subscribe to our tree care newsletter
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <label for="notes">Additional Notes</label>
+          <textarea id="notes" x-model="formData.notes" rows="4" placeholder="Describe your tree care needs, any specific concerns, or questions you have..."></textarea>
+        </div>
+        
+        <div class="navigation-buttons">
+          <button type="button" class="btn" @click="prevStep()">Back</button>
+          <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
+            <span x-show="!submitting">Submit Quote Request</span>
+            <span x-show="submitting">Submitting...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Success Message -->
+    <div class="step-content" x-show="submitted" x-transition>
+      <h2>🌳 Quote Request Submitted!</h2>
+      <p>Thank you! We've received your tree photos and information. Our AI is analyzing your media now.</p>
+      <p><strong>What happens next:</strong></p>
+      <ul>
+        <li>AI analysis of your photos/videos (immediate)</li>
+        <li>Professional review and quote preparation (within 24 hours)</li>
+        <li>Detailed quote emailed to you with specific recommendations</li>
+        <li>Optional follow-up call to discuss any questions</li>
+      </ul>
+      <p>Questions? Call us at <a href="tel:7786553741" style="color: var(--deep-forest-green); font-weight: bold;">778-655-3741</a></p>
+    </div>
+  </div>
+
+  <!-- Mobile Menu JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (menuToggle && navLinks) {
+        
+        // Toggle menu on hamburger click
+        menuToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const isActive = navLinks.classList.contains('active');
+          
+          if (isActive) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+        
+        // Touch event for mobile
+        menuToggle.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const isActive = navLinks.classList.contains('active');
+          
+          if (isActive) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+        
+        // Close menu when a link is clicked
+        const navItems = document.querySelectorAll('.nav-links a');
+        navItems.forEach(item => {
+          item.addEventListener('click', function() {
+            closeMenu();
+          });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (navLinks.classList.contains('active') && 
+              !navLinks.contains(e.target) && 
+              !menuToggle.contains(e.target)) {
+            closeMenu();
+          }
+        });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            closeMenu();
+          }
+        });
+        
+        function openMenu() {
+          navLinks.classList.add('active');
+          menuToggle.classList.add('active');
+          document.body.classList.add('menu-open');
+          menuToggle.setAttribute('aria-expanded', 'true');
+        }
+        
+        function closeMenu() {
+          navLinks.classList.remove('active');
+          menuToggle.classList.remove('active');
+          document.body.classList.remove('menu-open');
+          menuToggle.setAttribute('aria-expanded', 'false');
+        }
+        
+      }
+    });
+  </script>
+  
+  <script>
+    function quoteWizardWithProgress() {
+      return {
+        currentStep: 1,
+        submitting: false,
+        submitted: false,
+        uploadedFiles: [],
+        uploadProgress: {
+          visible: false,
+          files: [],
+          overall: 0,
+          eta: ''
+        },
+        
+        services: [
+          { id: 'removal', name: 'Tree Removal', icon: '🪓', description: 'Safe removal of trees' },
+          { id: 'pruning', name: 'Tree Pruning', icon: '✂️', description: 'Professional trimming and shaping' },
+          { id: 'assessment', name: 'Tree Assessment', icon: '🔍', description: 'Health and risk evaluation' },
+          { id: 'cabling', name: 'Tree Cabling', icon: '🔗', description: 'Support for weak branches' },
+          { id: 'planting', name: 'Tree Planting', icon: '🌱', description: 'New tree installation' },
+          { id: 'wildfire_risk', name: 'Wildfire Risk Management', icon: '🔥', description: 'Fire prevention services' },
+          { id: 'sprinkler_system', name: 'Sprinkler System', icon: '💧', description: 'Irrigation installation' },
+          { id: 'emergency', name: 'Emergency Services', icon: '🚨', description: '24/7 emergency tree care' }
+        ],
+        
+        selectedServices: [],
+        
+        formData: {
+          email: '',
+          name: '',
+          phone: '',
+          address: '',
+          referralSource: '',
+          referrerName: '',
+          newsletterOptIn: false,
+          notes: ''
+        },
+
+        handleFileSelect(event) {
+          this.processFiles(event.target.files);
+        },
+
+        handleDrop(event) {
+          this.processFiles(event.dataTransfer.files);
+        },
+
+        processFiles(fileList) {
+          Array.from(fileList).forEach(file => {
+            if (file.size > 100 * 1024 * 1024) {
+              alert(`File ${file.name} is too large. Maximum size is 100MB.`);
+              return;
+            }
+            
+            const fileData = {
+              id: Date.now() + Math.random(),
+              data: file,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              preview: null,
+              uploaded: false
+            };
+            
+            // Create preview
+            if (file.type.startsWith('image/')) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                fileData.preview = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+              fileData.preview = URL.createObjectURL(file);
+            }
+            
+            this.uploadedFiles.push(fileData);
+          });
+        },
+
+        removeFile(index) {
+          const file = this.uploadedFiles[index];
+          if (file.preview && file.type.startsWith('video/')) {
+            URL.revokeObjectURL(file.preview);
+          }
+          this.uploadedFiles.splice(index, 1);
+        },
+
+        async startUploadAndProceed() {
+          if (this.uploadedFiles.length === 0) {
+            this.nextStep();
+            return;
+          }
+          
+          this.uploadProgress.visible = true;
+          this.uploadProgress.files = [];
+          
+          // Prepare upload progress items
+          this.uploadedFiles.forEach(file => {
+            this.uploadProgress.files.push({
+              id: file.id,
+              name: file.name,
+              sizeText: this.formatFileSize(file.size),
+              progress: 0,
+              status: 'queued',
+              statusText: 'Queued',
+              speedText: ''
+            });
+          });
+          
+          try {
+            // Upload files one by one to avoid overwhelming mobile connections
+            for (let i = 0; i < this.uploadedFiles.length; i++) {
+              await this.uploadSingleFile(i);
+            }
+            
+            // All files uploaded successfully
+            this.updateOverallProgress();
+            setTimeout(() => {
+              this.nextStep();
+            }, 1000);
+            
+          } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Upload failed: ' + error.message);
+            this.uploadProgress.visible = false;
+          }
+        },
+
+        async uploadSingleFile(fileIndex) {
+          const file = this.uploadedFiles[fileIndex];
+          const progressItem = this.uploadProgress.files[fileIndex];
+          
+          return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file.data);
+            formData.append('upload_type', 'chunk');
+            formData.append('file_id', file.id);
+            
+            const xhr = new XMLHttpRequest();
+            const startTime = Date.now();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+              if (e.lengthComputable) {
+                const progress = Math.round((e.loaded / e.total) * 100);
+                progressItem.progress = progress;
+                progressItem.status = 'uploading';
+                progressItem.statusText = 'Uploading';
+                
+                // Calculate speed
+                const elapsed = (Date.now() - startTime) / 1000;
+                const speed = e.loaded / elapsed;
+                progressItem.speedText = this.formatSpeed(speed);
+                
+                this.updateOverallProgress();
+              }
+            });
+            
+            xhr.addEventListener('load', () => {
+              if (xhr.status === 200) {
+                progressItem.progress = 100;
+                progressItem.status = 'completed';
+                progressItem.statusText = 'Completed';
+                progressItem.speedText = 'Done';
+                file.uploaded = true;
+                resolve();
+              } else {
+                progressItem.status = 'error';
+                progressItem.statusText = 'Error';
+                reject(new Error(`Upload failed: ${xhr.status}`));
+              }
+            });
+            
+            xhr.addEventListener('error', () => {
+              progressItem.status = 'error';
+              progressItem.statusText = 'Error';
+              reject(new Error('Network error'));
+            });
+            
+            xhr.open('POST', '/server/api/upload-chunk.php');
+            xhr.send(formData);
+          });
+        },
+
+        updateOverallProgress() {
+          const totalFiles = this.uploadProgress.files.length;
+          const completedFiles = this.uploadProgress.files.filter(f => f.status === 'completed').length;
+          const totalProgress = this.uploadProgress.files.reduce((sum, f) => sum + f.progress, 0);
+          
+          this.uploadProgress.overall = Math.round(totalProgress / totalFiles);
+          
+          if (completedFiles === totalFiles) {
+            this.uploadProgress.eta = 'Complete!';
+          } else {
+            const remaining = totalFiles - completedFiles;
+            this.uploadProgress.eta = `${remaining} file(s) remaining`;
+          }
+        },
+
+        formatFileSize(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        formatSpeed(bytesPerSecond) {
+          if (bytesPerSecond === 0) return '0 B/s';
+          const k = 1024;
+          const sizes = ['B/s', 'KB/s', 'MB/s'];
+          const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
+          return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        },
+
+        async submitQuote() {
+          this.submitting = true;
+          
+          try {
+            const formData = new FormData();
+            
+            // Add form data
+            Object.keys(this.formData).forEach(key => {
+              formData.append(key, this.formData[key]);
+            });
+            
+            // Add selected services
+            formData.append('selectedServices', JSON.stringify(this.selectedServices));
+            
+            // Add file IDs (files are already uploaded)
+            const uploadedFileIds = this.uploadedFiles
+              .filter(f => f.uploaded)
+              .map(f => f.id);
+            formData.append('uploadedFileIds', JSON.stringify(uploadedFileIds));
+            
+            const response = await fetch('/server/api/submitQuote-with-progress.php', {
+              method: 'POST',
+              body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+              this.submitted = true;
+              this.currentStep = 4;
+            } else {
+              throw new Error(result.error || 'Submission failed');
+            }
+            
+          } catch (error) {
+            console.error('Submission error:', error);
+            alert('Submission failed: ' + error.message);
+          }
+          
+          this.submitting = false;
+        },
+
+        nextStep() {
+          if (this.currentStep < 3) {
+            this.currentStep++;
+          }
+        },
+
+        prevStep() {
+          if (this.currentStep > 1) {
+            this.currentStep--;
+          }
+        },
+
+        getStepClass(stepNumber) {
+          if (stepNumber < this.currentStep) return 'completed';
+          if (stepNumber === this.currentStep) return 'active';
+          return 'inactive';
+        }
+      }
+    }
+  </script>
+</body>
+</html> 
