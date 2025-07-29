@@ -13,7 +13,7 @@ try {
             c.address
         FROM quotes q
         JOIN customers c ON q.customer_id = c.id
-        WHERE q.quote_status IN ('draft_ready', 'ai_processing', 'admin_review')
+        WHERE q.quote_status IN ('submitted', 'draft_ready', 'ai_processing', 'admin_review')
         ORDER BY q.quote_created_at DESC
     ");
     $stmt->execute();
