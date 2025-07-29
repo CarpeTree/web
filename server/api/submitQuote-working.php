@@ -149,7 +149,7 @@ try {
         $customer_id,
         json_encode($selected_services),
         $_POST['notes'] ?? '',
-        'submitted'
+        'pending_files' // Will update to ai_processing or submitted based on file uploads
     ]);
     
     $quote_id = $pdo->lastInsertId();
@@ -193,6 +193,21 @@ try {
                 }
             }
         }
+    }
+    
+    // Update quote status based on file uploads and trigger AI processing
+    if ($file_count > 0) {
+        // Files uploaded - set for AI processing
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+        $stmt->execute([$quote_id]);
+        
+        error_log("Quote $quote_id: $file_count files uploaded, triggering AI analysis");
+    } else {
+        // No files - just submitted
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
+        $stmt->execute([$quote_id]);
+        
+        error_log("Quote $quote_id: No files uploaded, status set to submitted");
     }
     
     // Commit transaction
@@ -265,6 +280,31 @@ try {
     } catch (Error $e) {
         ob_end_clean(); // Clean up on fatal error
         error_log("Fatal error in admin notification for quote $quote_id: " . $e->getMessage());
+    }
+    
+    // Trigger AI processing for quotes with media (asynchronous)
+    if ($file_count > 0) {
+        try {
+            // Trigger AI analysis in background
+            $ai_url = 'https://carpetree.com/server/api/aiQuote.php?quote_id=' . $quote_id;
+            
+            // Use cURL to trigger AI processing asynchronously
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $ai_url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 1, // Very short timeout - fire and forget
+                CURLOPT_CONNECTTIMEOUT => 1,
+                CURLOPT_NOSIGNAL => 1
+            ]);
+            
+            $result = curl_exec($curl);
+            curl_close($curl);
+            
+            error_log("Triggered AI processing for quote $quote_id with $file_count files");
+        } catch (Exception $e) {
+            error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
+        }
     }
     
 } catch (Exception $e) {

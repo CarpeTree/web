@@ -58,36 +58,56 @@ try {
         throw new Exception("OpenAI API key not configured");
     }
 
-    // Build media content for OpenAI analysis
+    // Build media content for ChatGPT-4o analysis  
     $media_content = [];
     $has_media = false;
+    $media_summary = [];
     
     foreach ($media_files as $media) {
-        // Construct proper file path
-        $file_path = __DIR__ . '/../../uploads/' . $quote_id . '/' . $media['filename'];
+        // Construct proper file path (check multiple possible locations)
+        $possible_paths = [
+            __DIR__ . '/../../uploads/' . $quote_id . '/' . $media['filename'],
+            __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $media['filename'],
+            $media['file_path'] ?? ''
+        ];
         
-        if (file_exists($file_path)) {
-            $file_type = $media['file_type'] ?? $media['type'] ?? '';
+        $file_path = null;
+        foreach ($possible_paths as $path) {
+            if (!empty($path) && file_exists($path)) {
+                $file_path = $path;
+                break;
+            }
+        }
+        
+        if ($file_path) {
+            $file_type = $media['mime_type'] ?? $media['file_type'] ?? $media['type'] ?? '';
+            $filename = $media['filename'] ?? $media['original_filename'] ?? 'unknown';
             
-            // Handle images
+            // Handle images - full AI analysis with ChatGPT-4o vision
             if (strpos($file_type, 'image/') === 0) {
                 $image_data = base64_encode(file_get_contents($file_path));
                 $media_content[] = [
                     'type' => 'image_url',
                     'image_url' => [
-                        'url' => "data:$file_type;base64,$image_data"
+                        'url' => "data:$file_type;base64,$image_data",
+                        'detail' => 'high' // High detail for better tree analysis
                     ]
                 ];
+                $media_summary[] = "📷 Photo: $filename";
                 $has_media = true;
             }
-            // Handle videos - describe them for AI
+            // Handle videos - describe for AI context
             elseif (strpos($file_type, 'video/') === 0) {
+                $file_size = isset($media['file_size']) ? round($media['file_size'] / (1024*1024), 1) : 'unknown';
                 $media_content[] = [
                     'type' => 'text',
-                    'text' => "Video file uploaded: {$media['filename']} ({$file_type}). Please note that video analysis requires manual review."
+                    'text' => "🎬 Video uploaded: $filename ($file_type, {$file_size}MB). Video shows tree condition and site context. Please recommend in-person assessment for video content analysis."
                 ];
+                $media_summary[] = "🎬 Video: $filename ({$file_size}MB)";
                 $has_media = true;
             }
+        } else {
+            error_log("Media file not found for quote $quote_id: " . json_encode($media));
         }
     }
 
