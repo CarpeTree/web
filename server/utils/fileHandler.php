@@ -48,24 +48,21 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         throw new Exception('Failed to save uploaded file');
     }
     
-    // Insert into media table
+    // Insert into uploaded_files table
     $stmt = $pdo->prepare("
-        INSERT INTO media (
-            quote_id, filename, original_filename, file_type, 
-            mime_type, file_size, upload_path
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO uploaded_files (
+            quote_id, filename, original_filename, file_path,
+            file_size, mime_type, uploaded_at
+        ) VALUES (?, ?, ?, ?, ?, ?, NOW())
     ");
-    
-    $file_type = getFileTypeCategory($file['type']);
     
     $stmt->execute([
         $quote_id,
         $unique_filename,
         $file['name'],
-        $file_type,
-        $file['type'],
+        $file_path,
         $file['size'],
-        $file_path
+        $file['type']
     ]);
     
     return [
