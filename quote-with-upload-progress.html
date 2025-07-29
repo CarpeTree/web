@@ -771,7 +771,17 @@
               .map(f => f.id);
             formData.append('uploadedFileIds', JSON.stringify(uploadedFileIds));
             
-            const response = await fetch('/server/api/submitQuote-with-progress.php', {
+            // Debug logging
+            console.log('=== SUBMISSION DEBUG ===');
+            console.log('Selected services:', this.selectedServices);
+            console.log('Uploaded files:', this.uploadedFiles);
+            console.log('Uploaded file IDs:', uploadedFileIds);
+            console.log('Form data entries:');
+            for (let [key, value] of formData.entries()) {
+              console.log(`${key}:`, value);
+            }
+            
+            const response = await fetch('/server/api/submitQuote-with-progress-debug.php', {
               method: 'POST',
               body: formData
             });
