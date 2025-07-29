@@ -768,7 +768,7 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-                      const response = await fetch('/server/api/debug-form-data.php', {
+                      const response = await fetch('/server/api/submitQuote.php', {
             method: 'POST',
             body: formData
           });

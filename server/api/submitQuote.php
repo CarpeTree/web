@@ -264,11 +264,18 @@ try {
     
     // Now send simple admin notification without blocking user
     try {
+        // Use output buffering to catch any unexpected output
+        ob_start();
         require_once __DIR__ . '/admin-notification.php';
         $admin_notification_sent = sendAdminNotification($quote_id);
-        error_log("Simple admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
+        ob_end_clean(); // Discard any output
+        error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
     } catch (Exception $e) {
+        ob_end_clean(); // Clean up on error
         error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
+    } catch (Error $e) {
+        ob_end_clean(); // Clean up on fatal error
+        error_log("Fatal error in admin notification for quote $quote_id: " . $e->getMessage());
     }
     
     // Trigger quick AI assessment for all quotes (instant)
