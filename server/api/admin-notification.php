@@ -41,8 +41,9 @@ function sendAdminNotification($quote_id) {
         $ai_response = json_decode($quote['ai_response_json'], true);
         $services = json_decode($quote['selected_services'], true) ?: [];
         
-        // Calculate distance from Nelson
-        $distance_km = calculateDistanceFromNelson($quote['address']);
+        // Calculate distance using AI (O3 workhorse)
+        require_once __DIR__ . '/ai-distance-calculator.php';
+        $distance_km = calculateDistanceWithAI($quote['address']);
         
         // Check if media files exist
         $has_media = !empty($files);

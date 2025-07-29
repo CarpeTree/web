@@ -41,8 +41,9 @@ try {
         $ai_response = json_decode($quote['ai_response_json'], true);
         $services = json_decode($quote['selected_services'], true) ?: [];
 
-        // Calculate distance from Nelson, BC
-        $distance_km = calculateDistance($quote['address']);
+        // Calculate distance using AI (O3 workhorse)
+        require_once __DIR__ . '/ai-distance-calculator.php';
+        $distance_km = calculateDistanceWithAI($quote['address']);
         
         // Generate line items based on services and AI analysis
         $line_items = generateLineItems($services, $ai_response, count($files) > 0);
