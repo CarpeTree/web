@@ -1,10 +1,10 @@
 <?php
 // Quick fix version - admin notifications made async
 header('Content-Type: application/json');
-require_once '../config/database-simple.php';
-require_once '../config/config.php';
-require_once '../utils/fileHandler.php';
-require_once '../utils/mailer.php';
+require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../utils/fileHandler.php';
+require_once __DIR__ . '/../utils/mailer.php';
 
 try {
     // Validate required fields
@@ -76,7 +76,7 @@ try {
         ) VALUES (?, ?, ?, ?, NOW(), 0)
     ");
     
-    $initial_status = $files_uploaded ? 'ai_processing' : 'submitted_no_files';
+    $initial_status = $files_uploaded ? 'ai_processing' : 'submitted';
     
     $stmt->execute([
         $customer_id,
@@ -197,7 +197,16 @@ try {
         error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
     }
     
-    // Trigger AI processing asynchronously if files were uploaded
+    // Trigger quick AI assessment for all quotes (instant)
+    try {
+        require_once __DIR__ . '/quick-ai-assessment.php';
+        $quick_assessment = quickAIAssessment($quote_id);
+        error_log("Quick assessment for quote $quote_id: Category={$quick_assessment['category']}, Score={$quick_assessment['sufficiency_score']}/100");
+    } catch (Exception $e) {
+        error_log("Quick assessment failed for quote $quote_id: " . $e->getMessage());
+    }
+    
+    // Trigger full AI processing asynchronously if files were uploaded
     if (!empty($uploaded_files)) {
         $ai_script = __DIR__ . '/aiQuote.php';
         $command = "cd " . dirname(__DIR__) . " && php api/aiQuote.php $quote_id > /dev/null 2>&1 &";
@@ -214,54 +223,5 @@ try {
     echo json_encode([
         'error' => $e->getMessage()
     ]);
-}
-
-function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
-    // Validate file
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/mov', 'video/avi', 'audio/mpeg', 'audio/wav'];
-    if (!in_array($file['type'], $allowed_types)) {
-        throw new Exception('File type not allowed: ' . $file['type']);
-    }
-    
-    // Check file size (100MB limit)
-    $max_size = 100 * 1024 * 1024;
-    if ($file['size'] > $max_size) {
-        throw new Exception('File too large. Maximum size is 100MB.');
-    }
-    
-    // Generate unique filename
-    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $unique_filename = uniqid() . '_' . time() . '.' . $file_extension;
-    $file_path = $upload_dir . '/' . $unique_filename;
-    
-    // Move uploaded file
-    if (!move_uploaded_file($file['tmp_name'], $file_path)) {
-        throw new Exception('Failed to save uploaded file');
-    }
-    
-    // Insert into uploaded_files table
-    $stmt = $pdo->prepare("
-        INSERT INTO uploaded_files (
-            quote_id, filename, original_filename, file_path,
-            file_size, mime_type, uploaded_at
-        ) VALUES (?, ?, ?, ?, ?, ?, NOW())
-    ");
-    
-    $stmt->execute([
-        $quote_id,
-        $unique_filename,
-        $file['name'],
-        $file_path,
-        $file['size'],
-        $file['type']
-    ]);
-    
-    return [
-        'filename' => $unique_filename,
-        'original_name' => $file['name'],
-        'path' => $file_path,
-        'size' => $file['size'],
-        'type' => $file['type']
-    ];
 }
 ?> 
