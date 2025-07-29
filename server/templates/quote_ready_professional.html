@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Tree Service Quote - Carpe Tree'em</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #2D5A27 0%, #4A7C59 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header .quote-id { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: inline-block; font-size: 14px; font-weight: bold; }
+        .content { padding: 30px; }
+        .greeting { font-size: 18px; margin-bottom: 20px; color: #2D5A27; }
+        .quote-summary { background: #f8f9fa; border-left: 4px solid #2D5A27; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .quote-summary h3 { color: #2D5A27; margin-bottom: 15px; }
+        .cost-breakdown { margin: 20px 0; }
+        .cost-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .cost-item:last-child { border-bottom: none; font-weight: bold; background: #f0f8ff; margin: 10px -10px 0; padding: 15px 10px; }
+        .recommendations { background: #fff8dc; border: 1px solid #ffd700; border-radius: 5px; padding: 20px; margin: 20px 0; }
+        .recommendations h4 { color: #b8860b; margin-bottom: 10px; }
+        .recommendations ul { list-style: none; }
+        .recommendations li { padding: 5px 0; position: relative; padding-left: 20px; }
+        .recommendations li:before { content: "🌟"; position: absolute; left: 0; }
+        .next-steps { background: #e8f5e8; border-radius: 5px; padding: 20px; margin: 20px 0; }
+        .next-steps h4 { color: #2D5A27; margin-bottom: 10px; }
+        .contact-info { background: #2D5A27; color: white; padding: 20px; text-align: center; }
+        .contact-info h4 { margin-bottom: 15px; }
+        .contact-button { background: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; border-radius: 25px; display: inline-block; margin: 10px 5px; font-weight: bold; }
+        .contact-button:hover { background: #45a049; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        .logo { font-size: 24px; font-weight: bold; }
+        @media (max-width: 600px) {
+            .container { margin: 10px; }
+            .content { padding: 20px; }
+            .cost-item { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🌳 Carpe Tree'em</div>
+            <h1>Your Tree Service Quote</h1>
+            <div class="quote-id">Quote #{{quote_id}}</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Dear {{customer_name}},
+            </div>
+            
+            <p>Thank you for choosing Carpe Tree'em for your tree care needs! We've completed the analysis of your request and are pleased to provide your personalized quote.</p>
+            
+            <!-- Quote Summary -->
+            <div class="quote-summary">
+                <h3>📋 Quote Summary</h3>
+                <p><strong>Services Requested:</strong> {{services_list}}</p>
+                <p><strong>Property Location:</strong> {{address}}</p>
+                <p><strong>Analysis Method:</strong> {{analysis_method}}</p>
+                {{#has_files}}
+                <p><strong>Files Analyzed:</strong> {{files_count}} photo(s)/video(s)</p>
+                {{/has_files}}
+            </div>
+            
+            <!-- Cost Breakdown -->
+            <div class="cost-breakdown">
+                <h3>💰 Cost Breakdown</h3>
+                {{#cost_items}}
+                <div class="cost-item">
+                    <span>{{service_name}}</span>
+                    <span>${{cost}}</span>
+                </div>
+                {{/cost_items}}
+                <div class="cost-item">
+                    <span><strong>Total Estimate</strong></span>
+                    <span><strong>${{total_estimate}}</strong></span>
+                </div>
+            </div>
+            
+            {{#has_recommendations}}
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h4>🌟 Our Recommendations</h4>
+                <ul>
+                    {{#recommendations}}
+                    <li>{{description}}</li>
+                    {{/recommendations}}
+                </ul>
+            </div>
+            {{/has_recommendations}}
+            
+            <!-- Next Steps -->
+            <div class="next-steps">
+                <h4>🚀 Next Steps</h4>
+                {{#requires_assessment}}
+                <p>📋 <strong>In-Person Assessment:</strong> This preliminary estimate is based on the information provided. We recommend scheduling a site visit for a detailed assessment and final quote.</p>
+                {{/requires_assessment}}
+                {{^requires_assessment}}
+                <p>✅ <strong>Ready to Proceed:</strong> Based on our analysis, we can move forward with scheduling your tree services.</p>
+                {{/requires_assessment}}
+                <p>🗓️ <strong>Scheduling:</strong> Once approved, we can typically begin work within 1-2 weeks depending on weather and our schedule.</p>
+                <p>📞 <strong>Questions?</strong> Don't hesitate to reach out with any questions or concerns.</p>
+            </div>
+        </div>
+        
+        <!-- Contact Section -->
+        <div class="contact-info">
+            <h4>Ready to Move Forward?</h4>
+            <p>Contact us to schedule your service or ask any questions:</p>
+            <a href="tel:778-655-3741" class="contact-button">📞 Call Now</a>
+            <a href="mailto:sapport@carpetree.com" class="contact-button">📧 Email Us</a>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Carpe Tree'em - Professional Tree Care Services</strong></p>
+            <p>📞 778-655-3741 | 📧 sapport@carpetree.com</p>
+            <p>Serving the Greater Vancouver Area with expert tree care since 2020</p>
+            <br>
+            <p>This quote is valid for 30 days. Prices may vary based on site conditions discovered during in-person assessment.</p>
+        </div>
+    </div>
+</body>
+</html> 
