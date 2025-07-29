@@ -2,7 +2,7 @@
 // AI-Powered Distance Calculator using OpenAI O3
 require_once __DIR__ . '/../config/config.php';
 
-function calculateDistanceWithAI($customer_address) {
+function calculateDistanceWithAI($customer_address, $timeout = 5) {
     global $OPENAI_API_KEY;
     
     // Use OpenAI O3 to calculate accurate distances
@@ -39,7 +39,7 @@ Consider:
             'Authorization: Bearer ' . $OPENAI_API_KEY,
             'Content-Type: application/json'
         ],
-        CURLOPT_TIMEOUT => 5
+        CURLOPT_TIMEOUT => $timeout // Use configurable timeout
     ]);
 
     $response = curl_exec($curl);

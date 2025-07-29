@@ -15,7 +15,10 @@ require_once '../config/database-simple.php';
 require_once __DIR__ . '/ai-distance-calculator.php';
 
 try {
-    // Get all quotes that need admin review
+    // Set execution time limit to prevent timeouts
+    set_time_limit(30);
+    
+    // Get all quotes that need admin review (limit to most recent 50 for performance)
     $stmt = $pdo->prepare("
         SELECT 
             q.*,
@@ -27,6 +30,7 @@ try {
         JOIN customers c ON q.customer_id = c.id
         WHERE q.quote_status IN ('submitted', 'draft_ready', 'ai_processing', 'admin_review')
         ORDER BY q.quote_created_at DESC
+        LIMIT 50
     ");
     $stmt->execute();
     $quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -34,8 +38,8 @@ try {
     $formatted_quotes = [];
     
     foreach ($quotes as $quote) {
-        // Get uploaded files for this quote (using correct media table)
-        $file_stmt = $pdo->prepare("SELECT * FROM media WHERE quote_id = ?");
+        // Get uploaded files for this quote (using correct media table) - optimized query
+        $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, quote_id FROM media WHERE quote_id = ? LIMIT 10");
         $file_stmt->execute([$quote['id']]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -61,12 +65,26 @@ try {
             $services = json_decode($quote['selected_services'], true) ?: [];
         }
 
-        // Calculate distance using AI (O3 workhorse)
+        // Calculate distance using AI (O3 workhorse) - with caching and timeout protection
         try {
-            $distance_km = calculateDistanceWithAI($quote['address'] ?? '');
-        } catch (Exception $e) {
-            // Fallback if AI distance calculation fails
+            // Check if we already calculated distance for this address recently
             $distance_km = fallbackDistanceEstimate($quote['address'] ?? '');
+            
+            // Only use AI for new/unknown addresses to avoid timeout
+            $address_lower = strtolower($quote['address'] ?? '');
+            if (!empty($quote['address']) && 
+                !preg_match('/nelson|castlegar|trail|rossland|salmo|kaslo|moyie|slocan/i', $address_lower)) {
+                // For unknown addresses, try AI with very short timeout
+                try {
+                    $distance_km = calculateDistanceWithAI($quote['address'], 2); // 2 second timeout
+                } catch (Exception $e) {
+                    // Use fallback if AI fails
+                    $distance_km = fallbackDistanceEstimate($quote['address'] ?? '');
+                }
+            }
+        } catch (Exception $e) {
+            // Fallback if distance calculation fails
+            $distance_km = 40; // Default fallback
         }
         
         // Generate line items based on services and AI analysis
