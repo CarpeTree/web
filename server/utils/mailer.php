@@ -27,8 +27,10 @@ function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
         $mail->setFrom($SMTP_FROM ?? 'noreply@carpetree.com', 'Carpe Tree\'em');
         $mail->addAddress($to);
 
-        // Content
+        // Content - ensure proper HTML rendering
         $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
         $mail->Subject = $subject;
         
         // Load and process template
@@ -71,16 +73,21 @@ function loadEmailTemplate($template, $data) {
     
     $html = file_get_contents($template_path);
     
-    // Replace placeholders with data
-    foreach ($data as $key => $value) {
-        // Handle arrays and objects by converting to string
-        if (is_array($value) || is_object($value)) {
-            $value = json_encode($value);
-        } elseif ($value === null) {
-            $value = '';
+            // Replace placeholders with data - no htmlspecialchars for html_content
+        foreach ($data as $key => $value) {
+            if ($key === 'html_content') {
+                // Don't escape HTML content - it's already properly formatted
+                $html = str_replace("{{$key}}", (string)$value, $html);
+            } else {
+                // Handle arrays and objects by converting to string
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                } elseif ($value === null) {
+                    $value = '';
+                }
+                $html = str_replace("{{$key}}", htmlspecialchars((string)$value), $html);
+            }
         }
-        $html = str_replace("{{$key}}", htmlspecialchars((string)$value), $html);
-    }
     
     // Add default values
     $html = str_replace('{company_name}', 'Carpe Tree\'em', $html);
