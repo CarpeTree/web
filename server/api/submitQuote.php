@@ -1,292 +1,219 @@
 <?php
-// Quick fix version - admin notifications made async
+// Simple working quote submission - no complex features
 header('Content-Type: application/json');
-require_once __DIR__ . '/../config/database-simple.php';
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../utils/fileHandler.php';
-require_once __DIR__ . '/../utils/mailer.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 try {
-    // Validate required fields
+    // Only accept POST requests
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Only POST method allowed');
+    }
+    
+    // Basic validation
     if (empty($_POST['email'])) {
         throw new Exception('Email is required');
     }
     
-    // Validate email format
     if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Invalid email format');
     }
     
-    // Check if files were uploaded (make it optional)
-    $files_uploaded = !empty($_FILES) && isset($_FILES['files']) && $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE;
+    // Connect to database
+    require_once '../config/database-simple.php';
     
-    // Start database transaction
+    // Start transaction
     $pdo->beginTransaction();
     
-    // Enhanced duplicate customer detection by email, phone, name, AND address
-    $customer = null;
-    $is_duplicate = false;
-    $duplicate_match_type = '';
+    // Insert or update customer
+    $stmt = $pdo->prepare("
+        INSERT INTO customers (email, name, phone, address, created_at) 
+        VALUES (?, ?, ?, ?, NOW())
+        ON DUPLICATE KEY UPDATE 
+        name = COALESCE(VALUES(name), name),
+        phone = COALESCE(VALUES(phone), phone),
+        address = COALESCE(VALUES(address), address),
+        updated_at = NOW()
+    ");
     
-    // First check by email
-    $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
-    $stmt->execute([$_POST['email']]);
-    $customer = $stmt->fetch();
-    if ($customer) {
-        $duplicate_match_type = 'email';
+    $stmt->execute([
+        $_POST['email'],
+        $_POST['name'] ?? '',
+        $_POST['phone'] ?? '',
+        $_POST['address'] ?? ''
+    ]);
+    
+    // Get customer ID
+    $customer_id = $pdo->lastInsertId();
+    if (!$customer_id) {
+        $stmt = $pdo->prepare("SELECT id FROM customers WHERE email = ?");
+        $stmt->execute([$_POST['email']]);
+        $customer_id = $stmt->fetchColumn();
     }
     
-    // If not found by email, check by phone (if provided)
-    if (!$customer && !empty($_POST['phone'])) {
-        $clean_phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
-        $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE REGEXP_REPLACE(phone, '[^0-9]', '') = ? OR phone = ?
-        ");
-        $stmt->execute([$clean_phone, $_POST['phone']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'phone';
-        }
-    }
-    
-    // If not found by email/phone, check by name AND address combination (if both provided)
-    if (!$customer && !empty($_POST['name']) && !empty($_POST['address'])) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) 
-            AND LOWER(TRIM(address)) = LOWER(TRIM(?))
-        ");
-        $stmt->execute([$_POST['name'], $_POST['address']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'name_and_address';
-        }
-    }
-    
-    // If still not found, check by address only (same property, different person?)
-    if (!$customer && !empty($_POST['address'])) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE LOWER(TRIM(address)) = LOWER(TRIM(?))
-        ");
-        $stmt->execute([$_POST['address']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'address';
-        }
-    }
-    
-    if ($customer) {
-        $customer_id = $customer['id'];
-        
-        // Check if this is a returning customer (has previous quotes)
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM quotes WHERE customer_id = ?");
-        $stmt->execute([$customer_id]);
-        $quote_count = $stmt->fetchColumn();
-        $is_duplicate = $quote_count > 0;
-        
-        // Update existing customer
-        $stmt = $pdo->prepare("
-            UPDATE customers 
-            SET name = ?, phone = ?, address = ?, updated_at = NOW() 
-            WHERE id = ?
-        ");
-        $stmt->execute([
-            $_POST['name'] ?? '',
-            $_POST['phone'] ?? '',
-            $_POST['address'] ?? '',
-            $customer_id
-        ]);
-        
-        // Log duplicate customer detection with match type
-        if ($is_duplicate) {
-            error_log("DUPLICATE CUSTOMER DETECTED: Customer ID $customer_id ({$_POST['email']}) has submitted before - matched by: $duplicate_match_type");
-        }
-    } else {
-        // Create new customer
-        $stmt = $pdo->prepare("
-            INSERT INTO customers (email, name, phone, address, created_at) 
-            VALUES (?, ?, ?, ?, NOW())
-        ");
-        $stmt->execute([
-            $_POST['email'],
-            $_POST['name'] ?? '',
-            $_POST['phone'] ?? '',
-            $_POST['address'] ?? ''
-        ]);
-        $customer_id = $pdo->lastInsertId();
-        $is_duplicate = false;
-    }
-    
-    // Parse selected services
+    // Parse services
     $selected_services = [];
     if (!empty($_POST['selectedServices'])) {
-        $services_json = $_POST['selectedServices'];
-        $selected_services = json_decode($services_json, true) ?: [];
+        $decoded = json_decode($_POST['selectedServices'], true);
+        if (is_array($decoded)) {
+            $selected_services = $decoded;
+        }
     }
     
-    // Create quote
+    // Insert quote
     $stmt = $pdo->prepare("
         INSERT INTO quotes (
             customer_id, 
             selected_services, 
             notes, 
             quote_status, 
-            quote_created_at,
-            ai_analysis_complete
-        ) VALUES (?, ?, ?, ?, NOW(), 0)
+            quote_created_at
+        ) VALUES (?, ?, ?, ?, NOW())
     ");
-    
-    $initial_status = $files_uploaded ? 'ai_processing' : 'submitted';
     
     $stmt->execute([
         $customer_id,
         json_encode($selected_services),
         $_POST['notes'] ?? '',
-        $initial_status
+        'submitted'
     ]);
     
     $quote_id = $pdo->lastInsertId();
     
-    // Process uploaded files if any
-    $uploaded_files = [];
-    if ($files_uploaded) {
-        // Create upload directory with full path
-        $uploads_base = dirname(dirname(__DIR__)) . '/uploads';
-        if (!file_exists($uploads_base)) {
-            mkdir($uploads_base, 0755, true);
-        }
-        
-        $upload_dir = "$uploads_base/$quote_id";
-        if (!file_exists($upload_dir)) {
+    // Handle file uploads (simplified)
+    $file_count = 0;
+    if (!empty($_FILES['files'])) {
+        $upload_dir = '../uploads/quote_' . $quote_id;
+        if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
         
-        // Process uploaded files
         $files = $_FILES['files'];
-        
-        // Handle multiple files
-        if (is_array($files['tmp_name'])) {
-            for ($i = 0; $i < count($files['tmp_name']); $i++) {
+        if (is_array($files['name'])) {
+            for ($i = 0; $i < count($files['name']); $i++) {
                 if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                    $result = processUploadedFile([
-                        'tmp_name' => $files['tmp_name'][$i],
-                        'name' => $files['name'][$i],
-                        'size' => $files['size'][$i],
-                        'type' => $files['type'][$i]
-                    ], $quote_id, $upload_dir, $pdo);
+                    $file_name = 'upload_' . $i . '_' . time() . '_' . basename($files['name'][$i]);
+                    $file_path = $upload_dir . '/' . $file_name;
                     
-                    if ($result) {
-                        $uploaded_files[] = $result;
+                    if (move_uploaded_file($files['tmp_name'][$i], $file_path)) {
+                        $file_count++;
+                        
+                        // Log file in database
+                        $file_stmt = $pdo->prepare("
+                            INSERT INTO uploaded_files (quote_id, original_filename, stored_filename, file_path, file_size, mime_type, uploaded_at)
+                            VALUES (?, ?, ?, ?, ?, ?, NOW())
+                        ");
+                        $file_stmt->execute([
+                            $quote_id,
+                            $files['name'][$i],
+                            $file_name,
+                            $file_path,
+                            $files['size'][$i],
+                            $files['type'][$i]
+                        ]);
                     }
                 }
             }
-        } else {
-            // Single file
-            if ($files['error'] === UPLOAD_ERR_OK) {
-                $result = processUploadedFile($files, $quote_id, $upload_dir, $pdo);
-                if ($result) {
-                    $uploaded_files[] = $result;
-                }
-            }
         }
-        
-        // Update quote status based on whether files were uploaded
-        if (!empty($uploaded_files)) {
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted_no_files' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-        }
-    } else {
-        // If no files were uploaded, set status to submitted_no_files
-        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted_no_files' WHERE id = ?");
-        $stmt->execute([$quote_id]);
     }
     
-    // Commit transaction FIRST
+    // Commit transaction
     $pdo->commit();
     
-    // Send immediate confirmation email (quick)
-    $email_sent = false;
+    // Send customer confirmation email
+    $customer_email_sent = false;
     try {
-        $email_sent = sendEmail(
-            $_POST['email'],
-            'Quote Submission Received - Carpe Tree\'em',
-            'quote_confirmation',
-            [
-                'customer_name' => $_POST['name'] ?? 'Customer',
-                'quote_id' => $quote_id,
-                'services' => $selected_services,
-                'files_count' => count($uploaded_files),
-                'has_files' => !empty($uploaded_files)
-            ]
-        );
+        $to = $_POST['email'];
+        $subject = "Quote Request Received - Carpe Tree'em";
+        $message = "
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2>Thank you for your quote request!</h2>
+                <p>Hi " . htmlspecialchars($_POST['name'] ?? 'there') . ",</p>
+                <p>We've received your tree service quote request and will get back to you within 24 hours.</p>
+                <p><strong>Quote ID:</strong> #$quote_id</p>
+                <p><strong>Services requested:</strong> " . implode(', ', $selected_services) . "</p>
+                " . ($file_count > 0 ? "<p><strong>Files uploaded:</strong> $file_count photo(s)/video(s)</p>" : "") . "
+                <p>If you have any questions, please call us at 778-655-3741.</p>
+                <p>Best regards,<br>Carpe Tree'em Team</p>
+            </body>
+            </html>
+        ";
+        
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: Carpe Tree'em <quotes@carpetree.com>\r\n";
+        
+        $customer_email_sent = mail($to, $subject, $message, $headers);
     } catch (Exception $e) {
-        error_log("Quick confirmation email failed: " . $e->getMessage());
+        // Email failed but quote was saved - that's okay
+        error_log("Customer email failed: " . $e->getMessage());
     }
     
-    // Determine message
-    if (!empty($uploaded_files)) {
-        $message = 'Quote submitted successfully. AI analysis will begin shortly.';
-    } else {
-        $message = 'Quote submitted successfully. We will contact you to schedule an in-person assessment.';
-    }
-    
-    // Return success response IMMEDIATELY
-    echo json_encode([
-        'success' => true,
-        'quote_id' => $quote_id,
-        'customer_id' => $customer_id,
-        'uploaded_files' => count($uploaded_files),
-        'email_sent' => $email_sent,
-        'message' => $message,
-        'is_duplicate_customer' => $is_duplicate,
-        'duplicate_match_type' => $duplicate_match_type,
-        'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}"
-    ]);
-    
-    // Send admin notification asynchronously (after response sent)
+    // Send simple admin notification (async)
     if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
     }
     
-    // Now send simple admin notification without blocking user
-    try {
-        require_once __DIR__ . '/admin-notification-simple.php';
-        $admin_notification_sent = sendSimpleAdminAlert($quote_id);
-        error_log("Simple admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
-    } catch (Exception $e) {
-        error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
-    }
+    // Return success immediately
+    echo json_encode([
+        'success' => true,
+        'quote_id' => $quote_id,
+        'customer_id' => $customer_id,
+        'files_uploaded' => $file_count,
+        'customer_email_sent' => $customer_email_sent,
+        'message' => 'Quote submitted successfully! We will contact you within 24 hours.'
+    ]);
     
-    // Trigger quick AI assessment for all quotes (instant)
+    // Send admin notification after response (non-blocking)
     try {
-        require_once __DIR__ . '/quick-ai-assessment.php';
-        $quick_assessment = quickAIAssessment($quote_id);
-        error_log("Quick assessment for quote $quote_id: Category={$quick_assessment['category']}, Score={$quick_assessment['sufficiency_score']}/100");
+        $admin_subject = "New Quote #$quote_id - " . ($_POST['name'] ?? 'Customer');
+        $admin_message = "
+            New quote submitted:
+            
+            Quote ID: #$quote_id
+            Customer: " . ($_POST['name'] ?? 'Not provided') . "
+            Email: " . $_POST['email'] . "
+            Phone: " . ($_POST['phone'] ?? 'Not provided') . "
+            Address: " . ($_POST['address'] ?? 'Not provided') . "
+            Services: " . implode(', ', $selected_services) . "
+            Files: $file_count uploaded
+            Notes: " . ($_POST['notes'] ?? 'None') . "
+            
+            Review at: https://carpetree.com/admin-dashboard.html
+        ";
+        
+        $admin_headers = "From: Carpe Tree'em System <system@carpetree.com>\r\n";
+        mail('sapport@carpetree.com', $admin_subject, $admin_message, $admin_headers);
     } catch (Exception $e) {
-        error_log("Quick assessment failed for quote $quote_id: " . $e->getMessage());
-    }
-    
-    // Trigger full AI processing asynchronously if files were uploaded
-    if (!empty($uploaded_files)) {
-        $ai_script = __DIR__ . '/aiQuote.php';
-        $command = "cd " . dirname(__DIR__) . " && php api/aiQuote.php $quote_id > /dev/null 2>&1 &";
-        exec($command);
+        error_log("Admin notification failed: " . $e->getMessage());
     }
     
 } catch (Exception $e) {
-    // Rollback transaction on error
-    if ($pdo->inTransaction()) {
+    // Rollback transaction if it exists
+    if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollback();
     }
     
+    // Log error
+    error_log("Quote submission error: " . $e->getMessage());
+    
+    // Return error response
     http_response_code(400);
     echo json_encode([
-        'error' => $e->getMessage()
+        'success' => false,
+        'error' => $e->getMessage(),
+        'debug_info' => [
+            'file' => __FILE__,
+            'line' => $e->getLine(),
+            'post_data' => $_POST,
+            'files_data' => isset($_FILES) ? array_keys($_FILES) : []
+        ]
     ]);
 }
 ?> 
