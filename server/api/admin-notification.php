@@ -8,9 +8,9 @@ function sendAdminNotification($quote_id) {
     global $pdo;
     
     try {
-        // Get quote details with duplicate customer detection
+        // Get quote details with duplicate customer detection and all customer data
         $stmt = $pdo->prepare("
-            SELECT q.*, c.name, c.email, c.phone, c.address,
+            SELECT q.*, c.name, c.email, c.phone, c.address, c.referral_source, c.referrer_name, c.newsletter_opt_in,
                    COUNT(q2.id) as total_customer_quotes
             FROM quotes q 
             JOIN customers c ON q.customer_id = c.id 
@@ -40,9 +40,11 @@ function sendAdminNotification($quote_id) {
         // Calculate distance from Nelson
         $distance_km = calculateDistanceFromNelson($quote['address']);
         
-        // Generate admin email content with duplicate detection
+        // Generate admin email content with duplicate detection  
+        $media_info = $has_media ? " | " . count($files) . " media files" : " | No media";
         $duplicate_prefix = $quote['is_duplicate_customer'] ? "🔄 RETURNING CUSTOMER - " : "";
-        $subject = "🌳 {$duplicate_prefix}New Quote Ready for Review - Quote #{$quote_id}";
+        $services_count = count($services);
+        $subject = "🌳 {$duplicate_prefix}Quote #{$quote_id} - {$services_count} services{$media_info} - {$quote['name']}";
         
         // Determine how this duplicate was detected (check current quote submission for context)
         $duplicate_match_info = '';
@@ -108,15 +110,17 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
     <body>
         <div class="container">
             <div class="header">
-                <h1>🌳 New Quote Ready for Your Review</h1>
-                <h2>Quote #' . $quote['id'] . '</h2>
-                <p>Submitted: ' . date('F j, Y g:i A', strtotime($quote['quote_created_at'])) . '</p>
+                <h1>🌳 Complete Quote Submission Details</h1>
+                <h2>Quote #' . $quote['id'] . ' - ' . htmlspecialchars($quote['name']) . '</h2>
+                <p><strong>Submitted:</strong> ' . date('F j, Y g:i A', strtotime($quote['quote_created_at'])) . '</p>
+                <p><strong>Services:</strong> ' . count($services) . ' requested | <strong>Media:</strong> ' . ($has_media ? count($files) . ' files attached' : 'None uploaded') . '</p>
             </div>
             
             <div class="section urgent">
-                <h3>🚨 Action Required</h3>
-                <p><strong>This quote needs your personal review and pricing adjustment.</strong></p>
-                <p>Media files are attached to this email for your analysis.</p>' .
+                <h3>🚨 Complete Quote Information</h3>
+                <p><strong>✅ This email contains ALL submission details:</strong> Customer info, services requested, notes, and AI analysis.</p>
+                <p><strong>📎 Media files:</strong> ' . ($has_media ? 'Attached to this email for immediate download and analysis.' : 'None uploaded - consider in-person assessment.') . '</p>
+                <p><strong>🖥️ Dashboard use:</strong> View media gallery, adjust pricing, and send final quotes to customers.</p>' .
                 ($quote['is_duplicate_customer'] ? 
                     '<div style="background: #fff3cd; padding: 1rem; margin: 1rem 0; border-radius: 8px; border: 2px solid #ffc107;">
                         <h4 style="color: #856404; margin: 0 0 0.5rem 0;">🔄 RETURNING CUSTOMER ALERT</h4>
@@ -124,21 +128,44 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
                         <p style="color: #856404; margin: 0; font-size: 0.9em;"><strong>Detected by:</strong> ' . ($duplicate_match_info ?: 'customer record match') . '</p>
                     </div>' : '') . '
                 <div class="action-buttons">
-                    <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn">📊 Review This Quote</a>
-                    <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545;">👥 Customer CRM Dashboard</a>
+                    <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #2D5A27; font-size: 16px; padding: 15px 25px;">
+                        📊 Review Quote & View Media Gallery
+                    </a>
+                    <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545; font-size: 14px;">
+                        👥 Customer History & CRM
+                    </a>
                 </div>
+                <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 10px;">
+                    💡 Use the dashboard to view media files in organized gallery format, adjust pricing, and send quotes to customers.
+                </p>
             </div>
             
             <div class="section">
                 <h3>👤 Customer Information</h3>
                 <table style="width: 100%;">
-                    <tr><td><strong>Name:</strong></td><td>' . htmlspecialchars($quote['name']) . '</td></tr>
+                    <tr><td><strong>Name:</strong></td><td>' . htmlspecialchars($quote['name'] ?: 'Not provided') . '</td></tr>
                     <tr><td><strong>Email:</strong></td><td><a href="mailto:' . htmlspecialchars($quote['email']) . '">' . htmlspecialchars($quote['email']) . '</a></td></tr>
-                    <tr><td><strong>Phone:</strong></td><td><a href="tel:' . htmlspecialchars($quote['phone']) . '">' . htmlspecialchars($quote['phone']) . '</a></td></tr>
-                    <tr><td><strong>Address:</strong></td><td>' . htmlspecialchars($quote['address']) . '</td></tr>
-                    <tr><td><strong>Distance:</strong></td><td class="highlight">' . $distance_km . ' km from Nelson</td></tr>
-                    <tr><td><strong>Services:</strong></td><td>' . $services_text . '</td></tr>
+                    <tr><td><strong>Phone:</strong></td><td><a href="tel:' . htmlspecialchars($quote['phone']) . '">' . htmlspecialchars($quote['phone'] ?: 'Not provided') . '</a></td></tr>
+                    <tr><td><strong>Property Address:</strong></td><td>' . htmlspecialchars($quote['address'] ?: 'Not provided') . '</td></tr>
+                    <tr><td><strong>Distance from Nelson:</strong></td><td class="highlight">' . $distance_km . ' km</td></tr>' .
+                    ($quote['referral_source'] ? '<tr><td><strong>How they heard about us:</strong></td><td>' . htmlspecialchars(ucwords(str_replace('_', ' ', $quote['referral_source']))) . '</td></tr>' : '') .
+                    ($quote['referrer_name'] ? '<tr><td><strong>Referred by:</strong></td><td>' . htmlspecialchars($quote['referrer_name']) . '</td></tr>' : '') .
+                    '<tr><td><strong>Newsletter signup:</strong></td><td>' . ($quote['newsletter_opt_in'] ? 'Yes' : 'No') . '</td></tr>
                 </table>
+            </div>
+            
+            <div class="section">
+                <h3>🌲 Services Requested</h3>
+                <div style="background: white; padding: 15px; border-radius: 6px;">
+                    ' . $services_text . '
+                </div>' .
+                ($quote['notes'] ? '
+                <div style="margin-top: 15px;">
+                    <h4>📝 Additional Notes from Customer:</h4>
+                    <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #2D5A27; font-style: italic;">
+                        "' . nl2br(htmlspecialchars($quote['notes'])) . '"
+                    </div>
+                </div>' : '') . '
             </div>';
     
     // Media section
@@ -146,14 +173,18 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
         $html .= '
             <div class="section">
                 <h3>📹 Uploaded Media (' . count($files) . ' files)</h3>
-                <p><strong>All media files are attached to this email for download.</strong></p>
+                <p><strong>✅ All media files are attached to this email for immediate download and analysis.</strong></p>
+                <p style="background: #e8f5e8; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                    💡 <strong>Pro tip:</strong> Use the dashboard link below to view media files in an organized gallery format with zooming and full-screen capabilities.
+                </p>
                 <div class="media-grid">';
         
         foreach ($files as $file) {
             $file_size = round($file['file_size'] / 1024 / 1024, 2); // MB
+            $file_icon = strpos($file['mime_type'], 'video') !== false ? '🎥' : '📸';
             $html .= '
                 <div class="media-item">
-                    <strong>' . htmlspecialchars($file['filename']) . '</strong><br>
+                    ' . $file_icon . ' <strong>' . htmlspecialchars($file['filename']) . '</strong><br>
                     <small>' . htmlspecialchars($file['mime_type']) . ' (' . $file_size . ' MB)</small><br>
                     <small>Uploaded: ' . date('M j, Y g:i A', strtotime($file['uploaded_at'])) . '</small>
                 </div>';
@@ -163,31 +194,41 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
     } else {
         $html .= '
             <div class="section">
-                <h3>📝 No Media Files</h3>
-                <p><strong>Text-only quote - In-person assessment recommended</strong></p>
+                <h3>📝 No Media Files Uploaded</h3>
+                <p><strong>⚠️ Text-only quote submission - In-person assessment strongly recommended</strong></p>
+                <p style="background: #fff3cd; padding: 10px; border-radius: 6px; color: #856404;">
+                    Consider scheduling a site visit for accurate tree assessment and detailed recommendations.
+                </p>
             </div>';
     }
     
     // AI Analysis section
     if ($ai_response) {
-        $html .= '<div class="section ai-section"><h3>🤖 AI Analysis Results</h3>';
+        $html .= '<div class="section ai-section">
+            <h3>🤖 AI Analysis Results</h3>
+            <p style="background: white; padding: 10px; border-radius: 6px; font-size: 0.9em; color: #666;">
+                <strong>Note:</strong> AI analysis provides initial recommendations. Always verify with professional assessment before finalizing quotes.
+            </p>';
         
         if (isset($ai_response['quote_summary'])) {
             $summary = $ai_response['quote_summary'];
-            $html .= '<h4>Analysis Summary</h4><ul>';
+            $html .= '<div style="background: white; padding: 15px; border-radius: 6px; margin: 10px 0;">
+                <h4 style="color: #2D5A27; margin-top: 0;">📊 Analysis Summary</h4>
+                <table style="width: 100%; border-collapse: collapse;">';
             
             if (isset($summary['total_trees'])) {
-                $html .= '<li><strong>Trees Identified:</strong> ' . $summary['total_trees'] . '</li>';
+                $html .= '<tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Trees Identified:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">' . $summary['total_trees'] . '</td></tr>';
             }
             if (isset($summary['analysis_method'])) {
-                $html .= '<li><strong>Analysis Method:</strong> ' . htmlspecialchars($summary['analysis_method']) . '</li>';
+                $html .= '<tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Analysis Method:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">' . htmlspecialchars($summary['analysis_method']) . '</td></tr>';
             }
             if (isset($summary['requires_in_person_assessment'])) {
-                $status = $summary['requires_in_person_assessment'] ? 'Yes' : 'No';
-                $html .= '<li><strong>In-Person Assessment Required:</strong> ' . $status . '</li>';
+                $status = $summary['requires_in_person_assessment'] ? '⚠️ Yes - Required' : '✅ No - Photos sufficient';
+                $bg_color = $summary['requires_in_person_assessment'] ? '#fff3cd' : '#d4edda';
+                $html .= '<tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>In-Person Assessment:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee; background: ' . $bg_color . '; font-weight: bold;">' . $status . '</td></tr>';
             }
             
-            $html .= '</ul>';
+            $html .= '</table></div>';
         }
         
         // Cost breakdown
