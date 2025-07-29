@@ -9,19 +9,19 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
-    global $pdo;
+    global $pdo, $SMTP_HOST, $SMTP_USER, $SMTP_PASS, $SMTP_PORT, $SMTP_FROM;
     
     try {
         $mail = new PHPMailer(true);
 
         // Server settings
         $mail->isSMTP();
-            $mail->Host       = $SMTP_HOST ?? 'smtp.hostinger.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = $SMTP_USER ?? '';
-    $mail->Password   = $SMTP_PASS ?? '';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = $SMTP_PORT ?? 587;
+        $mail->Host       = $SMTP_HOST ?? 'smtp.hostinger.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $SMTP_USER ?? '';
+        $mail->Password   = $SMTP_PASS ?? '';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $SMTP_PORT ?? 587;
 
         // Recipients
         $mail->setFrom($SMTP_FROM ?? 'noreply@carpetree.com', 'Carpe Tree\'em');
