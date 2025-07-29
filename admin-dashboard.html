@@ -339,74 +339,40 @@
                         
                         <!-- Enhanced location info with multiple sources -->
                         <div x-show="quote.address || quote.geo_latitude || quote.exif_locations" class="location-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <strong>📍 Location Sources & Distance:</strong>
-                                <span x-text="quote.distance + 'km away (best estimate)'"></span>
-                            </div>
-                            
-                            <!-- Customer Address -->
-                            <div x-show="quote.address" style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
-                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                    <strong>🏠 Address:</strong>
-                                    <span x-text="quote.address" style="flex: 1; min-width: 200px;"></span>
-                                    <a :href="getGoogleMapsUrl({address: quote.address})" 
-                                       target="_blank" 
-                                       style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; background: #4285f4; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;"
-                                       onmouseover="this.style.background='#3367d6'"
-                                       onmouseout="this.style.background='#4285f4'">
-                                        🗺️ Directions (Address)
-                                    </a>
-                                    <a :href="getStreetViewUrl(quote.address)" 
-                                       target="_blank" 
-                                       style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; background: #34a853; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;"
-                                       onmouseover="this.style.background='#2d8a47'"
-                                       onmouseout="this.style.background='#34a853'">
-                                        👁️ Street View
-                                    </a>
-                                </div>
-                            </div>
-                            
-                            <!-- GPS Coordinates from Browser -->
-                            <div x-show="quote.geo_latitude" style="margin: 8px 0; padding: 8px; background: #e8f5e8; border-radius: 4px;">
-                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                    <strong>📱 GPS Location:</strong>
-                                    <span style="font-family: monospace;">
-                                        <span x-text="quote.geo_latitude?.toFixed(6)"></span>, <span x-text="quote.geo_longitude?.toFixed(6)"></span>
-                                        <span x-show="quote.geo_accuracy"> (±<span x-text="Math.round(quote.geo_accuracy)"></span>m)</span>
-                                    </span>
-                                    <a :href="getGoogleMapsUrl({geo_latitude: quote.geo_latitude, geo_longitude: quote.geo_longitude})" 
-                                       target="_blank" 
-                                       style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; background: #ff6d01; color: white; text-decoration: none; border-radius: 3px; font-size: 11px;"
-                                       onmouseover="this.style.background='#e55a00'"
-                                       onmouseout="this.style.background='#ff6d01'">
+                            <!-- Location Information -->
+                            <div class="location-info">
+                                <div class="info-label">📍 Location Sources & Distance</div>
+                                <div x-text="quote.distance_km ? `${quote.distance_km}km away (best estimate)` : 'Distance calculating...'"></div>
+                                
+                                <!-- GPS Coordinates -->
+                                <div x-show="quote.geo_latitude && quote.geo_longitude" style="margin-top: 0.5rem;">
+                                    <div style="font-size: 0.8rem; color: #666;">🗺️ GPS Location:</div>
+                                    <div x-text="`${quote.geo_latitude}, ${quote.geo_longitude}`"></div>
+                                    <button @click="getGoogleMapsUrl({geo_latitude: quote.geo_latitude, geo_longitude: quote.geo_longitude})" 
+                                            style="background: #2D5A27; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-top: 4px;">
                                         🗺️ Directions (GPS)
-                                    </a>
+                                    </button>
                                 </div>
-                            </div>
-                            
-                            <!-- EXIF Coordinates from Photos -->
-                            <div x-show="quote.exif_locations && quote.exif_locations.length > 0" style="margin: 8px 0; padding: 8px; background: #fff3cd; border-radius: 4px;">
-                                <strong>📷 Photo Locations:</strong>
-                                <template x-for="(exif, index) in quote.exif_locations" :key="index">
-                                    <div style="display: flex; align-items: center; gap: 10px; margin: 4px 0; flex-wrap: wrap;">
-                                        <span style="font-family: monospace; font-size: 11px;">
-                                            <span x-text="exif.latitude?.toFixed(6)"></span>, <span x-text="exif.longitude?.toFixed(6)"></span>
-                                        </span>
-                                        <span x-text="exif.filename" style="color: #666; font-size: 11px;"></span>
-                                        <a :href="getGoogleMapsUrl({geo_latitude: exif.latitude, geo_longitude: exif.longitude})" 
-                                           target="_blank" 
-                                           style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 6px; background: #6f42c1; color: white; text-decoration: none; border-radius: 3px; font-size: 10px;"
-                                           onmouseover="this.style.background='#5a32a3'"
-                                           onmouseout="this.style.background='#6f42c1'">
-                                            🗺️ Photo Location
-                                        </a>
-                                    </div>
-                                </template>
-                            </div>
-                            
-                            <!-- IP Location (if available) -->
-                            <div x-show="quote.ip_address && quote.ip_address !== 'Unknown'" style="font-size: 11px; color: #666; margin-top: 8px;">
-                                🌐 Client IP: <span x-text="quote.ip_address"></span>
+                                
+                                <!-- EXIF Photo Locations -->
+                                <div x-show="quote.exif_locations && quote.exif_locations.length > 0" style="margin-top: 0.5rem;">
+                                    <div style="font-size: 0.8rem; color: #666;">📸 Photo Locations:</div>
+                                    <template x-for="exif in quote.exif_locations" :key="exif.filename">
+                                        <div style="margin-top: 0.25rem;">
+                                            <div x-text="`${exif.filename}: ${exif.latitude}, ${exif.longitude}`"></div>
+                                            <button @click="getGoogleMapsUrl({geo_latitude: exif.latitude, geo_longitude: exif.longitude})" 
+                                                    style="background: #2D5A27; color: white; border: none; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 2px;">
+                                                🗺️ Directions (EXIF)
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                                
+                                <!-- IP Address -->
+                                <div x-show="quote.ip_address" style="margin-top: 0.5rem;">
+                                    <div style="font-size: 0.8rem; color: #666;">🌐 IP Address:</div>
+                                    <div x-text="quote.ip_address"></div>
+                                </div>
                             </div>
                         </div>
                         
@@ -466,7 +432,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
                             <div>
                                 <label style="font-size: 0.8rem; color: #666;">Distance (km)</label>
-                                <div class="distance-result" x-text="`${quote.distance_km} km`"></div>
+                                <div class="distance-result" x-text="quote.distance_km ? `${quote.distance_km} km` : 'Calculating...'"></div>
                             </div>
                             <div>
                                 <label style="font-size: 0.8rem; color: #666;">Vehicle Type</label>

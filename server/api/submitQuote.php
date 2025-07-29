@@ -181,6 +181,13 @@ try {
         $selected_services = json_decode($services_json, true) ?: [];
     }
     
+    // Combine notes with other service details if provided
+    $notes = $_POST['notes'] ?? '';
+    if (!empty($_POST['otherServiceDetails'])) {
+        $other_details = $_POST['otherServiceDetails'];
+        $notes = $notes ? $notes . "\n\nOther Service Details:\n" . $other_details : "Other Service Details:\n" . $other_details;
+    }
+    
     // Create quote
     $stmt = $pdo->prepare("
         INSERT INTO quotes (
@@ -198,7 +205,7 @@ try {
     $stmt->execute([
         $customer_id,
         json_encode($selected_services),
-        $_POST['notes'] ?? '',
+        $notes,
         $initial_status
     ]);
     

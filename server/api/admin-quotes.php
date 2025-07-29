@@ -41,7 +41,7 @@ try {
     
     foreach ($quotes as $quote) {
         // Get uploaded files for this quote (using correct media table) - optimized query
-        $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, file_type, quote_id FROM media WHERE quote_id = ? LIMIT 10");
+        $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, file_type, quote_id, file_path, file_size, original_filename FROM media WHERE quote_id = ? LIMIT 10");
         $file_stmt->execute([$quote['id']]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -114,7 +114,9 @@ try {
                 'id' => $file['id'],
                 'filename' => $file['filename'],
                 'type' => $file['mime_type'],
-                'download_url' => "/uploads/{$file['quote_id']}/{$file['filename']}"
+                'download_url' => "/uploads/{$file['quote_id']}/{$file['filename']}",
+                'file_path' => $file['file_path'] ?? null,
+                'file_size' => $file['file_size'] ?? 0
             ];
         }, $files);
 
@@ -132,19 +134,24 @@ try {
 
         // Calculate distance using AI (O3 workhorse) - with caching and timeout protection
         try {
-            // Check if we already calculated distance for this address recently
-            $distance_km = fallbackDistanceEstimate($quote['address'] ?? '');
+            // Calculate distance using multiple sources
+            $distance_km = 40; // Default fallback
             
-            // Only use AI for new/unknown addresses to avoid timeout
-            $address_lower = strtolower($quote['address'] ?? '');
-            if (!empty($quote['address']) && 
-                !preg_match('/nelson|castlegar|trail|rossland|salmo|kaslo|moyie|slocan/i', $address_lower)) {
-                // For unknown addresses, try AI with very short timeout
+            // First try GPS coordinates if available
+            if (!empty($quote['geo_latitude']) && !empty($quote['geo_longitude'])) {
                 try {
-                    $distance_km = calculateDistanceWithAI($quote['address'], 2); // 2 second timeout
+                    $distance_km = calculateDistanceWithGPS($quote['geo_latitude'], $quote['geo_longitude']);
                 } catch (Exception $e) {
-                    // Use fallback if AI fails
-                    $distance_km = fallbackDistanceEstimate($quote['address'] ?? '');
+                    error_log("GPS distance calculation failed: " . $e->getMessage());
+                }
+            }
+            
+            // If no GPS or GPS failed, try address
+            if ($distance_km == 40 && !empty($quote['address'])) {
+                try {
+                    $distance_km = fallbackDistanceEstimate($quote['address']);
+                } catch (Exception $e) {
+                    error_log("Address distance calculation failed: " . $e->getMessage());
                 }
             }
         } catch (Exception $e) {
@@ -219,6 +226,27 @@ try {
     echo json_encode([
         'error' => $e->getMessage()
     ]);
+}
+
+function calculateDistanceWithGPS($lat, $lng) {
+    // Base location (Nelson, BC - approximate center of service area)
+    $base_lat = 49.4911;
+    $base_lng = -117.2919;
+    
+    // Calculate distance using Haversine formula
+    $earth_radius = 6371; // Earth's radius in kilometers
+    
+    $lat_diff = deg2rad($lat - $base_lat);
+    $lng_diff = deg2rad($lng - $base_lng);
+    
+    $a = sin($lat_diff/2) * sin($lat_diff/2) +
+         cos(deg2rad($base_lat)) * cos(deg2rad($lat)) *
+         sin($lng_diff/2) * sin($lng_diff/2);
+    
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    $distance = $earth_radius * $c;
+    
+    return round($distance, 1);
 }
 
 function calculateDistance($customer_address) {
