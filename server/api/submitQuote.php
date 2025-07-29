@@ -89,13 +89,20 @@ try {
         // Update existing customer
         $stmt = $pdo->prepare("
             UPDATE customers 
-            SET name = ?, phone = ?, address = ?, updated_at = NOW() 
+            SET name = COALESCE(?, name), 
+                phone = COALESCE(?, phone), 
+                address = COALESCE(?, address), 
+                referral_source = COALESCE(?, referral_source),
+                referrer_name = COALESCE(?, referrer_name),
+                updated_at = NOW() 
             WHERE id = ?
         ");
         $stmt->execute([
-            $_POST['name'] ?? '',
-            $_POST['phone'] ?? '',
-            $_POST['address'] ?? '',
+            $_POST['name'] ?? null,
+            $_POST['phone'] ?? null,
+            $_POST['address'] ?? null,
+            $_POST['howDidYouHear'] ?? null,
+            $_POST['referrerName'] ?? null,
             $customer_id
         ]);
         
@@ -106,14 +113,16 @@ try {
     } else {
         // Create new customer
         $stmt = $pdo->prepare("
-            INSERT INTO customers (email, name, phone, address, created_at) 
-            VALUES (?, ?, ?, ?, NOW())
+            INSERT INTO customers (email, name, phone, address, referral_source, referrer_name) 
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $_POST['email'],
             $_POST['name'] ?? '',
             $_POST['phone'] ?? '',
-            $_POST['address'] ?? ''
+            $_POST['address'] ?? '',
+            $_POST['howDidYouHear'] ?? null,
+            $_POST['referrerName'] ?? null
         ]);
         $customer_id = $pdo->lastInsertId();
         $is_duplicate = false;
