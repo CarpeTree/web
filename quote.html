@@ -768,7 +768,7 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-                      const response = await fetch('/server/api/submitQuote-debug.php', {
+                      const response = await fetch('/server/api/submitQuote.php', {
             method: 'POST',
             body: formData
           });
@@ -789,6 +789,13 @@
           
           if (response.ok && result.success) {
               console.log('Quote submitted successfully:', result);
+              
+              // Log if customer was detected as duplicate (for admin awareness)
+              if (result.is_duplicate_customer) {
+                console.log('🔄 Returning customer detected! Match type:', result.duplicate_match_type);
+                console.log('📊 CRM Dashboard URL:', result.crm_dashboard_url);
+              }
+              
               this.submitted = true;
               this.currentStep = 4; // Show success
             } else {
