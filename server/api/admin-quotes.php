@@ -41,9 +41,35 @@ try {
     
     foreach ($quotes as $quote) {
         // Get uploaded files for this quote (using correct media table) - optimized query
-        $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, quote_id FROM media WHERE quote_id = ? LIMIT 10");
+        $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, file_type, quote_id FROM media WHERE quote_id = ? LIMIT 10");
         $file_stmt->execute([$quote['id']]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get EXIF location data for this quote
+        $exif_stmt = $pdo->prepare("SELECT exif_latitude, exif_longitude, exif_timestamp, camera_make, camera_model, media_id FROM media_locations WHERE quote_id = ?");
+        $exif_stmt->execute([$quote['id']]);
+        $exif_locations = $exif_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Match EXIF data with media files
+        $formatted_exif = [];
+        foreach ($exif_locations as $exif) {
+            // Find the corresponding media file
+            $media_file = null;
+            foreach ($files as $file) {
+                if ($file['id'] == $exif['media_id']) {
+                    $media_file = $file;
+                    break;
+                }
+            }
+            
+            $formatted_exif[] = [
+                'latitude' => (float)$exif['exif_latitude'],
+                'longitude' => (float)$exif['exif_longitude'],
+                'timestamp' => $exif['exif_timestamp'],
+                'camera' => trim(($exif['camera_make'] ?? '') . ' ' . ($exif['camera_model'] ?? '')),
+                'filename' => $media_file ? $media_file['filename'] : 'unknown'
+            ];
+        }
 
         // Format files for frontend (using correct media table columns)
         $formatted_files = array_map(function($file) {
@@ -140,7 +166,8 @@ try {
             'geo_latitude' => $quote['geo_latitude'], // Added GPS latitude
             'geo_longitude' => $quote['geo_longitude'], // Added GPS longitude
             'geo_accuracy' => $quote['geo_accuracy'], // Added GPS accuracy
-            'ip_address' => $quote['ip_address'] // Added IP address
+            'ip_address' => $quote['ip_address'], // Added IP address
+            'exif_locations' => $formatted_exif // Added EXIF location data
         ];
     }
 
