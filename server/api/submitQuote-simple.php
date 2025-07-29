@@ -17,10 +17,16 @@ try {
     // Start database transaction
     $pdo->beginTransaction();
     
-    // Simple customer creation (no duplicate detection)
+    // Handle existing customers with ON DUPLICATE KEY UPDATE
     $stmt = $pdo->prepare("
         INSERT INTO customers (email, name, phone, address, referral_source, referrer_name)
         VALUES (?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+        name = COALESCE(VALUES(name), name),
+        phone = COALESCE(VALUES(phone), phone),
+        address = COALESCE(VALUES(address), address),
+        referral_source = COALESCE(VALUES(referral_source), referral_source),
+        referrer_name = COALESCE(VALUES(referrer_name), referrer_name)
     ");
     
     $stmt->execute([
@@ -33,6 +39,12 @@ try {
     ]);
     
     $customer_id = $pdo->lastInsertId();
+    if (!$customer_id) {
+        // If no new insert, get existing customer ID
+        $stmt = $pdo->prepare("SELECT id FROM customers WHERE email = ?");
+        $stmt->execute([$_POST['email']]);
+        $customer_id = $stmt->fetchColumn();
+    }
     
     // Create quote record
     $stmt = $pdo->prepare("
