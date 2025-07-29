@@ -229,7 +229,8 @@
   </nav>
 
   <!-- Upload Progress Overlay (blocks everything during upload) -->
-      <div x-show="false" class="upload-progress-overlay" x-transition>
+      <!-- DISABLED UPLOAD OVERLAY -->
+    <div style="display: none;" class="upload-progress-overlay">
     <div class="upload-progress-container">
       <h3>📤 Uploading Files...</h3>
       
@@ -498,6 +499,7 @@
           // Ensure upload progress is hidden on start
           this.uploadProgress.visible = false;
           this.uploadProgress.files = [];
+          console.log('Quote wizard initialized - upload overlay should be hidden');
         },
         
         services: [
