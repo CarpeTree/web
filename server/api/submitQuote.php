@@ -261,6 +261,26 @@ try {
         $stmt->execute([$quote_id]);
     }
     
+    // Ensure compatibility view for legacy code (uploaded_files)
+    try {
+        $pdo->exec("CREATE OR REPLACE VIEW uploaded_files AS 
+            SELECT 
+                id,
+                quote_id,
+                filename,
+                original_filename,
+                file_path,
+                file_size,
+                mime_type,
+                uploaded_at,
+                NULL AS file_hash,
+                exif_data
+            FROM media");
+    } catch (Exception $e) {
+        // log but don't block submission
+        error_log('Failed to create uploaded_files view: ' . $e->getMessage());
+    }
+    
     // Commit transaction FIRST
     $pdo->commit();
     
