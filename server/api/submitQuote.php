@@ -257,42 +257,8 @@ try {
         'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}"
     ]);
     
-    // Send admin notification asynchronously (after response sent)
-    if (function_exists('fastcgi_finish_request')) {
-        fastcgi_finish_request();
-    }
-    
-    // Now send simple admin notification without blocking user
-    try {
-        // Use output buffering to catch any unexpected output
-        ob_start();
-        require_once __DIR__ . '/admin-notification.php';
-        $admin_notification_sent = sendAdminNotification($quote_id);
-        ob_end_clean(); // Discard any output
-        error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
-    } catch (Exception $e) {
-        ob_end_clean(); // Clean up on error
-        error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
-    } catch (Error $e) {
-        ob_end_clean(); // Clean up on fatal error
-        error_log("Fatal error in admin notification for quote $quote_id: " . $e->getMessage());
-    }
-    
-    // Trigger quick AI assessment for all quotes (instant)
-    try {
-        require_once __DIR__ . '/quick-ai-assessment.php';
-        $quick_assessment = quickAIAssessment($quote_id);
-        error_log("Quick assessment for quote $quote_id: Category={$quick_assessment['category']}, Score={$quick_assessment['sufficiency_score']}/100");
-    } catch (Exception $e) {
-        error_log("Quick assessment failed for quote $quote_id: " . $e->getMessage());
-    }
-    
-    // Trigger full AI processing asynchronously if files were uploaded
-    if (!empty($uploaded_files)) {
-        $ai_script = __DIR__ . '/aiQuote.php';
-        $command = "cd " . dirname(__DIR__) . " && php api/aiQuote.php $quote_id > /dev/null 2>&1 &";
-        exec($command);
-    }
+    // TEMPORARILY DISABLED: Send admin notification asynchronously (after response sent)
+    error_log("Core quote submission successful for quote $quote_id - admin notifications temporarily disabled for debugging");
     
 } catch (Exception $e) {
     // Rollback transaction on error
