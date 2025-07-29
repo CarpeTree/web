@@ -13,14 +13,14 @@ try {
             q.quote_status,
             q.selected_services,
             q.notes,
-            q.created_at,
+            q.quote_created_at,
             c.email,
             c.name,
             c.phone,
             c.address
         FROM quotes q 
         JOIN customers c ON q.customer_id = c.id 
-        ORDER BY q.created_at DESC 
+        ORDER BY q.quote_created_at DESC 
         LIMIT 10
     ");
     
@@ -40,7 +40,7 @@ try {
             echo "Address: {$quote['address']}\n";
             echo "Services: {$quote['selected_services']}\n";
             echo "Notes: {$quote['notes']}\n";
-            echo "Created: {$quote['created_at']}\n";
+            echo "Created: {$quote['quote_created_at']}\n";
             echo "---\n\n";
         }
     }
