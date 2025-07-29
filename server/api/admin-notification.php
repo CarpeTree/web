@@ -40,6 +40,9 @@ function sendAdminNotification($quote_id) {
         // Calculate distance from Nelson
         $distance_km = calculateDistanceFromNelson($quote['address']);
         
+        // Check if media files exist
+        $has_media = !empty($files);
+        
         // Generate admin email content with duplicate detection  
         $media_info = $has_media ? " | " . count($files) . " media files" : " | No media";
         $duplicate_prefix = $quote['is_duplicate_customer'] ? "🔄 RETURNING CUSTOMER - " : "";
