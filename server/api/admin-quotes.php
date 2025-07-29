@@ -96,9 +96,11 @@ function calculateDistance($customer_address) {
     if (strpos($address_lower, 'nelson') !== false) {
         return 10; // Fixed distance for Nelson area
     } elseif (strpos($address_lower, 'moyie') !== false) {
-        return 45; // Fixed distance for Moyie Lake
+        return 200; // Moyie Lake is ~200km from Nelson (near Cranbrook)
     } elseif (strpos($address_lower, 'castlegar') !== false) {
         return 25;
+    } elseif (strpos($address_lower, 'cranbrook') !== false) {
+        return 180; // Cranbrook area
     } elseif (strpos($address_lower, 'trail') !== false) {
         return 45;
     } elseif (strpos($address_lower, 'rossland') !== false) {
