@@ -23,6 +23,45 @@ try {
     // Start database transaction
     $pdo->beginTransaction();
     
+    // Enhanced location and IP tracking
+    $ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+    $timestamp = date('Y-m-d H:i:s');
+    
+    // Get geolocation data if provided
+    $geo_latitude = $_POST['geo_latitude'] ?? null;
+    $geo_longitude = $_POST['geo_longitude'] ?? null;
+    $geo_accuracy = $_POST['geo_accuracy'] ?? null;
+    
+    // Log comprehensive submission data
+    error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . " | Geo: " . ($geo_latitude ? "$geo_latitude,$geo_longitude" : 'Not provided'));
+    
+    // Insert customer with enhanced location data
+    $stmt = $pdo->prepare("
+        INSERT INTO customers (
+            name, email, phone, address, referral_source, referrer_name, newsletter_opt_in, 
+            ip_address, user_agent, geo_latitude, geo_longitude, geo_accuracy, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    
+    $stmt->execute([
+        $_POST['name'] ?? '',
+        $_POST['email'],
+        $_POST['phone'] ?? null,
+        $_POST['address'] ?? null,
+        $_POST['referral_source'] ?? null,
+        $_POST['referrer_name'] ?? null,
+        isset($_POST['newsletter_opt_in']) ? 1 : 0,
+        $ip_address,
+        $user_agent,
+        $geo_latitude ? (float)$geo_latitude : null,
+        $geo_longitude ? (float)$geo_longitude : null,
+        $geo_accuracy ? (float)$geo_accuracy : null,
+        $timestamp
+    ]);
+    
+    $customer_id = $pdo->lastInsertId();
+    
     // Enhanced duplicate customer detection by email, phone, name, AND address
     $customer = null;
     $is_duplicate = false;

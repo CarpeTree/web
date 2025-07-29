@@ -742,7 +742,39 @@
           this.submitting = true;
           
           try {
-            const formData = new FormData();
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+            
+            // Enhanced location capture
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        console.log("Got geolocation:", position.coords);
+                        
+                        // Add hidden fields for geolocation data
+                        const geoData = document.createElement('div');
+                        geoData.innerHTML = `
+                            <input type="hidden" name="geo_latitude" value="${position.coords.latitude}">
+                            <input type="hidden" name="geo_longitude" value="${position.coords.longitude}">
+                            <input type="hidden" name="geo_accuracy" value="${position.coords.accuracy}">
+                        `;
+                        form.appendChild(geoData);
+                        
+                        console.log("Added geolocation data to form submission");
+                    },
+                    function(error) {
+                        console.log("Geolocation error:", error.message);
+                        // Continue without geolocation - not critical
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000  // 5 minutes
+                    }
+                );
+            } else {
+                console.log("Geolocation not supported by browser");
+            }
             
             // Add form data
             Object.keys(this.formData).forEach(key => {
