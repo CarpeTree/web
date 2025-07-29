@@ -45,6 +45,23 @@ try {
         $file_stmt->execute([$quote['id']]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // If no media found, attempt to load from legacy uploaded_files table
+        if (empty($files)) {
+            try {
+                $legacy_exists = $pdo->query("SHOW TABLES LIKE 'uploaded_files'")->rowCount() > 0;
+                if ($legacy_exists) {
+                    $legacy_stmt = $pdo->prepare("SELECT id, filename, mime_type, quote_id FROM uploaded_files WHERE quote_id = ? LIMIT 10");
+                    $legacy_stmt->execute([$quote['id']]);
+                    $legacy_files = $legacy_stmt->fetchAll(PDO::FETCH_ASSOC);
+                    if (!empty($legacy_files)) {
+                        $files = $legacy_files;
+                    }
+                }
+            } catch (Exception $e) {
+                // ignore
+            }
+        }
+
         // Get EXIF location data for this quote
         $exif_stmt = $pdo->prepare("SELECT exif_latitude, exif_longitude, exif_timestamp, camera_make, camera_model, media_id FROM media_locations WHERE quote_id = ?");
         $exif_stmt->execute([$quote['id']]);

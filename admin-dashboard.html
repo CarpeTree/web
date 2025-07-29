@@ -873,11 +873,8 @@
                 },
 
                 getGoogleMapsUrl(params) {
-                    // Starting point: 4530 Blewitt Rd, Nelson, BC V1L 6X1 (49.4928, -117.2948)
-                    const origin = '49.4928,-117.2948';
-                    
+                    // Build destination string
                     let destination;
-                    
                     if (params.address) {
                         destination = encodeURIComponent(params.address);
                     } else if (params.geo_latitude && params.geo_longitude) {
@@ -885,9 +882,12 @@
                     } else {
                         return '#';
                     }
-                    
-                    // Use Google Maps directions URL with origin and destination
-                    return `https://www.google.com/maps/dir/${origin}/${destination}`;
+
+                    /*
+                     * No origin specified → Google Maps defaults to "Your location" (current device position).
+                     * This meets the requirement: "always default starting location to my location".
+                     */
+                    return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
                 },
 
                 getStreetViewUrl(address) {
