@@ -94,7 +94,9 @@ function calculateDistance($customer_address) {
     $address_lower = strtolower($customer_address);
     
     if (strpos($address_lower, 'nelson') !== false) {
-        return rand(5, 15); // 5-15km within Nelson
+        return 10; // Fixed distance for Nelson area
+    } elseif (strpos($address_lower, 'moyie') !== false) {
+        return 45; // Fixed distance for Moyie Lake
     } elseif (strpos($address_lower, 'castlegar') !== false) {
         return 25;
     } elseif (strpos($address_lower, 'trail') !== false) {
@@ -114,8 +116,8 @@ function calculateDistance($customer_address) {
     } elseif (strpos($address_lower, 'calgary') !== false) {
         return 420;
     } else {
-        // Default for unknown addresses - assume within region
-        return rand(20, 60);
+        // Default for unknown addresses - consistent 40km estimate
+        return 40;
     }
 }
 
