@@ -33,10 +33,10 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         throw new Exception('File type not allowed: ' . $file['type']);
     }
     
-    // Validate file size (100MB max for videos)
-    $max_size = 100 * 1024 * 1024; // 100MB for videos
+    // Validate file size (1 GB max)
+    $max_size = 1024 * 1024 * 1024; // 1 GB
     if ($file['size'] > $max_size) {
-        throw new Exception('File too large. Maximum size is 100MB.');
+        throw new Exception('File too large. Maximum size is 1GB.');
     }
     
     // Generate unique filename

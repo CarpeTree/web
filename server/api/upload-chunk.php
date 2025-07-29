@@ -26,10 +26,10 @@ try {
         throw new Exception('File type not allowed: ' . $file['type']);
     }
     
-    // Check file size (100MB limit)
-    $max_size = 100 * 1024 * 1024;
+    // Check file size (1GB limit)
+    $max_size = 1024 * 1024 * 1024;
     if ($file['size'] > $max_size) {
-        throw new Exception('File too large. Maximum size is 100MB.');
+        throw new Exception('File too large. Maximum size is 1GB.');
     }
     
     // Create temporary storage directory
