@@ -69,6 +69,6 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         'filename' => $unique_filename,
         'original_name' => $file['name'],
         'size' => $file['size'],
-        'type' => $file_type
+        'type' => $file['type']
     ];
 } 
