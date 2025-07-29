@@ -539,6 +539,11 @@
         },
 
         processFiles(fileList) {
+          // Only process if we actually have files
+          if (!fileList || fileList.length === 0) {
+            return;
+          }
+          
           Array.from(fileList).forEach(file => {
             if (file.size > 100 * 1024 * 1024) {
               alert(`File ${file.name} is too large. Maximum size is 100MB.`);
@@ -569,8 +574,8 @@
             this.uploadedFiles.push(fileData);
           });
           
-          // Auto-upload files immediately
-          if (fileList.length > 0) {
+          // Auto-upload files immediately (only if we actually have valid files)
+          if (fileList.length > 0 && this.uploadedFiles.length > 0) {
             this.startFileUploads();
           }
         },
@@ -584,6 +589,11 @@
         },
 
         async startFileUploads() {
+          // Don't show upload progress if there are no files
+          if (this.uploadedFiles.length === 0) {
+            return;
+          }
+          
           this.uploadProgress.visible = true;
           this.uploadProgress.files = [];
           
