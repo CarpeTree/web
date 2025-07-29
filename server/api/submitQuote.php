@@ -17,9 +17,8 @@ try {
         throw new Exception('Invalid email format');
     }
     
-    // Check if files were uploaded (either direct upload or pre-uploaded file IDs)
-    $files_uploaded = (!empty($_FILES) && isset($_FILES['files']) && $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE) ||
-                     (!empty($_POST['uploadedFileIds']) && $_POST['uploadedFileIds'] !== '[]');
+    // Check if files were uploaded (make it optional)
+    $files_uploaded = !empty($_FILES) && isset($_FILES['files']) && $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE;
     
     // Start database transaction
     $pdo->beginTransaction();
@@ -164,28 +163,8 @@ try {
             mkdir($upload_dir, 0755, true);
         }
         
-        // Handle pre-uploaded files (from upload progress system)
-        if (!empty($_POST['uploadedFileIds']) && $_POST['uploadedFileIds'] !== '[]') {
-            $uploadedFileIds = json_decode($_POST['uploadedFileIds'], true);
-            if ($uploadedFileIds) {
-                foreach ($uploadedFileIds as $fileId) {
-                    // Get file info from database
-                    $stmt = $pdo->prepare("SELECT * FROM uploaded_files WHERE id = ?");
-                    $stmt->execute([$fileId]);
-                    $fileInfo = $stmt->fetch();
-                    
-                    if ($fileInfo) {
-                        // Update quote_id for this file
-                        $stmt = $pdo->prepare("UPDATE uploaded_files SET quote_id = ? WHERE id = ?");
-                        $stmt->execute([$quote_id, $fileId]);
-                        $uploaded_files[] = $fileInfo;
-                    }
-                }
-            }
-        }
-        // Handle direct file uploads (traditional way)
-        else if (!empty($_FILES['files'])) {
-            $files = $_FILES['files'];
+        // Process uploaded files
+        $files = $_FILES['files'];
         
         // Handle multiple files
         if (is_array($files['tmp_name'])) {
