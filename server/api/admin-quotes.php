@@ -22,12 +22,12 @@ try {
     $formatted_quotes = [];
     
     foreach ($quotes as $quote) {
-        // Get uploaded files for this quote
-        $file_stmt = $pdo->prepare("SELECT * FROM uploaded_files WHERE quote_id = ?");
+        // Get uploaded files for this quote (using correct media table)
+        $file_stmt = $pdo->prepare("SELECT * FROM media WHERE quote_id = ?");
         $file_stmt->execute([$quote['id']]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Format files for frontend
+        // Format files for frontend (using correct media table columns)
         $formatted_files = array_map(function($file) {
             return [
                 'id' => $file['id'],
