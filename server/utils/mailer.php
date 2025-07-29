@@ -175,4 +175,72 @@ function sendAdminAlert($type, $data) {
             return false;
     }
 }
+
+function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
+    global $pdo, $SMTP_HOST, $SMTP_USER, $SMTP_PASS, $SMTP_PORT, $SMTP_FROM;
+    
+    try {
+        $mail = new PHPMailer(true);
+
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = $SMTP_HOST ?? 'smtp.hostinger.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $SMTP_USER ?? '';
+        $mail->Password   = $SMTP_PASS ?? '';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $SMTP_PORT ?? 587;
+
+        // Recipients
+        $mail->setFrom($SMTP_FROM ?? 'noreply@carpetree.com', 'Carpe Tree\'em');
+        $mail->addAddress($to);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        $mail->Subject = $subject;
+        $mail->Body = $html_body;
+        $mail->AltBody = strip_tags($html_body);
+
+        $mail->send();
+        
+        // Log successful email (simpler version)
+        logEmailSimple($to, $subject, 'direct', 'sent', '', $quote_id);
+        
+        return true;
+        
+    } catch (Exception $e) {
+        error_log("Email sending failed: " . $e->getMessage());
+        
+        // Log failed email
+        logEmailSimple($to, $subject, 'direct', 'failed', $e->getMessage(), $quote_id);
+        
+        return false;
+    }
+}
+
+function logEmailSimple($recipient, $subject, $template, $status, $error = '', $quote_id = null) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO email_logs (
+                recipient, subject, template_used, status, error_message, quote_id
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $recipient,
+            $subject,
+            $template,
+            $status,
+            $error ?: null,
+            $quote_id
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Failed to log email: " . $e->getMessage());
+    }
+}
 // END NEW 
