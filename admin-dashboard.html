@@ -500,20 +500,20 @@
 
                 async loadQuotes() {
                     try {
-                        // Try simplified API first for debugging, then fallback to regular
+                        // Try regular API first (with AI analysis), fallback to simplified
                         let response;
                         try {
-                            response = await fetch('./server/api/admin-quotes-simple.php');
+                            response = await fetch('./server/api/admin-quotes.php');
                             if (!response.ok) {
-                                throw new Error('Simplified API failed');
+                                throw new Error('Regular API failed');
                             }
                         } catch (e) {
-                            console.log('Trying regular API...', e.message);
-                            // Fallback to regular API
+                            console.log('Trying simplified API...', e.message);
+                            // Fallback to simplified API
                             try {
-                                response = await fetch('./server/api/admin-quotes.php');
+                                response = await fetch('./server/api/admin-quotes-simple.php');
                             } catch (e2) {
-                                response = await fetch('/server/api/admin-quotes.php');
+                                response = await fetch('/server/api/admin-quotes-simple.php');
                             }
                         }
                         
