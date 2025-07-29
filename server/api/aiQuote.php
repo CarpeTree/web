@@ -58,22 +58,54 @@ try {
         throw new Exception("OpenAI API key not configured");
     }
 
-    // Build image URLs for OpenAI
-    $image_urls = [];
+    // Build media content for OpenAI analysis
+    $media_content = [];
+    $has_media = false;
+    
     foreach ($media_files as $media) {
-        if ($media['file_type'] === 'image') {
-            // Convert to base64 for API
-            $image_data = base64_encode(file_get_contents($media['file_path']));
-            $mime_type = $media['mime_type'];
-            $image_urls[] = "data:$mime_type;base64,$image_data";
+        // Construct proper file path
+        $file_path = __DIR__ . '/../../uploads/' . $quote_id . '/' . $media['filename'];
+        
+        if (file_exists($file_path)) {
+            $file_type = $media['file_type'] ?? $media['type'] ?? '';
+            
+            // Handle images
+            if (strpos($file_type, 'image/') === 0) {
+                $image_data = base64_encode(file_get_contents($file_path));
+                $media_content[] = [
+                    'type' => 'image_url',
+                    'image_url' => [
+                        'url' => "data:$file_type;base64,$image_data"
+                    ]
+                ];
+                $has_media = true;
+            }
+            // Handle videos - describe them for AI
+            elseif (strpos($file_type, 'video/') === 0) {
+                $media_content[] = [
+                    'type' => 'text',
+                    'text' => "Video file uploaded: {$media['filename']} ({$file_type}). Please note that video analysis requires manual review."
+                ];
+                $has_media = true;
+            }
         }
     }
 
-    if (empty($image_urls)) {
-        throw new Exception("No images found for AI analysis");
+    if (!$has_media) {
+        throw new Exception("No media files found for AI analysis");
     }
 
-    // Prepare messages for OpenAI
+    // Prepare messages for OpenAI with media content
+    $user_content = [
+        [
+            'type' => 'text',
+            'text' => "Please analyze the uploaded media and provide a comprehensive tree service quote. Customer selected these services: " . $quote['selected_services'] . ". Additional notes: " . ($quote['notes'] ?? 'None provided.')
+        ]
+    ];
+    
+    // Add all media content
+    $user_content = array_merge($user_content, $media_content);
+    
     $messages = [
         [
             'role' => 'system',
@@ -81,28 +113,13 @@ try {
         ],
         [
             'role' => 'user',
-            'content' => [
-                [
-                    'type' => 'text',
-                    'text' => "Please analyze these tree photos and provide a comprehensive quote. Customer selected these services: " . $quote['selected_services'] . ". Additional notes: " . ($quote['notes'] ?? 'None provided.')
-                ]
-            ]
+            'content' => $user_content
         ]
     ];
 
-    // Add images to the user message
-    foreach ($image_urls as $image_url) {
-        $messages[1]['content'][] = [
-            'type' => 'image_url',
-            'image_url' => [
-                'url' => $image_url
-            ]
-        ];
-    }
-
     // Make OpenAI API request
     $openai_request = [
-                    'model' => 'o3', // OpenAI o3 - most advanced reasoning model with vision capabilities
+                    'model' => 'gpt-4o', // OpenAI GPT-4o with vision capabilities for media analysis
         'messages' => $messages,
         'temperature' => 0.2,
         'max_tokens' => 4000,
