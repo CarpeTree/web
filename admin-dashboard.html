@@ -346,7 +346,7 @@
 
                     <!-- AI Analysis Controls -->
                     <template x-if="quote.files && quote.files.length > 0">
-                        <div class="ai-controls" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <div class="ai-controls" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #28a745;">
                             <h4 style="margin: 0 0 0.5rem 0; color: #495057;">🤖 AI Analysis Controls</h4>
                             <div style="margin-bottom: 0.5rem;">
                                 <label for="ai-context" style="display: block; font-weight: bold; margin-bottom: 0.25rem;">Additional Context for AI:</label>
@@ -359,12 +359,23 @@
                             <button 
                                 @click="regenerateAIAnalysis(quote)" 
                                 :disabled="quote.ai_regenerating"
-                                style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                                style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;"
                                 :style="quote.ai_regenerating ? 'background: #6c757d; cursor: not-allowed;' : ''"
                             >
                                 <span x-show="!quote.ai_regenerating">🔄 Regenerate AI Analysis</span>
                                 <span x-show="quote.ai_regenerating">⏳ Analyzing...</span>
                             </button>
+                            <div style="margin-top: 0.5rem; font-size: 12px; color: #6c757d;">
+                                Files detected: <span x-text="quote.files.length"></span> | 
+                                Quote ID: <span x-text="quote.id"></span>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <!-- Debug: Show if no files detected -->
+                    <template x-if="!quote.files || quote.files.length === 0">
+                        <div style="margin-top: 1rem; padding: 0.5rem; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">
+                            No media files detected - AI regeneration not available
                         </div>
                     </template>
 
@@ -554,6 +565,12 @@
                         this.quotes = data.quotes || [];
                         this.loading = false;
                         
+                        // Initialize UI state for each quote
+                        this.quotes.forEach(quote => {
+                            quote.ai_context = quote.ai_context || '';
+                            quote.ai_regenerating = quote.ai_regenerating || false;
+                        });
+                        
                         if (data.message) {
                             console.log('API Response:', data.message);
                         }
@@ -647,19 +664,46 @@
                 },
 
                 async regenerateAIAnalysis(quote) {
+                    console.log('Regenerating AI analysis for quote:', quote.id);
                     quote.ai_regenerating = true;
+                    
                     try {
-                        const response = await fetch('/server/api/regenerate-ai-analysis.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ quote_id: quote.id, context: quote.ai_context || '' })
-                        });
+                        // Try multiple URL paths for the API
+                        let response;
+                        const payload = { quote_id: quote.id, context: quote.ai_context || '' };
+                        
+                        console.log('Sending payload:', payload);
+                        
+                        try {
+                            response = await fetch('./server/api/regenerate-ai-analysis.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                        } catch (e) {
+                            console.log('Trying absolute path...', e.message);
+                            response = await fetch('/server/api/regenerate-ai-analysis.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                        }
+                        
+                        console.log('Response status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
                         const result = await response.json();
+                        console.log('API result:', result);
+                        
                         if (result.success) {
                             // Update the AI summary
                             quote.ai_summary = result.analysis;
                             
                             // Reload the entire quotes list to get updated line items
+                            console.log('Reloading quotes...');
                             await this.loadQuotes();
                             
                             quote.ai_regenerating = false;
