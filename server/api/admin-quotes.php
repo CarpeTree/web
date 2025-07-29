@@ -97,6 +97,8 @@ function calculateDistance($customer_address) {
         return 10; // Fixed distance for Nelson area
     } elseif (strpos($address_lower, 'moyie') !== false) {
         return 200; // Moyie Lake is ~200km from Nelson (near Cranbrook)
+    } elseif (strpos($address_lower, 'slocan') !== false) {
+        return 55; // Slocan Valley/Pools area - about 55km from Nelson
     } elseif (strpos($address_lower, 'castlegar') !== false) {
         return 25;
     } elseif (strpos($address_lower, 'cranbrook') !== false) {
