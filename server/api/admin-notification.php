@@ -5,6 +5,7 @@ if (basename($_SERVER['SCRIPT_NAME']) === 'admin-notification.php') {
 }
 require_once __DIR__ . '/../config/database-simple.php';
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../utils/mailer.php';
 
 // Function to send admin notification email with attachments
 function sendAdminNotification($quote_id) {
@@ -66,13 +67,24 @@ function sendAdminNotification($quote_id) {
         
         $html_body = generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km);
         
-        // Send email with attachments
-        return sendEmailWithAttachments(
-            $ADMIN_EMAIL ?? 'sapport@carpetree.com',
+        // Send email using proper iCloud SMTP (not basic mail function)
+        $attachments = [];
+        foreach ($files as $file) {
+            $file_path = dirname(dirname(__DIR__)) . "/uploads/$quote_id/" . $file['filename'];
+            if (file_exists($file_path)) {
+                $attachments[] = [
+                    'path' => $file_path,
+                    'name' => $file['original_filename'] ?? $file['filename']
+                ];
+            }
+        }
+        
+        return sendEmail(
+            $ADMIN_EMAIL ?? 'phil.bajenski@gmail.com',
             $subject,
-            $html_body,
-            $files,
-            $quote_id
+            'admin_notification_html',
+            ['html_content' => $html_body],
+            $attachments
         );
         
     } catch (Exception $e) {
