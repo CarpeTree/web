@@ -31,8 +31,8 @@ function sendAdminNotification($quote_id) {
         // Mark if this is a duplicate/returning customer
         $quote['is_duplicate_customer'] = (int)$quote['total_customer_quotes'] > 1;
         
-        // Get uploaded files
-        $file_stmt = $pdo->prepare("SELECT * FROM uploaded_files WHERE quote_id = ?");
+        // Get uploaded files (using correct media table)
+        $file_stmt = $pdo->prepare("SELECT * FROM media WHERE quote_id = ?");
         $file_stmt->execute([$quote_id]);
         $files = $file_stmt->fetchAll(PDO::FETCH_ASSOC);
         
