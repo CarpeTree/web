@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
-require_once '../config/database-simple.php';
-require_once '../config/config.php';
+require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../config/config.php';
 
 // Function to send admin notification email with attachments
 function sendAdminNotification($quote_id) {
