@@ -88,7 +88,30 @@ try {
         }
         
         // Generate line items based on services and AI analysis
-        $line_items = generateLineItems($services, $ai_response, count($files) > 0);
+        $line_items = [];
+        
+        // Only generate line items if we have AI analysis OR no media files
+        if ($ai_response && !empty($ai_response)) {
+            // AI analysis complete - generate detailed line items based on findings
+            $line_items = generateLineItems($services, $ai_response, count($files) > 0);
+        } elseif (count($files) > 0) {
+            // Has media but no AI analysis yet - show pending status
+            $line_items = [
+                [
+                    'service_name' => '⏳ AI Analysis Pending',
+                    'description' => 'Line items will be generated after AI completes image/video analysis',
+                    'price' => 0,
+                    'min_price' => 0,
+                    'max_price' => 0,
+                    'suggested_price' => 0,
+                    'included' => false,
+                    'prescription' => 'Please wait for AI analysis to complete'
+                ]
+            ];
+        } else {
+            // No media files - generate basic line items for manual assessment
+            $line_items = generateLineItems($services, null, false);
+        }
 
         // Format AI summary
         $ai_summary = formatAISummary($ai_response, count($files) > 0);
@@ -336,13 +359,17 @@ function generateOptionalServices($selected_services, $has_media) {
 
 function formatAISummary($ai_response, $has_media) {
     if (!$ai_response) {
-        return "No AI analysis available. Manual assessment required.";
+        if ($has_media) {
+            return "⏳ AI Analysis Pending - Images/videos uploaded and being processed...";
+        } else {
+            return "📋 Manual Assessment Required - No media files uploaded. In-person assessment recommended.";
+        }
     }
 
     $summary = "";
     
     if ($has_media) {
-        $summary .= "🎬 Video Analysis Complete\n\n";
+        $summary .= "🎬 AI Analysis Complete\n\n";
     } else {
         $summary .= "📝 Text-based Analysis\n\n";
     }

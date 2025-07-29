@@ -271,6 +271,34 @@ try {
         error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
     }
     
+    // Trigger AI processing for quotes with media files (asynchronous)
+    if (!empty($uploaded_files)) {
+        try {
+            // Update status to indicate AI processing has started
+            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+            $stmt->execute([$quote_id]);
+            
+            // Trigger AI analysis
+            $ai_url = 'https://carpetree.com/server/api/simple-ai-analysis.php?quote_id=' . $quote_id;
+            
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $ai_url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_CONNECTTIMEOUT => 1,
+                CURLOPT_NOSIGNAL => 1
+            ]);
+            
+            $result = curl_exec($curl);
+            curl_close($curl);
+            
+            error_log("Triggered AI processing for quote $quote_id with " . count($uploaded_files) . " files");
+        } catch (Exception $e) {
+            error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
+        }
+    }
+    
 } catch (Exception $e) {
     // Rollback transaction on error
     if ($pdo->inTransaction()) {
