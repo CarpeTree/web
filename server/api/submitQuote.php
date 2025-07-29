@@ -40,8 +40,20 @@ try {
     $geo_longitude = $_POST['geo_longitude'] ?? null;
     $geo_accuracy = $_POST['geo_accuracy'] ?? null;
     
+    // Also check for GPS data from the location button
+    if (!$geo_latitude && isset($_POST['gpsLat'])) {
+        $geo_latitude = $_POST['gpsLat'];
+        $geo_longitude = $_POST['gpsLng'];
+        $geo_accuracy = $_POST['gpsAccuracy'] ?? null;
+    }
+    
     // Log comprehensive submission data
-    error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . " | Geo: " . ($geo_latitude ? "$geo_latitude,$geo_longitude" : 'Not provided'));
+    $location_info = '';
+    if ($geo_latitude && $geo_longitude) {
+        $accuracy_text = $geo_accuracy ? " (±${geo_accuracy}m)" : '';
+        $location_info = " | GPS: $geo_latitude,$geo_longitude$accuracy_text";
+    }
+    error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . $location_info);
     
     // Insert customer with enhanced location data
     $stmt = $pdo->prepare("

@@ -461,7 +461,10 @@
             </button>
           </div>
           <div x-show="locationText" style="margin-top: 5px; font-size: 12px; color: #666;">
-            <span x-text="locationText"></span>
+            <div x-text="locationText"></div>
+            <div x-show="gpsCoords" style="margin-top: 3px; font-size: 11px; color: #2D5A27; font-weight: 500;">
+              🌳 Precise GPS coordinates saved for tree location identification
+            </div>
           </div>
         </div>
         
@@ -735,7 +738,7 @@
               };
               
               this.locationCaptured = true;
-              this.locationText = `${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)}`;
+              this.locationText = `📍 GPS: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)} (±${Math.round(this.gpsCoords.accuracy)}m)`;
             } catch (error) {
               console.log('Geolocation not available or denied');
             }
@@ -768,13 +771,13 @@
                 
                 if (data.display_name) {
                   this.formData.address = data.display_name;
-                  this.locationText = `📍 Location captured: ${data.display_name}`;
+                  this.locationText = `📍 Address: ${data.display_name} | GPS: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)} (±${Math.round(this.gpsCoords.accuracy)}m)`;
                 } else {
-                  this.locationText = `📍 GPS: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)}`;
+                  this.locationText = `📍 GPS: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)} (±${Math.round(this.gpsCoords.accuracy)}m)`;
                 }
               } catch (geocodeError) {
                 // If reverse geocoding fails, just show coordinates
-                this.locationText = `📍 GPS captured: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)} (address lookup failed)`;
+                this.locationText = `📍 GPS: ${this.gpsCoords.lat.toFixed(6)}, ${this.gpsCoords.lng.toFixed(6)} (±${Math.round(this.gpsCoords.accuracy)}m) | Address lookup failed`;
                 console.log('Reverse geocoding failed:', geocodeError);
               }
               
@@ -899,6 +902,8 @@
             if (this.gpsCoords) {
               formData.append('gpsLat', this.gpsCoords.lat);
               formData.append('gpsLng', this.gpsCoords.lng);
+              formData.append('gpsAccuracy', this.gpsCoords.accuracy);
+              console.log('Including precise GPS coordinates for tree location:', this.gpsCoords);
             }
             
             if (this.exifCoords) {
