@@ -18,7 +18,14 @@ try {
     }
     
     // Check if files were uploaded (make it optional)
-    $files_uploaded = !empty($_FILES) && isset($_FILES['files']) && $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE;
+    $files_uploaded = false;
+    if (!empty($_FILES) && isset($_FILES['files'])) {
+        if (is_array($_FILES['files']['error'])) {
+            $files_uploaded = $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE;
+        } else {
+            $files_uploaded = $_FILES['files']['error'] !== UPLOAD_ERR_NO_FILE;
+        }
+    }
     
     // Start database transaction
     $pdo->beginTransaction();
