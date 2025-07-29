@@ -41,5 +41,4 @@ try {
         echo json_encode(['error' => 'Database connection failed. Please try again later.']);
         exit;
     }
-}
-?> 
+} 

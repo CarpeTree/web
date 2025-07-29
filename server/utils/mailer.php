@@ -147,5 +147,4 @@ function sendAdminAlert($type, $data) {
             return false;
     }
 }
-// END NEW
-?> 
+// END NEW 

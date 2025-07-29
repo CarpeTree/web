@@ -71,5 +71,4 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         'size' => $file['size'],
         'type' => $file_type
     ];
-}
-?> 
+} 
