@@ -96,8 +96,8 @@ try {
 
     $messages = [
         [
-            'role' => 'system',
-            'content' => 'You are an expert arborist analyzing photos/videos for tree service quotes. Provide detailed analysis of tree species, condition, safety risks, and service recommendations. Be specific about what you observe.'
+            'role' => 'system', 
+            'content' => 'You are a certified arborist with 20+ years experience providing detailed tree care estimates. Analyze uploaded media to provide professional tree service quotes with: (1) Species identification with confidence level, (2) Tree health assessment using ISA standards, (3) Structural defect analysis, (4) Safety risk evaluation, (5) Specific service recommendations with pricing considerations, (6) Equipment requirements and access challenges. Provide estimates that require minimal editing for professional use.'
         ],
         [
             'role' => 'user',
@@ -105,9 +105,9 @@ try {
         ]
     ];
 
-    // Call OpenAI ChatGPT-4o
+    // Call OpenAI ChatGPT o3 - your proven tree care specialist
     $openai_request = [
-        'model' => 'gpt-4o',
+        'model' => 'o3',
         'messages' => $messages,
         'temperature' => 0.2,
         'max_tokens' => 1500
@@ -142,8 +142,8 @@ try {
 
     $ai_analysis = $ai_result['choices'][0]['message']['content'];
 
-    // Format the analysis
-    $analysis_summary = "🤖 ChatGPT-4o Analysis Complete\n\n";
+    // Format the analysis  
+    $analysis_summary = "🤖 ChatGPT o3 Tree Analysis Complete\n\n";
     $analysis_summary .= "📁 Media analyzed: " . implode(', ', $media_summary) . "\n\n";
     $analysis_summary .= "🔍 AI Analysis:\n" . $ai_analysis;
 
