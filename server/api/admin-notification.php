@@ -50,7 +50,7 @@ function sendAdminNotification($quote_id) {
         $media_info = $has_media ? " | " . count($files) . " media files" : " | No media";
         $duplicate_prefix = $quote['is_duplicate_customer'] ? "🔄 RETURNING CUSTOMER - " : "";
         $services_count = count($services);
-        $subject = "🌳 {$duplicate_prefix}Quote #{$quote_id} - {$services_count} services{$media_info} - {$quote['name']}";
+        $subject = "New Quote Request #{$quote_id} - {$quote['name']} - Carpe Tree'em";
         
         // Determine how this duplicate was detected (check current quote submission for context)
         $duplicate_match_info = '';
@@ -116,7 +116,7 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
     <body>
         <div class="container">
             <div class="header">
-                <h1>🌳 Complete Quote Submission Details</h1>
+                <h1>New Service Request - Carpe Tree\'em</h1>
                 <h2>Quote #' . $quote['id'] . ' - ' . htmlspecialchars($quote['name']) . '</h2>
                 <p><strong>Submitted:</strong> ' . date('F j, Y g:i A', strtotime($quote['quote_created_at'])) . '</p>
                 <p><strong>Services:</strong> ' . count($services) . ' requested | <strong>Media:</strong> ' . ($has_media ? count($files) . ' files attached' : 'None uploaded') . '</p>
@@ -321,7 +321,7 @@ function sendEmailWithAttachments($to, $subject, $html_body, $files, $quote_id) 
     
     // Headers - improved to avoid spam
     $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "From: Carpe Tree'em Admin <phil.bajenski@gmail.com>\r\n";
+    $headers .= "From: Carpe Tree'em <quotes@carpetree.com>\r\n";
     $headers .= "Reply-To: phil.bajenski@gmail.com\r\n";
     $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
     $headers .= "X-Priority: 1\r\n";
