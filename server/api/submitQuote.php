@@ -23,13 +23,69 @@ try {
     // Start database transaction
     $pdo->beginTransaction();
     
-    // Check if customer exists
-    $stmt = $pdo->prepare("SELECT id FROM customers WHERE email = ?");
+    // Enhanced duplicate customer detection by email, phone, name, AND address
+    $customer = null;
+    $is_duplicate = false;
+    $duplicate_match_type = '';
+    
+    // First check by email
+    $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
     $stmt->execute([$_POST['email']]);
     $customer = $stmt->fetch();
+    if ($customer) {
+        $duplicate_match_type = 'email';
+    }
+    
+    // If not found by email, check by phone (if provided)
+    if (!$customer && !empty($_POST['phone'])) {
+        $clean_phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
+        $stmt = $pdo->prepare("
+            SELECT * FROM customers 
+            WHERE REGEXP_REPLACE(phone, '[^0-9]', '') = ? OR phone = ?
+        ");
+        $stmt->execute([$clean_phone, $_POST['phone']]);
+        $customer = $stmt->fetch();
+        if ($customer) {
+            $duplicate_match_type = 'phone';
+        }
+    }
+    
+    // If not found by email/phone, check by name AND address combination (if both provided)
+    if (!$customer && !empty($_POST['name']) && !empty($_POST['address'])) {
+        $stmt = $pdo->prepare("
+            SELECT * FROM customers 
+            WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) 
+            AND LOWER(TRIM(address)) = LOWER(TRIM(?))
+        ");
+        $stmt->execute([$_POST['name'], $_POST['address']]);
+        $customer = $stmt->fetch();
+        if ($customer) {
+            $duplicate_match_type = 'name_and_address';
+        }
+    }
+    
+    // If still not found, check by address only (same property, different person?)
+    if (!$customer && !empty($_POST['address'])) {
+        $stmt = $pdo->prepare("
+            SELECT * FROM customers 
+            WHERE LOWER(TRIM(address)) = LOWER(TRIM(?))
+        ");
+        $stmt->execute([$_POST['address']]);
+        $customer = $stmt->fetch();
+        if ($customer) {
+            $duplicate_match_type = 'address';
+        }
+    }
     
     if ($customer) {
         $customer_id = $customer['id'];
+        
+        // Check if this is a returning customer (has previous quotes)
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM quotes WHERE customer_id = ?");
+        $stmt->execute([$customer_id]);
+        $quote_count = $stmt->fetchColumn();
+        $is_duplicate = $quote_count > 0;
+        
         // Update existing customer
         $stmt = $pdo->prepare("
             UPDATE customers 
@@ -42,6 +98,11 @@ try {
             $_POST['address'] ?? '',
             $customer_id
         ]);
+        
+        // Log duplicate customer detection with match type
+        if ($is_duplicate) {
+            error_log("DUPLICATE CUSTOMER DETECTED: Customer ID $customer_id ({$_POST['email']}) has submitted before - matched by: $duplicate_match_type");
+        }
     } else {
         // Create new customer
         $stmt = $pdo->prepare("
@@ -55,6 +116,7 @@ try {
             $_POST['address'] ?? ''
         ]);
         $customer_id = $pdo->lastInsertId();
+        $is_duplicate = false;
     }
     
     // Parse selected services
@@ -180,7 +242,10 @@ try {
         'customer_id' => $customer_id,
         'uploaded_files' => count($uploaded_files),
         'email_sent' => $email_sent,
-        'message' => $message
+        'message' => $message,
+        'is_duplicate_customer' => $is_duplicate,
+        'duplicate_match_type' => $duplicate_match_type,
+        'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}"
     ]);
     
     // Send admin notification asynchronously (after response sent)

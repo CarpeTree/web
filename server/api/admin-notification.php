@@ -8,12 +8,15 @@ function sendAdminNotification($quote_id) {
     global $pdo;
     
     try {
-        // Get quote details
+        // Get quote details with duplicate customer detection
         $stmt = $pdo->prepare("
-            SELECT q.*, c.name, c.email, c.phone, c.address 
+            SELECT q.*, c.name, c.email, c.phone, c.address,
+                   COUNT(q2.id) as total_customer_quotes
             FROM quotes q 
             JOIN customers c ON q.customer_id = c.id 
+            LEFT JOIN quotes q2 ON c.id = q2.customer_id
             WHERE q.id = ?
+            GROUP BY q.id, c.id
         ");
         $stmt->execute([$quote_id]);
         $quote = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -21,6 +24,9 @@ function sendAdminNotification($quote_id) {
         if (!$quote) {
             throw new Exception("Quote not found");
         }
+        
+        // Mark if this is a duplicate/returning customer
+        $quote['is_duplicate_customer'] = (int)$quote['total_customer_quotes'] > 1;
         
         // Get uploaded files
         $file_stmt = $pdo->prepare("SELECT * FROM uploaded_files WHERE quote_id = ?");
@@ -34,8 +40,21 @@ function sendAdminNotification($quote_id) {
         // Calculate distance from Nelson
         $distance_km = calculateDistanceFromNelson($quote['address']);
         
-        // Generate admin email content
-        $subject = "🌳 New Quote Ready for Review - Quote #{$quote_id}";
+        // Generate admin email content with duplicate detection
+        $duplicate_prefix = $quote['is_duplicate_customer'] ? "🔄 RETURNING CUSTOMER - " : "";
+        $subject = "🌳 {$duplicate_prefix}New Quote Ready for Review - Quote #{$quote_id}";
+        
+        // Determine how this duplicate was detected (check current quote submission for context)
+        $duplicate_match_info = '';
+        if ($quote['is_duplicate_customer']) {
+            // Try to determine match type by comparing current quote with existing customer data
+            $match_types = [];
+            if (!empty($quote['email'])) $match_types[] = 'email';
+            if (!empty($quote['phone'])) $match_types[] = 'phone';
+            if (!empty($quote['name'])) $match_types[] = 'name';
+            if (!empty($quote['address'])) $match_types[] = 'address';
+            $duplicate_match_info = implode('/or ', $match_types);
+        }
         
         $html_body = generateAdminEmailHTML($quote, $files, $ai_response, $services, $distance_km);
         
@@ -97,9 +116,16 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
             <div class="section urgent">
                 <h3>🚨 Action Required</h3>
                 <p><strong>This quote needs your personal review and pricing adjustment.</strong></p>
-                <p>Media files are attached to this email for your analysis.</p>
+                <p>Media files are attached to this email for your analysis.</p>' .
+                ($quote['is_duplicate_customer'] ? 
+                    '<div style="background: #fff3cd; padding: 1rem; margin: 1rem 0; border-radius: 8px; border: 2px solid #ffc107;">
+                        <h4 style="color: #856404; margin: 0 0 0.5rem 0;">🔄 RETURNING CUSTOMER ALERT</h4>
+                        <p style="color: #856404; margin: 0 0 0.5rem 0;">This customer has submitted quotes before. Check their history for context and pricing reference.</p>
+                        <p style="color: #856404; margin: 0; font-size: 0.9em;"><strong>Detected by:</strong> ' . ($duplicate_match_info ?: 'customer record match') . '</p>
+                    </div>' : '') . '
                 <div class="action-buttons">
-                    <a href="https://carpetree.com/admin-dashboard.html" class="btn">📊 Open Admin Dashboard</a>
+                    <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn">📊 Review This Quote</a>
+                    <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545;">👥 Customer CRM Dashboard</a>
                 </div>
             </div>
             
@@ -227,7 +253,8 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
             </div>
             
             <div class="action-buttons">
-                <a href="https://carpetree.com/admin-dashboard.html" class="btn">📊 Review & Edit Quote</a>
+                <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn">📊 Review & Edit Quote</a>
+                <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545;">👥 Customer History</a>
                 <a href="mailto:' . htmlspecialchars($quote['email']) . '" class="btn">📧 Contact Customer</a>
             </div>
             

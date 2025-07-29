@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer CRM Dashboard - Carpe Tree'em</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2D5A27, #4a7c59);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2D5A27;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2D5A27;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #2D5A27;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .customer-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .customer-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .customer-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #2D5A27;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .duplicate-alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #856404;
+        }
+
+        .quotes-section {
+            padding: 1.5rem;
+        }
+
+        .quote-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2D5A27;
+        }
+
+        .quote-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-id {
+            font-weight: 600;
+            color: #2D5A27;
+        }
+
+        .quote-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-submitted {
+            background: #cce5ff;
+            color: #0066cc;
+        }
+
+        .status-draft_ready {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-sent_to_client {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .quote-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .search-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .search-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 Customer CRM Dashboard</h1>
+        <p>Carpe Tree'em - Customer Relationship Management</p>
+    </div>
+
+    <div class="container" x-data="customerCRM()">
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2 style="margin-bottom: 1.5rem;">🔍 Find Customer</h2>
+            <div class="search-grid">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" 
+                           id="email" 
+                           x-model="searchEmail" 
+                           placeholder="customer@example.com"
+                           @input="searchCustomers()">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" 
+                           id="phone" 
+                           x-model="searchPhone" 
+                           placeholder="(250) 555-0123"
+                           @input="searchCustomers()">
+                </div>
+                <div class="form-group">
+                    <label for="name">Customer Name</label>
+                    <input type="text" 
+                           id="name" 
+                           x-model="searchName" 
+                           placeholder="John Smith"
+                           @input="searchCustomers()">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" 
+                           id="address" 
+                           x-model="searchAddress" 
+                           placeholder="123 Main St"
+                           @input="searchCustomers()">
+                </div>
+                <button class="btn btn-primary" @click="searchCustomers()">
+                    🔍 Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <template x-if="loading">
+            <div class="loading">
+                <h3>🔄 Searching customers...</h3>
+            </div>
+        </template>
+
+        <!-- No Results -->
+        <template x-if="!loading && customers.length === 0 && (searchEmail || searchPhone || searchName || searchAddress)">
+            <div class="no-results">
+                <h3>😔 No customers found</h3>
+                <p>Try searching with a different email, phone number, name, or address.</p>
+            </div>
+        </template>
+
+        <!-- Customer Results -->
+        <template x-for="customer in customers" :key="customer.id">
+            <div class="customer-card">
+                <!-- Customer Header -->
+                <div class="customer-header">
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                        <h2 x-text="`Customer #${customer.id}`"></h2>
+                        <template x-if="customer.is_duplicate">
+                            <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;">
+                                🔄 RETURNING CUSTOMER
+                            </span>
+                        </template>
+                    </div>
+                    
+                    <div class="customer-info">
+                        <div class="info-item">
+                            <span class="info-label">Name</span>
+                            <span class="info-value" x-text="customer.name || 'No name provided'"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">
+                                <a :href="`mailto:${customer.email}`" x-text="customer.email"></a>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">
+                                <a :href="`tel:${customer.phone}`" x-text="customer.phone || 'No phone provided'"></a>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">First Contact</span>
+                            <span class="info-value" x-text="formatDate(customer.created_at)"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Quotes</span>
+                            <span class="info-value" x-text="`${customer.quotes.length} quote(s)`"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Last Address</span>
+                            <span class="info-value" x-text="customer.address || 'No address provided'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Customer Alert -->
+                    <template x-if="customer.is_duplicate">
+                        <div class="duplicate-alert">
+                            <h4>🔄 Returning Customer Detected!</h4>
+                            <p>This customer has submitted quotes before. Review their history below for context and pricing reference.</p>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Quotes History -->
+                <div class="quotes-section">
+                    <h3 style="margin-bottom: 1rem;">📋 Quote History</h3>
+                    
+                    <template x-if="customer.quotes.length === 0">
+                        <div style="text-align: center; color: #666; padding: 1rem;">
+                            No quotes found for this customer.
+                        </div>
+                    </template>
+
+                    <template x-for="quote in customer.quotes" :key="quote.id">
+                        <div class="quote-item">
+                            <div class="quote-header">
+                                <div>
+                                    <span class="quote-id" x-text="`Quote #${quote.id}`"></span>
+                                    <span x-text="`- ${formatDate(quote.quote_created_at)}`" style="color: #666; margin-left: 0.5rem;"></span>
+                                </div>
+                                <span class="quote-status" 
+                                      :class="`status-${quote.quote_status}`"
+                                      x-text="quote.quote_status.replace('_', ' ').toUpperCase()"></span>
+                            </div>
+                            <div class="quote-details">
+                                <p><strong>Services:</strong> <span x-text="formatServices(quote.selected_services)"></span></p>
+                                <template x-if="quote.total_estimate">
+                                    <p><strong>Estimate:</strong> $<span x-text="parseFloat(quote.total_estimate).toFixed(2)"></span></p>
+                                </template>
+                                <template x-if="quote.notes">
+                                    <p><strong>Notes:</strong> <span x-text="quote.notes"></span></p>
+                                </template>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                <a :href="`/admin-dashboard.html?quote_id=${quote.id}`" 
+                                   class="btn btn-secondary" 
+                                   style="text-decoration: none; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                                    📊 Review Quote
+                                </a>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a :href="`mailto:${customer.email}`" class="btn btn-secondary">📧 Email Customer</a>
+                    <a :href="`tel:${customer.phone}`" class="btn btn-secondary">📞 Call Customer</a>
+                    <button class="btn btn-primary" @click="viewLatestQuote(customer)">📋 Latest Quote</button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        function customerCRM() {
+            return {
+                searchEmail: '',
+                searchPhone: '',
+                searchName: '',
+                searchAddress: '',
+                customers: [],
+                loading: false,
+
+                async init() {
+                    // Check URL parameters for direct customer access
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const email = urlParams.get('email');
+                    const phone = urlParams.get('phone');
+                    const name = urlParams.get('name');
+                    const address = urlParams.get('address');
+                    const customerId = urlParams.get('customer_id');
+
+                    if (email) {
+                        this.searchEmail = email;
+                        await this.searchCustomers();
+                    } else if (phone) {
+                        this.searchPhone = phone;
+                        await this.searchCustomers();
+                    } else if (name) {
+                        this.searchName = name;
+                        await this.searchCustomers();
+                    } else if (address) {
+                        this.searchAddress = address;
+                        await this.searchCustomers();
+                    } else if (customerId) {
+                        await this.searchByCustomerId(customerId);
+                    }
+                },
+
+                async searchCustomers() {
+                    if (!this.searchEmail && !this.searchPhone && !this.searchName && !this.searchAddress) {
+                        this.customers = [];
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.searchEmail) params.append('email', this.searchEmail);
+                        if (this.searchPhone) params.append('phone', this.searchPhone);
+                        if (this.searchName) params.append('name', this.searchName);
+                        if (this.searchAddress) params.append('address', this.searchAddress);
+
+                        const response = await fetch(`/server/api/customer-search.php?${params}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.customers = data.customers;
+                            // Update URL to reflect search
+                            const newUrl = new URL(window.location);
+                            if (this.searchEmail) newUrl.searchParams.set('email', this.searchEmail);
+                            if (this.searchPhone) newUrl.searchParams.set('phone', this.searchPhone);
+                            if (this.searchName) newUrl.searchParams.set('name', this.searchName);
+                            if (this.searchAddress) newUrl.searchParams.set('address', this.searchAddress);
+                            window.history.replaceState({}, '', newUrl);
+                        } else {
+                            console.error('Search failed:', data.message);
+                            this.customers = [];
+                        }
+                    } catch (error) {
+                        console.error('Error searching customers:', error);
+                        this.customers = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async searchByCustomerId(customerId) {
+                    this.loading = true;
+                    try {
+                        const response = await fetch(`/server/api/customer-search.php?customer_id=${customerId}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.customers = data.customers;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching customer:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                formatServices(servicesJson) {
+                    try {
+                        const services = JSON.parse(servicesJson || '[]');
+                        return services.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ') || 'No services specified';
+                    } catch (e) {
+                        return 'No services specified';
+                    }
+                },
+
+                viewLatestQuote(customer) {
+                    if (customer.quotes.length > 0) {
+                        const latestQuote = customer.quotes[0]; // Assuming sorted by date desc
+                        window.open(`/admin-dashboard.html?quote_id=${latestQuote.id}`, '_blank');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html> 
