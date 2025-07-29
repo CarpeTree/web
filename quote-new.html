@@ -8,65 +8,36 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
-    .quote-wizard {
-      max-width: 800px;
-      margin: 120px auto 40px;
-      padding: 0 20px;
-    }
-    
-    .step-indicator {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 40px;
-    }
-    
-    .step {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    /* Upload Progress at Top - Floating */
+    .upload-progress-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 10px;
-      font-weight: bold;
-      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
     }
     
-    .step.active {
-      background: var(--deep-forest-green);
-      color: var(--background-color);
-    }
-    
-    .step.completed {
-      background: var(--muted-golden-amber);
-      color: var(--deep-forest-green);
-    }
-    
-    .step.inactive {
-      background: #e0e0e0;
-      color: #888;
-    }
-    
-    .step-content {
-      background: var(--background-color);
-      border: 2px solid var(--deep-forest-green);
-      border-radius: 8px;
-      padding: 30px;
-      margin-bottom: 20px;
-      min-height: 400px;
-    }
-    
-    /* Upload Progress Styles */
     .upload-progress-container {
-      position: sticky;
-      top: 20px;
       background: white;
-      border: 2px solid var(--deep-forest-green);
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 100;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 3px solid var(--deep-forest-green);
+    }
+    
+    .upload-progress-container h3 {
+      color: var(--deep-forest-green);
+      margin: 0 0 20px 0;
+      text-align: center;
+      font-size: 1.5rem;
     }
     
     .upload-progress-item {
@@ -93,9 +64,9 @@
     
     .progress-bar {
       width: 100%;
-      height: 8px;
+      height: 10px;
       background: #e0e0e0;
-      border-radius: 4px;
+      border-radius: 5px;
       overflow: hidden;
       margin: 10px 0;
     }
@@ -103,7 +74,7 @@
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--deep-forest-green), var(--muted-golden-amber));
-      border-radius: 4px;
+      border-radius: 5px;
       transition: width 0.3s ease;
       width: 0%;
     }
@@ -155,6 +126,14 @@
       color: var(--deep-forest-green);
     }
     
+    /* Form disabled state */
+    .form-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      filter: blur(2px);
+    }
+    
+    /* File preview improvements */
     .file-preview {
       display: flex;
       flex-wrap: wrap;
@@ -213,27 +192,9 @@
       font-size: 0.8rem;
     }
     
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-      .quote-wizard {
-        margin-top: 150px;
-        padding: 0 15px;
-      }
-      
-      .step-content {
-        padding: 20px;
-      }
-      
-      .upload-progress-container {
-        position: relative;
-        margin: 10px 0;
-        padding: 15px;
-      }
-      
-      .file-preview-item {
-        width: 100px;
-        height: 100px;
-      }
+    /* Auto-scroll animation */
+    .auto-scroll {
+      scroll-behavior: smooth;
     }
   </style>
 </head>
@@ -267,14 +228,10 @@
     </div>
   </nav>
 
-  <div class="quote-wizard" x-data="quoteWizardWithProgress()">
-    <h1 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 30px;">
-      🌳 Get Your Tree Service Quote
-    </h1>
-    
-    <!-- Upload Progress Display -->
-    <div x-show="uploadProgress.visible" class="upload-progress-container">
-      <h3>📤 Upload Progress</h3>
+  <!-- Upload Progress Overlay (blocks everything during upload) -->
+  <div x-show="uploadProgress.visible" class="upload-progress-overlay" x-transition>
+    <div class="upload-progress-container">
+      <h3>📤 Uploading Files...</h3>
       
       <!-- Individual File Progress -->
       <template x-for="file in uploadProgress.files" :key="file.id">
@@ -306,23 +263,22 @@
         </div>
       </div>
     </div>
-    
-    <!-- Step Indicator -->
-    <div class="step-indicator">
-      <div class="step" :class="getStepClass(1)">1</div>
-      <div class="step" :class="getStepClass(2)">2</div>
-      <div class="step" :class="getStepClass(3)">3</div>
-    </div>
+  </div>
 
-    <!-- Step 1: Service Selection -->
-    <div class="step-content" x-show="currentStep === 1" x-transition>
-      <h2>Step 1: What tree services do you need?</h2>
+  <div class="quote-wizard" x-data="improvedQuoteWizard()" :class="{ 'form-disabled': uploadProgress.visible }">
+    <h1 style="text-align: center; color: var(--deep-forest-green); margin-bottom: 30px;">
+      🌳 Get Your Tree Service Quote
+    </h1>
+    
+    <!-- Service Selection -->
+    <div class="step-content">
+      <h2>What tree services do you need?</h2>
       <p>Select all services that apply to your property:</p>
       
       <div class="service-grid">
         <template x-for="service in services">
           <label class="service-option">
-            <input type="checkbox" :value="service.id" x-model="selectedServices">
+            <input type="checkbox" :value="service.id" x-model="selectedServices" @change="onServiceChange()">
             <div class="service-card">
               <div class="service-icon" x-text="service.icon"></div>
               <h3 x-text="service.name"></h3>
@@ -331,18 +287,12 @@
           </label>
         </template>
       </div>
-      
-      <div class="navigation-buttons">
-        <button type="button" class="btn btn-primary" @click="nextStep()" :disabled="selectedServices.length === 0">
-          Next: Upload Photos/Videos
-        </button>
-      </div>
     </div>
 
-    <!-- Step 2: Media Upload with Real-time Progress -->
-    <div class="step-content" x-show="currentStep === 2" x-transition>
-      <h2>Step 2: Upload Photos & Videos</h2>
-      <p>Upload videos and photos of your trees for a detailed quote within 24 hours.</p>
+    <!-- File Upload Section (shows after service selection) -->
+    <div class="step-content" x-show="selectedServices.length > 0" x-transition id="upload-section">
+      <h2>Upload Photos & Videos (Optional)</h2>
+      <p>Upload videos and photos of your trees for a more detailed quote.</p>
       
       <div class="upload-zone" @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
         <input type="file" id="fileInput" multiple accept="image/*,video/*" @change="handleFileSelect" style="display: none;">
@@ -370,19 +320,17 @@
         </template>
       </div>
       
-      <div class="navigation-buttons">
-        <button type="button" class="btn" @click="prevStep()">Back</button>
-        <button type="button" class="btn btn-primary" @click="startUploadAndProceed()">
-          <span x-show="!uploadProgress.visible">Next: Contact Information</span>
-          <span x-show="uploadProgress.visible">Uploading...</span>
+      <div class="navigation-buttons" x-show="!uploadProgress.visible">
+        <button type="button" class="btn btn-primary" @click="proceedToForm()">
+          Continue to Contact Information
         </button>
       </div>
     </div>
 
-    <!-- Step 3: Contact Information -->
-    <div class="step-content" x-show="currentStep === 3" x-transition>
-      <h2>Step 3: Contact Information</h2>
-      <p>Upload videos and photos of your trees for a detailed quote within 24 hours.</p>
+    <!-- Contact Information Form -->
+    <div class="step-content" x-show="showContactForm" x-transition id="contact-section">
+      <h2>Contact Information</h2>
+      <p>Tell us about your project and how to reach you.</p>
       
       <form @submit.prevent="submitQuote()">
         <div class="form-group">
@@ -436,7 +384,6 @@
         </div>
         
         <div class="navigation-buttons">
-          <button type="button" class="btn" @click="prevStep()">Back</button>
           <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
             <span x-show="!submitting">Submit Quote Request</span>
             <span x-show="submitting">Submitting...</span>
@@ -468,7 +415,6 @@
       
       if (menuToggle && navLinks) {
         
-        // Toggle menu on hamburger click
         menuToggle.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -482,7 +428,6 @@
           }
         });
         
-        // Touch event for mobile
         menuToggle.addEventListener('touchstart', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -496,7 +441,6 @@
           }
         });
         
-        // Close menu when a link is clicked
         const navItems = document.querySelectorAll('.nav-links a');
         navItems.forEach(item => {
           item.addEventListener('click', function() {
@@ -504,7 +448,6 @@
           });
         });
         
-        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
           if (navLinks.classList.contains('active') && 
               !navLinks.contains(e.target) && 
@@ -513,7 +456,6 @@
           }
         });
         
-        // Close menu on escape key
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape' && navLinks.classList.contains('active')) {
             closeMenu();
@@ -539,11 +481,11 @@
   </script>
   
   <script>
-    function quoteWizardWithProgress() {
+    function improvedQuoteWizard() {
       return {
-        currentStep: 1,
         submitting: false,
         submitted: false,
+        showContactForm: false,
         uploadedFiles: [],
         uploadProgress: {
           visible: false,
@@ -574,6 +516,18 @@
           referrerName: '',
           newsletterOptIn: false,
           notes: ''
+        },
+
+        onServiceChange() {
+          // Auto-scroll to upload section when first service is selected
+          if (this.selectedServices.length === 1) {
+            this.$nextTick(() => {
+              document.getElementById('upload-section').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+            });
+          }
         },
 
         handleFileSelect(event) {
@@ -614,6 +568,11 @@
             
             this.uploadedFiles.push(fileData);
           });
+          
+          // Auto-upload files immediately
+          if (fileList.length > 0) {
+            this.startFileUploads();
+          }
         },
 
         removeFile(index) {
@@ -624,12 +583,7 @@
           this.uploadedFiles.splice(index, 1);
         },
 
-        async startUploadAndProceed() {
-          if (this.uploadedFiles.length === 0) {
-            this.nextStep();
-            return;
-          }
-          
+        async startFileUploads() {
           this.uploadProgress.visible = true;
           this.uploadProgress.files = [];
           
@@ -647,15 +601,17 @@
           });
           
           try {
-            // Upload files one by one to avoid overwhelming mobile connections
+            // Upload files one by one
             for (let i = 0; i < this.uploadedFiles.length; i++) {
               await this.uploadSingleFile(i);
             }
             
             // All files uploaded successfully
             this.updateOverallProgress();
+            
+            // Hide upload overlay and enable form
             setTimeout(() => {
-              this.nextStep();
+              this.uploadProgress.visible = false;
             }, 1000);
             
           } catch (error) {
@@ -685,7 +641,6 @@
                 progressItem.status = 'uploading';
                 progressItem.statusText = 'Uploading';
                 
-                // Calculate speed
                 const elapsed = (Date.now() - startTime) / 1000;
                 const speed = e.loaded / elapsed;
                 progressItem.speedText = this.formatSpeed(speed);
@@ -735,20 +690,14 @@
           }
         },
 
-        formatFileSize(bytes) {
-          if (bytes === 0) return '0 Bytes';
-          const k = 1024;
-          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-          const i = Math.floor(Math.log(bytes) / Math.log(k));
-          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        },
-
-        formatSpeed(bytesPerSecond) {
-          if (bytesPerSecond === 0) return '0 B/s';
-          const k = 1024;
-          const sizes = ['B/s', 'KB/s', 'MB/s'];
-          const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
-          return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        proceedToForm() {
+          this.showContactForm = true;
+          this.$nextTick(() => {
+            document.getElementById('contact-section').scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          });
         },
 
         async submitQuote() {
@@ -760,7 +709,6 @@
             // Add form data with validation
             Object.keys(this.formData).forEach(key => {
               let value = this.formData[key];
-              // Convert boolean to string, handle empty values
               if (typeof value === 'boolean') {
                 value = value ? '1' : '0';
               } else if (value === null || value === undefined) {
@@ -780,17 +728,7 @@
               .map(f => f.id);
             formData.append('uploadedFileIds', JSON.stringify(uploadedFileIds));
             
-            // Debug logging
-            console.log('=== SUBMISSION DEBUG ===');
-            console.log('Selected services:', this.selectedServices);
-            console.log('Uploaded files:', this.uploadedFiles);
-            console.log('Uploaded file IDs:', uploadedFileIds);
-            console.log('Form data entries:');
-            for (let [key, value] of formData.entries()) {
-              console.log(`${key}:`, value);
-            }
-            
-            const response = await fetch('/server/api/submitQuote-with-progress-debug.php', {
+            const response = await fetch('/server/api/submitQuote.php', {
               method: 'POST',
               body: formData
             });
@@ -808,8 +746,15 @@
             }
             
             if (response.ok && result.success) {
+              console.log('Quote submitted successfully:', result);
+              
+              // Log if customer was detected as duplicate (for admin awareness)
+              if (result.is_duplicate_customer) {
+                console.log('🔄 Returning customer detected! Match type:', result.duplicate_match_type);
+                console.log('📊 CRM Dashboard URL:', result.crm_dashboard_url);
+              }
+              
               this.submitted = true;
-              this.currentStep = 4;
             } else {
               throw new Error(result.error || 'Submission failed');
             }
@@ -822,22 +767,20 @@
           this.submitting = false;
         },
 
-        nextStep() {
-          if (this.currentStep < 3) {
-            this.currentStep++;
-          }
+        formatFileSize(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         },
 
-        prevStep() {
-          if (this.currentStep > 1) {
-            this.currentStep--;
-          }
-        },
-
-        getStepClass(stepNumber) {
-          if (stepNumber < this.currentStep) return 'completed';
-          if (stepNumber === this.currentStep) return 'active';
-          return 'inactive';
+        formatSpeed(bytesPerSecond) {
+          if (bytesPerSecond === 0) return '0 B/s';
+          const k = 1024;
+          const sizes = ['B/s', 'KB/s', 'MB/s'];
+          const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
+          return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
       }
     }
