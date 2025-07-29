@@ -757,9 +757,18 @@
           try {
             const formData = new FormData();
             
-            // Add form data
+            // Add form data with validation
             Object.keys(this.formData).forEach(key => {
-              formData.append(key, this.formData[key]);
+              let value = this.formData[key];
+              // Convert boolean to string, handle empty values
+              if (typeof value === 'boolean') {
+                value = value ? '1' : '0';
+              } else if (value === null || value === undefined) {
+                value = '';
+              } else {
+                value = String(value);
+              }
+              formData.append(key, value);
             });
             
             // Add selected services

@@ -33,6 +33,18 @@ try {
     }
     debugLog("Email format validation passed");
     
+    // Additional field validation to catch pattern issues
+    $fields_to_check = ['name', 'phone', 'address', 'referralSource', 'referrerName', 'notes'];
+    foreach ($fields_to_check as $field) {
+        $value = $_POST[$field] ?? '';
+        debugLog("Field '$field' value: '" . $value . "' (length: " . strlen($value) . ")");
+        
+        // Check for any non-printable characters that might cause pattern issues
+        if (preg_match('/[^\x20-\x7E\r\n\t]/', $value)) {
+            debugLog("WARNING: Field '$field' contains non-printable characters");
+        }
+    }
+    
     // Start transaction
     $pdo->beginTransaction();
     debugLog("Transaction started");
