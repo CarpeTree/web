@@ -285,8 +285,8 @@ try {
     // Trigger AI processing for quotes with media (asynchronous)
     if ($file_count > 0) {
         try {
-            // Trigger AI analysis in background
-            $ai_url = 'https://carpetree.com/server/api/aiQuote.php?quote_id=' . $quote_id;
+            // Trigger AI analysis in background  
+            $ai_url = 'https://carpetree.com/server/api/simple-ai-analysis.php?quote_id=' . $quote_id;
             
             // Use cURL to trigger AI processing asynchronously
             $curl = curl_init();
