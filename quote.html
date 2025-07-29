@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
+    [x-cloak] { display: none !important; }
+  </style>
+  <style>
     /* Upload Progress at Top - Floating */
     .upload-progress-overlay {
       position: fixed;
@@ -229,7 +232,7 @@
   </nav>
 
   <!-- Upload Progress Overlay (blocks everything during upload) -->
-  <div x-show="uploadProgress.visible" class="upload-progress-overlay" x-transition>
+  <div x-show="uploadProgress.visible" class="upload-progress-overlay" x-transition x-cloak>
     <div class="upload-progress-container">
       <h3>📤 Uploading Files...</h3>
       
@@ -492,6 +495,10 @@
           files: [],
           overall: 0,
           eta: ''
+        },
+        
+        init() {
+          console.log('Alpine.js initialized, uploadProgress.visible:', this.uploadProgress.visible);
         },
         
         services: [
