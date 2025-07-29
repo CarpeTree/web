@@ -269,6 +269,42 @@ try {
     ob_clean();
     echo json_encode($response);
     
+    // Background processing (after response sent)
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+    
+    // Quick AI assessment
+    try {
+        require_once __DIR__ . '/quick-ai-assessment.php';
+        $quick_assessment = quickAIAssessment($quote_id);
+        debugLog("Quick assessment for quote $quote_id: Category={$quick_assessment['category']}, Score={$quick_assessment['sufficiency_score']}/100");
+    } catch (Exception $e) {
+        debugLog("Quick assessment failed for quote $quote_id: " . $e->getMessage());
+    }
+    
+    // Send admin notification
+    try {
+        debugLog("Sending admin notification email");
+        require_once __DIR__ . '/admin-notification-simple.php';
+        $admin_notification_sent = sendSimpleAdminAlert($quote_id);
+        debugLog("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
+    } catch (Exception $e) {
+        debugLog("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
+    }
+    
+    // Trigger AI processing asynchronously if files were uploaded
+    if (!empty($uploaded_file_ids)) {
+        try {
+            $ai_script = __DIR__ . '/aiQuote.php';
+            $command = "cd " . dirname(__DIR__) . " && php api/aiQuote.php $quote_id > /dev/null 2>&1 &";
+            exec($command);
+            debugLog("AI processing triggered for quote $quote_id");
+        } catch (Exception $e) {
+            debugLog("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
+        }
+    }
+    
 } catch (Exception $e) {
     debugLog("EXCEPTION CAUGHT: " . $e->getMessage());
     debugLog("Exception trace: " . $e->getTraceAsString());
