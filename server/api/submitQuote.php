@@ -206,12 +206,12 @@ try {
             $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
             $stmt->execute([$quote_id]);
         } else {
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted_no_files' WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
             $stmt->execute([$quote_id]);
         }
     } else {
-        // If no files were uploaded, set status to submitted_no_files
-        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted_no_files' WHERE id = ?");
+        // If no files were uploaded, set status to submitted
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
         $stmt->execute([$quote_id]);
     }
     

@@ -73,7 +73,13 @@ function loadEmailTemplate($template, $data) {
     
     // Replace placeholders with data
     foreach ($data as $key => $value) {
-        $html = str_replace("{{$key}}", htmlspecialchars($value), $html);
+        // Handle arrays and objects by converting to string
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode($value);
+        } elseif ($value === null) {
+            $value = '';
+        }
+        $html = str_replace("{{$key}}", htmlspecialchars((string)$value), $html);
     }
     
     // Add default values
