@@ -500,13 +500,21 @@
 
                 async loadQuotes() {
                     try {
-                        // Try relative path first, then absolute
+                        // Try simplified API first for debugging, then fallback to regular
                         let response;
                         try {
-                            response = await fetch('./server/api/admin-quotes.php');
+                            response = await fetch('./server/api/admin-quotes-simple.php');
+                            if (!response.ok) {
+                                throw new Error('Simplified API failed');
+                            }
                         } catch (e) {
-                            // Fallback to absolute path
-                            response = await fetch('/server/api/admin-quotes.php');
+                            console.log('Trying regular API...', e.message);
+                            // Fallback to regular API
+                            try {
+                                response = await fetch('./server/api/admin-quotes.php');
+                            } catch (e2) {
+                                response = await fetch('/server/api/admin-quotes.php');
+                            }
                         }
                         
                         if (!response.ok) {
@@ -521,6 +529,11 @@
                         
                         this.quotes = data.quotes || [];
                         this.loading = false;
+                        
+                        if (data.message) {
+                            console.log('API Response:', data.message);
+                        }
+                        
                     } catch (error) {
                         console.error('Error loading quotes:', error);
                         this.loading = false;
