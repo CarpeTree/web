@@ -264,8 +264,8 @@ try {
     
     // Now send simple admin notification without blocking user
     try {
-        require_once __DIR__ . '/admin-notification-simple.php';
-        $admin_notification_sent = sendSimpleAdminAlert($quote_id);
+        require_once __DIR__ . '/admin-notification.php';
+        $admin_notification_sent = sendAdminNotification($quote_id);
         error_log("Simple admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
     } catch (Exception $e) {
         error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
