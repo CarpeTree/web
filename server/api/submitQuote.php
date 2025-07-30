@@ -119,8 +119,12 @@ try {
                 address = COALESCE(?, address), 
                 referral_source = COALESCE(?, referral_source),
                 referrer_name = COALESCE(?, referrer_name),
-                ip_address = ?, user_agent = ?, 
-                geo_latitude = ?, geo_longitude = ?, geo_accuracy = ?,
+                newsletter_opt_in = COALESCE(?, newsletter_opt_in),
+                ip_address = COALESCE(?, ip_address), 
+                user_agent = COALESCE(?, user_agent), 
+                geo_latitude = COALESCE(?, geo_latitude), 
+                geo_longitude = COALESCE(?, geo_longitude), 
+                geo_accuracy = COALESCE(?, geo_accuracy),
                 updated_at = NOW() 
             WHERE id = ?
         ");
@@ -130,6 +134,7 @@ try {
             $_POST['address'] ?? null,
             $_POST['referral_source'] ?? null,
             $_POST['referrer_name'] ?? null,
+            isset($_POST['newsletter_opt_in']) ? 1 : 0,
             $ip_address,
             $user_agent,
             $geo_latitude ? (float)$geo_latitude : null,
