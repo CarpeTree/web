@@ -44,9 +44,12 @@ try {
     // Helper to extract key frames and audio from video using ffmpeg
 function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { // 0 = no limit
     $frames = [];
+    error_log("extractVideoFrames called with: $videoPath");
     if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
+        error_log("FFmpeg not found in /usr/bin/ffmpeg or PATH");
         return $frames; // ffmpeg not available
     }
+    error_log("FFmpeg found, proceeding with frame extraction");
     $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
     mkdir($tmpDir);
     
@@ -65,8 +68,10 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { 
             escapeshellarg($tmpDir)
         );
     }
+    error_log("Executing FFmpeg command: $cmd");
     shell_exec($cmd);
     $files = glob($tmpDir . '/frame_*.jpg');
+    error_log("Found " . count($files) . " extracted frames");
     foreach ($files as $frameFile) {
         $imageData = base64_encode(file_get_contents($frameFile));
         $frames[] = [
