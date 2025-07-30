@@ -41,7 +41,38 @@ try {
     $media_summary = [];
     $has_images = false;
 
-    foreach ($media_files as $media) {
+    // Helper to extract key frames from video using ffmpeg
+function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 5) {
+    $frames = [];
+    if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
+        return $frames; // ffmpeg not available
+    }
+    $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
+    mkdir($tmpDir);
+    $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+        escapeshellarg($videoPath),
+        (int)$secondsInterval,
+        (int)$maxFrames,
+        escapeshellarg($tmpDir)
+    );
+    shell_exec($cmd);
+    $files = glob($tmpDir . '/frame_*.jpg');
+    foreach ($files as $frameFile) {
+        $imageData = base64_encode(file_get_contents($frameFile));
+        $frames[] = [
+            'type' => 'image_url',
+            'image_url' => [
+                'url' => 'data:image/jpeg;base64,' . $imageData,
+                'detail' => 'high'
+            ]
+        ];
+        unlink($frameFile);
+    }
+    rmdir($tmpDir);
+    return $frames;
+}
+
+foreach ($media_files as $media) {
         $filename = $media['filename'] ?? 'unknown';
         $file_type = $media['mime_type'] ?? $media['file_type'] ?? '';
         
@@ -70,11 +101,31 @@ try {
             }
         } elseif (strpos($file_type, 'video/') === 0) {
             $size = isset($media['file_size']) ? round($media['file_size'] / (1024*1024), 1) : 'unknown';
-            $media_content[] = [
-                'type' => 'text',
-                'text' => "🎬 Video file: $filename ($size MB). Contains tree/site footage requiring manual review."
+            // Extract key frames for analysis
+            $videoPathOptions = [
+                __DIR__ . '/../../uploads/' . $quote_id . '/' . $filename,
+                __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $filename
             ];
-            $media_summary[] = "🎬 $filename";
+            $framesAdded = false;
+            foreach ($videoPathOptions as $vp) {
+                if (file_exists($vp)) {
+                    $frames = extractVideoFrames($vp, 5, 4); // 4 frames every 5s (~20s coverage)
+                    if ($frames) {
+                        $media_content = array_merge($media_content, $frames);
+                        $media_summary[] = "🎬 $filename (" . count($frames) . " frames)";
+                        $has_images = true;
+                        $framesAdded = true;
+                    }
+                    break;
+                }
+            }
+            if (!$framesAdded) {
+                // fallback text
+                $media_content[] = [
+                    'type' => 'text',
+                    'text' => "🎬 Video file: $filename ($size MB). Frames unavailable."
+                ];
+                            }
         }
     }
 
