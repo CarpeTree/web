@@ -22,7 +22,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             q.id, q.customer_id, q.quote_status, q.selected_services, q.notes,
-            q.ai_response_json, q.created_at,
+            q.ai_response_json, q.quote_created_at,
             c.name as customer_name, c.email as customer_email, c.phone as customer_phone, 
             c.address, c.referral_source, c.referrer_name,
             c.geo_latitude, c.geo_longitude, c.geo_accuracy, c.ip_address,
@@ -31,7 +31,7 @@ try {
         JOIN customers c ON q.customer_id = c.id
         LEFT JOIN media m ON q.id = m.quote_id
         GROUP BY q.id
-        ORDER BY q.created_at DESC
+        ORDER BY q.quote_created_at DESC
         LIMIT 50
     ");
     $stmt->execute();
