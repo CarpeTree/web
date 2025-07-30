@@ -42,7 +42,7 @@ try {
     $has_images = false;
 
     // Helper to extract key frames and audio from video using ffmpeg
-function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 5) {
+function extractVideoFrames($videoPath, $secondsInterval = 3, $maxFrames = 15) {
     $frames = [];
     if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
         return $frames; // ffmpeg not available
@@ -165,7 +165,7 @@ foreach ($media_files as $media) {
             $framesAdded = false;
             foreach ($videoPathOptions as $vp) {
                 if (file_exists($vp)) {
-                    $frames = extractVideoFrames($vp, 5, 4); // 4 frames every 5s (~20s coverage)
+                    $frames = extractVideoFrames($vp, 3, 15); // 15 frames every 3s (better coverage)
                     $transcription = extractAndTranscribeAudio($vp); // Extract audio transcription
                     
                     if ($frames) {
