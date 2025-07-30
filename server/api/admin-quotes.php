@@ -169,13 +169,23 @@ try {
             $distance_km = 40; // Default fallback
         }
         
-        // If distance still fallback and we have address, try AI calculator for better accuracy
+        // If distance still fallback and we have address, try Google Maps for better accuracy
         if ($distance_km == 40 && !empty($quote['address'])) {
             try {
-                require_once __DIR__ . '/ai-distance-calculator.php';
-                $distance_km = calculateDistanceWithAI($quote['address']);
+                require_once __DIR__ . '/google-distance-calculator.php';
+                $distance_result = calculateDistanceMultiSource(
+                    $quote['address'], 
+                    $quote['geo_latitude'], 
+                    $quote['geo_longitude']
+                );
+                if ($distance_result && $distance_result['distance_km'] > 0) {
+                    $distance_km = $distance_result['distance_km'];
+                    // Store additional travel info for potential display
+                    $quotes[$i]['travel_time'] = $distance_result['duration_with_traffic'] ?? null;
+                    $quotes[$i]['distance_source'] = $distance_result['source'] ?? 'calculated';
+                }
             } catch (Exception $e) {
-                error_log("AI distance calc in dashboard failed: " . $e->getMessage());
+                error_log("Google Maps distance calc in dashboard failed: " . $e->getMessage());
             }
         }
 
