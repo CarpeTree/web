@@ -18,10 +18,7 @@ try {
         exit;
     }
     
-    // Start transaction
-    $pdo->beginTransaction();
-    
-    // Add GPS columns
+    // Add GPS columns (without transaction - DDL statements auto-commit)
     $pdo->exec("ALTER TABLE customers 
         ADD COLUMN geo_latitude DECIMAL(10, 8) DEFAULT NULL,
         ADD COLUMN geo_longitude DECIMAL(11, 8) DEFAULT NULL,
@@ -33,8 +30,6 @@ try {
     $pdo->exec("CREATE INDEX idx_customers_geo ON customers (geo_latitude, geo_longitude)");
     $pdo->exec("CREATE INDEX idx_customers_ip ON customers (ip_address)");
     
-    $pdo->commit();
-    
     echo json_encode([
         'success' => true,
         'message' => 'GPS columns added successfully',
@@ -42,10 +37,6 @@ try {
     ]);
     
 } catch (Exception $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollback();
-    }
-    
     http_response_code(500);
     echo json_encode([
         'success' => false,
