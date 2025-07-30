@@ -127,9 +127,15 @@ try {
             );
         }
         error_log("Executing FFmpeg command: $cmd");
-        shell_exec($cmd);
-        $files = glob($tmpDir . '/frame_*.jpg');
-        error_log("Found " . count($files) . " extracted frames");
+        if (function_exists('shell_exec')) {
+            shell_exec($cmd);
+            $files = glob($tmpDir . '/frame_*.jpg');
+            error_log("Found " . count($files) . " extracted frames");
+        } else {
+            error_log("shell_exec() disabled on server - cannot extract video frames");
+            rmdir($tmpDir);
+            return $frames; // Return empty frames array
+        }
         foreach ($files as $frameFile) {
             $imageData = base64_encode(file_get_contents($frameFile));
             $frames[] = [
