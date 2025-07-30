@@ -107,7 +107,7 @@ try {
 
     // ChatGPT o3 - Your proven tree care specialist with minimal editing required
     $openai_request = [
-        'model' => (getenv('AI_MODEL') ?: 'gpt-4o-mini'),
+        'model' => 'o3',
         'messages' => $messages,
         'temperature' => 0.2,
         'max_tokens' => 2000  // gpt-4o uses max_tokens
