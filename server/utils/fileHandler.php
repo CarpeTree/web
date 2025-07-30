@@ -5,19 +5,30 @@ function validateFileType($mimeType) {
     $allowed_types = [
         'image/jpeg', 'image/png', 'image/webp', 'image/heic',
         'video/mp4', 'video/quicktime', 'video/x-msvideo',
-        'audio/mpeg', 'audio/mp4', 'audio/wav'
+        'audio/mpeg', 'audio/mp4', 'audio/wav',
+        'application/octet-stream' // Allow generic binary type (browser fallback)
     ];
     
     return in_array($mimeType, $allowed_types);
 }
 
-function getFileTypeCategory($mimeType) {
+function getFileTypeCategory($mimeType, $filename = '') {
     if (strpos($mimeType, 'image/') === 0) {
         return 'image';
     } elseif (strpos($mimeType, 'video/') === 0) {
         return 'video';
     } elseif (strpos($mimeType, 'audio/') === 0) {
         return 'audio';
+    } elseif ($mimeType === 'application/octet-stream' && $filename) {
+        // For generic binary type, check file extension
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'heic'])) {
+            return 'image';
+        } elseif (in_array($extension, ['mp4', 'mov', 'avi'])) {
+            return 'video';
+        } elseif (in_array($extension, ['mp3', 'm4a', 'wav'])) {
+            return 'audio';
+        }
     }
     return 'unknown';
 }
@@ -49,13 +60,9 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
     }
     
     // Determine file type category
-    $file_type = 'other';
-    if (strpos($file['type'], 'image/') === 0) {
-        $file_type = 'image';
-    } elseif (strpos($file['type'], 'video/') === 0) {
-        $file_type = 'video';
-    } elseif (strpos($file['type'], 'audio/') === 0) {
-        $file_type = 'audio';
+    $file_type = getFileTypeCategory($file['type'], $file['name']);
+    if ($file_type === 'unknown') {
+        $file_type = 'other';
     }
     
     // Extract EXIF data for images

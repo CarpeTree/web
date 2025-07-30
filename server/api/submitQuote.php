@@ -1,18 +1,12 @@
 <?php
 // Quick fix version - admin notifications made async
 header('Content-Type: application/json');
-file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Script started\n", FILE_APPEND);
 require_once __DIR__ . '/../config/database-simple.php';
-file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Database loaded\n", FILE_APPEND);
-$pdo_id = spl_object_hash($pdo);
-file_put_contents('debug.log', date('Y-m-d H:i:s') . " - PDO object ID: $pdo_id\n", FILE_APPEND);
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../utils/fileHandler.php';
 require_once __DIR__ . '/../utils/mailer.php';
-file_put_contents('debug.log', date('Y-m-d H:i:s') . " - All includes loaded\n", FILE_APPEND);
 
 try {
-    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Inside try block\n", FILE_APPEND);
     // Validate required fields
     if (empty($_POST['email'])) {
         throw new Exception('Email is required');
@@ -34,9 +28,7 @@ try {
     }
     
     // Start database transaction
-    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to start transaction. PDO ID: " . spl_object_hash($pdo) . "\n", FILE_APPEND);
     $pdo->beginTransaction();
-    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - Transaction started. inTransaction(): " . ($pdo->inTransaction() ? 'true' : 'false') . "\n", FILE_APPEND);
     
     // Enhanced location and IP tracking
     $ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
@@ -63,7 +55,7 @@ try {
     }
     error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . $location_info);
     
-    // Enhanced duplicate customer detection by email, phone, name, AND address (check FIRST)
+    // Enhanced duplicate customer detection FIRST (before creating customer)
     $customer = null;
     $is_duplicate = false;
     $duplicate_match_type = '';
@@ -76,6 +68,7 @@ try {
     if ($customer) {
         $duplicate_match_type = 'email';
         $customer_id = $customer['id'];
+        $is_duplicate = true;
     }
     
     // If not found by email, check by phone (if provided)
@@ -90,6 +83,7 @@ try {
         if ($customer) {
             $duplicate_match_type = 'phone';
             $customer_id = $customer['id'];
+            $is_duplicate = true;
         }
     }
     
@@ -105,23 +99,11 @@ try {
         if ($customer) {
             $duplicate_match_type = 'name+address';
             $customer_id = $customer['id'];
+            $is_duplicate = true;
         }
     }
     
-    // If not found by exact match, check by address only (broader match)
-    if (!$customer && !empty($_POST['address'])) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE LOWER(TRIM(address)) = LOWER(TRIM(?))
-        ");
-        $stmt->execute([$_POST['address']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'address';
-            $customer_id = $customer['id'];
-        }
-    }
-    
+    // If found existing customer, update their info
     if ($customer) {
         // Check if this is a returning customer (has previous quotes)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM quotes WHERE customer_id = ?");
@@ -137,6 +119,8 @@ try {
                 address = COALESCE(?, address), 
                 referral_source = COALESCE(?, referral_source),
                 referrer_name = COALESCE(?, referrer_name),
+                ip_address = ?, user_agent = ?, 
+                geo_latitude = ?, geo_longitude = ?, geo_accuracy = ?,
                 updated_at = NOW() 
             WHERE id = ?
         ");
@@ -144,12 +128,17 @@ try {
             $_POST['name'] ?? null,
             $_POST['phone'] ?? null,
             $_POST['address'] ?? null,
-            $_POST['howDidYouHear'] ?? null,
-            $_POST['referrerName'] ?? null,
+            $_POST['referral_source'] ?? null,
+            $_POST['referrer_name'] ?? null,
+            $ip_address,
+            $user_agent,
+            $geo_latitude ? (float)$geo_latitude : null,
+            $geo_longitude ? (float)$geo_longitude : null,
+            $geo_accuracy ? (float)$geo_accuracy : null,
             $customer_id
         ]);
         
-        // Log duplicate customer detection with match type
+        // Log duplicate customer detection
         if ($is_duplicate) {
             error_log("DUPLICATE CUSTOMER DETECTED: Customer ID $customer_id ({$_POST['email']}) has submitted before - matched by: $duplicate_match_type");
         }
@@ -157,24 +146,27 @@ try {
         // Create new customer
         $stmt = $pdo->prepare("
             INSERT INTO customers (
-                email, name, phone, address, referral_source, referrer_name, newsletter_opt_in,
+                name, email, phone, address, referral_source, referrer_name, newsletter_opt_in, 
                 ip_address, user_agent, geo_latitude, geo_longitude, geo_accuracy, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
+        
         $stmt->execute([
-            $_POST['email'],
             $_POST['name'] ?? '',
+            $_POST['email'],
             $_POST['phone'] ?? null,
             $_POST['address'] ?? null,
-            $_POST['howDidYouHear'] ?? null,
-            $_POST['referrerName'] ?? null,
+            $_POST['referral_source'] ?? null,
+            $_POST['referrer_name'] ?? null,
             isset($_POST['newsletter_opt_in']) ? 1 : 0,
             $ip_address,
             $user_agent,
             $geo_latitude ? (float)$geo_latitude : null,
             $geo_longitude ? (float)$geo_longitude : null,
-            $geo_accuracy ? (float)$geo_accuracy : null
+            $geo_accuracy ? (float)$geo_accuracy : null,
+            $timestamp
         ]);
+        
         $customer_id = $pdo->lastInsertId();
         $is_duplicate = false;
     }
@@ -219,70 +211,70 @@ try {
     // Process uploaded files if any
     $uploaded_files = [];
     if ($files_uploaded) {
-        // Create upload directory with full path
-        $uploads_base = dirname(dirname(__DIR__)) . '/uploads';
-        if (!file_exists($uploads_base)) {
-            mkdir($uploads_base, 0755, true);
-        }
-        
-        $upload_dir = "$uploads_base/$quote_id";
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        
-        // Process uploaded files
-        $files = $_FILES['files'];
-        
-        // Handle multiple files
-        if (is_array($files['tmp_name'])) {
-            for ($i = 0; $i < count($files['tmp_name']); $i++) {
-                if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                    $result = processUploadedFile([
-                        'tmp_name' => $files['tmp_name'][$i],
-                        'name' => $files['name'][$i],
-                        'size' => $files['size'][$i],
-                        'type' => $files['type'][$i]
-                    ], $quote_id, $upload_dir, $pdo);
-                    
+        try {
+            // Create upload directory with full path
+            $uploads_base = dirname(dirname(__DIR__)) . '/uploads';
+            if (!file_exists($uploads_base)) {
+                mkdir($uploads_base, 0755, true);
+            }
+            
+            $upload_dir = "$uploads_base/$quote_id";
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+            
+            // Process uploaded files
+            $files = $_FILES['files'];
+            
+            // Handle multiple files
+            if (is_array($files['tmp_name'])) {
+                for ($i = 0; $i < count($files['tmp_name']); $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $result = processUploadedFile([
+                            'tmp_name' => $files['tmp_name'][$i],
+                            'name' => $files['name'][$i],
+                            'size' => $files['size'][$i],
+                            'type' => $files['type'][$i]
+                        ], $quote_id, $upload_dir, $pdo);
+                        
+                        if ($result) {
+                            $uploaded_files[] = $result;
+                        }
+                    }
+                }
+            } else {
+                // Single file
+                if ($files['error'] === UPLOAD_ERR_OK) {
+                    $result = processUploadedFile($files, $quote_id, $upload_dir, $pdo);
                     if ($result) {
                         $uploaded_files[] = $result;
                     }
+                } else {
+                    error_log("File error: " . $files['error']);
                 }
             }
-        } else {
-            // Single file
-            if ($files['error'] === UPLOAD_ERR_OK) {
-                $result = processUploadedFile($files, $quote_id, $upload_dir, $pdo);
-                if ($result) {
-                    $uploaded_files[] = $result;
-                }
-            }
+        } catch (Exception $e) {
+            // Log file processing error but don't let it break the transaction
+            error_log("File processing error for quote $quote_id: " . $e->getMessage());
         }
-        
-        // Update quote status based on whether files were uploaded
-        if (!empty($uploaded_files)) {
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-        }
+    }
+    
+    // Update quote status based on whether files were uploaded (do this BEFORE commit)
+    if (!empty($uploaded_files)) {
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+        $stmt->execute([$quote_id]);
     } else {
-        // If no files were uploaded, set status to submitted
         $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
         $stmt->execute([$quote_id]);
     }
     
-    // Update status for AI processing if files were uploaded (before commit)
-    if (!empty($uploaded_files)) {
-        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
-        $stmt->execute([$quote_id]);
-    }
+    // Commit transaction FIRST
+    $pdo->commit();
     
-    // Ensure compatibility view for legacy code (uploaded_files)
+    // Ensure compatibility view for legacy code (uploaded_files) - AFTER commit
     try {
-        $pdo->exec("CREATE OR REPLACE VIEW uploaded_files AS 
-            SELECT 
+        $pdo->exec("CREATE OR REPLACE VIEW uploaded_files AS
+            SELECT
                 id,
                 quote_id,
                 filename,
@@ -298,11 +290,6 @@ try {
         // log but don't block submission
         error_log('Failed to create uploaded_files view: ' . $e->getMessage());
     }
-    
-    // Commit transaction FIRST
-    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to commit. PDO ID: " . spl_object_hash($pdo) . "\n", FILE_APPEND);
-    file_put_contents('debug.log', date('Y-m-d H:i:s') . " - About to commit transaction. inTransaction(): " . ($pdo->inTransaction() ? 'true' : 'false') . "\n", FILE_APPEND);
-    $pdo->commit();
     
     // Send immediate confirmation email (quick)
     $email_sent = false;
@@ -360,10 +347,15 @@ try {
     // Trigger AI processing for quotes with media files (asynchronous)
     if (!empty($uploaded_files)) {
         try {
+            // Update status to indicate AI processing has started
+            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+            $stmt->execute([$quote_id]);
+            
             // Trigger context assessment first
-            require_once __DIR__ . '/../utils/context-assessor.php';
-            $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
-            error_log("Context assessment for quote $quote_id: " . json_encode($context_assessment));
+            // TODO: Fix context assessment - temporarily disabled due to undefined callOpenAI function
+            // require_once __DIR__ . '/../utils/context-assessor.php';
+            // $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
+            // error_log("Context assessment for quote $quote_id: " . json_encode($context_assessment));
             
             // Trigger AI analysis
             $ai_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
@@ -388,30 +380,24 @@ try {
         }
     } else {
         // Even without files, assess the text-based context
-        try {
-            require_once __DIR__ . '/../utils/context-assessor.php';
-            $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
-            error_log("Text-only context assessment for quote $quote_id: " . json_encode($context_assessment));
-        } catch (Exception $e) {
-            error_log("Failed context assessment for quote $quote_id: " . $e->getMessage());
-        }
+        // TODO: Fix context assessment - temporarily disabled due to undefined callOpenAI function
+        // try {
+        //     require_once __DIR__ . '/../utils/context-assessor.php';
+        //     $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
+        //     error_log("Text-only context assessment for quote $quote_id: " . json_encode($context_assessment));
+        // } catch (Exception $e) {
+        //     error_log("Failed context assessment for quote $quote_id: " . $e->getMessage());
+        // }
     }
     
 } catch (Exception $e) {
     // Rollback transaction on error
-    error_log("Exception caught in submitQuote.php: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
     if ($pdo->inTransaction()) {
-        error_log("Rolling back active transaction");
         $pdo->rollback();
-    } else {
-        error_log("No active transaction to rollback");
     }
     
     http_response_code(400);
     echo json_encode([
-        'error' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString()
+        'error' => $e->getMessage()
     ]);
 } 
