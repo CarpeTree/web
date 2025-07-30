@@ -4,7 +4,15 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../config/database-simple.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../utils/fileHandler.php';
-require_once __DIR__ . '/../utils/mailer.php';
+
+// Try to load mailer, but don't fail if PHPMailer dependencies missing
+$mailer_available = false;
+try {
+    require_once __DIR__ . '/../utils/mailer.php';
+    $mailer_available = true;
+} catch (Error $e) {
+    error_log("Mailer not available: " . $e->getMessage());
+}
 
 try {
     // Validate required fields
@@ -296,23 +304,27 @@ try {
         error_log('Failed to create uploaded_files view: ' . $e->getMessage());
     }
     
-    // Send immediate confirmation email (quick)
+    // Send immediate confirmation email (quick) - only if mailer available
     $email_sent = false;
-    try {
-        $email_sent = sendEmail(
-            $_POST['email'],
-            'Quote Submission Received - Carpe Tree\'em',
-            'quote_confirmation',
-            [
-                'customer_name' => $_POST['name'] ?? 'Customer',
-                'quote_id' => $quote_id,
-                'services' => $selected_services,
-                'files_count' => count($uploaded_files),
-                'has_files' => !empty($uploaded_files)
-            ]
-        );
-    } catch (Exception $e) {
-        error_log("Quick confirmation email failed: " . $e->getMessage());
+    if ($mailer_available) {
+        try {
+            $email_sent = sendEmail(
+                $_POST['email'],
+                'Quote Submission Received - Carpe Tree\'em',
+                'quote_confirmation',
+                [
+                    'customer_name' => $_POST['name'] ?? 'Customer',
+                    'quote_id' => $quote_id,
+                    'services' => $selected_services,
+                    'files_count' => count($uploaded_files),
+                    'has_files' => !empty($uploaded_files)
+                ]
+            );
+        } catch (Exception $e) {
+            error_log("Quick confirmation email failed: " . $e->getMessage());
+        }
+    } else {
+        error_log("Confirmation email skipped - mailer not available");
     }
     
     // Determine message
