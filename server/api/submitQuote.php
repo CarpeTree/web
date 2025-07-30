@@ -352,13 +352,15 @@ try {
         fastcgi_finish_request();
     }
     
-    // Send admin notification without blocking user
-    try {
+    // Send admin notification only if no uploaded_files (to avoid duplicate once AI analysis sends)
+    if (empty($uploaded_files)) {
+        try {
         require_once __DIR__ . '/admin-notification.php';
         $admin_notification_sent = sendAdminNotification($quote_id);
         error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
     } catch (Exception $e) {
         error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
+        }
     }
     
     // Trigger AI processing for quotes with media files (asynchronous)
