@@ -25,7 +25,7 @@ Consider:
                 'content' => $prompt
             ]
         ],
-        'max_tokens' => 150,
+        'max_completion_tokens' => 150,
         'temperature' => 0.1 // Low temperature for accurate, consistent results
     ];
 

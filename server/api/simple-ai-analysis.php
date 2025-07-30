@@ -239,7 +239,7 @@ foreach ($media_files as $media) {
         'model' => 'o3',
         'messages' => $messages,
         'temperature' => 0.2,
-        'max_tokens' => 2000  // gpt-4o uses max_tokens
+        'max_completion_tokens' => 2000  // gpt-4o uses max_tokens
     ];
 
     $curl = curl_init();
