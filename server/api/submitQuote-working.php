@@ -48,7 +48,7 @@ try {
         $clean_phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
         $stmt = $pdo->prepare("
             SELECT * FROM customers 
-            WHERE REGEXP_REPLACE(phone, '[^0-9]', '') = ? OR phone = ?
+            WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone, '-', ''), ' ', ''), '(', ''), ')', '') = ? OR phone = ?
         ");
         $stmt->execute([$clean_phone, $_POST['phone']]);
         $customer = $stmt->fetch();

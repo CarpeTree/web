@@ -16,12 +16,25 @@ if (!file_exists($config_path)) {
 // Load config variables
 require_once $config_path;
 
-// Use variables from config.php
-$db_host = $DB_HOST ?? 'localhost';
-$db_name = $DB_NAME ?? 'carpe_tree_quotes';
-$db_user = $DB_USER ?? 'root';
-$db_pass = $DB_PASS ?? '';
-$db_charset = $DB_CHARSET ?? 'utf8mb4';
+// Load environment variables from .env if available
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+    if (class_exists('Dotenv\Dotenv')) {
+        $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+        try {
+            $dotenv->load();
+        } catch (Exception $e) {
+            // .env not found or failed to parse - not critical
+        }
+    }
+}
+
+// Use variables from config.php OR environment variables
+$db_host = $_ENV['DB_HOST'] ?? $_ENV['MYSQL_HOST'] ?? ($DB_HOST ?? 'localhost');
+$db_name = $_ENV['DB_NAME'] ?? $_ENV['MYSQL_DATABASE'] ?? ($DB_NAME ?? 'carpe_tree_quotes');
+$db_user = $_ENV['DB_USER'] ?? $_ENV['MYSQL_USER'] ?? ($DB_USER ?? 'root');
+$db_pass = $_ENV['DB_PASS'] ?? $_ENV['MYSQL_PASSWORD'] ?? ($DB_PASS ?? '');
+$db_charset = $_ENV['DB_CHARSET'] ?? ($DB_CHARSET ?? 'utf8mb4');
 
 // Database connection with error handling
 $dsn = "mysql:host=$db_host;dbname=$db_name;charset=$db_charset";

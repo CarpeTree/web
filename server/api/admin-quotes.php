@@ -475,6 +475,11 @@ function formatAISummary($ai_response, $has_media) {
         }
     }
 
+    // If AI response contains raw analysis string only
+    if (isset($ai_response['analysis']) && is_string($ai_response['analysis'])) {
+        return "🎬 AI Analysis Complete\n\n" . trim($ai_response['analysis']);
+    }
+
     $summary = "";
     
     if ($has_media) {

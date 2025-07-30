@@ -45,7 +45,7 @@ try {
         if ($phone) {
             // Clean phone number for search (remove formatting)
             $clean_phone = preg_replace('/[^0-9]/', '', $phone);
-            $search_conditions[] = "(REGEXP_REPLACE(c.phone, '[^0-9]', '') = ? OR c.phone = ?)";
+            $search_conditions[] = "(REPLACE(REPLACE(REPLACE(REPLACE(c.phone, '-', ''), ' ', ''), '(', ''), ')', '') = ? OR c.phone = ?)";
             $search_params[] = $clean_phone;
             $search_params[] = $phone;
         }

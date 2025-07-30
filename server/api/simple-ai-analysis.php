@@ -152,7 +152,7 @@ try {
     // Update quote with AI analysis
     $stmt = $pdo->prepare("
         UPDATE quotes 
-        SET ai_response_json = ?, quote_status = 'draft_ready' 
+        SET ai_response_json = ?, ai_analysis_complete = 1, quote_status = 'draft_ready' 
         WHERE id = ?
     ");
     $stmt->execute([json_encode(['analysis' => $ai_analysis, 'media' => $media_summary]), $quote_id]);
