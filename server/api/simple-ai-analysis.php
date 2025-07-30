@@ -42,19 +42,29 @@ try {
     $has_images = false;
 
     // Helper to extract key frames and audio from video using ffmpeg
-function extractVideoFrames($videoPath, $secondsInterval = 3, $maxFrames = 15) {
+function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { // 0 = no limit
     $frames = [];
     if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
         return $frames; // ffmpeg not available
     }
     $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
     mkdir($tmpDir);
-    $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
-        escapeshellarg($videoPath),
-        (int)$secondsInterval,
-        (int)$maxFrames,
-        escapeshellarg($tmpDir)
-    );
+    
+    // If maxFrames is 0, extract frames for entire video duration
+    if ($maxFrames == 0) {
+        $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d %s/frame_%%03d.jpg',
+            escapeshellarg($videoPath),
+            (int)$secondsInterval,
+            escapeshellarg($tmpDir)
+        );
+    } else {
+        $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+            escapeshellarg($videoPath),
+            (int)$secondsInterval,
+            (int)$maxFrames,
+            escapeshellarg($tmpDir)
+        );
+    }
     shell_exec($cmd);
     $files = glob($tmpDir . '/frame_*.jpg');
     foreach ($files as $frameFile) {
@@ -165,7 +175,7 @@ foreach ($media_files as $media) {
             $framesAdded = false;
             foreach ($videoPathOptions as $vp) {
                 if (file_exists($vp)) {
-                    $frames = extractVideoFrames($vp, 3, 15); // 15 frames every 3s (better coverage)
+                    $frames = extractVideoFrames($vp, 5, 0); // Every 5s, entire video duration
                     $transcription = extractAndTranscribeAudio($vp); // Extract audio transcription
                     
                     if ($frames) {
