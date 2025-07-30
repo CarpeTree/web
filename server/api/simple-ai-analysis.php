@@ -41,7 +41,7 @@ try {
     $media_summary = [];
     $has_images = false;
 
-    // Helper to extract key frames from video using ffmpeg
+    // Helper to extract key frames and audio from video using ffmpeg
 function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 5) {
     $frames = [];
     if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
@@ -70,6 +70,62 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 5) {
     }
     rmdir($tmpDir);
     return $frames;
+}
+
+// Helper to extract and transcribe audio from video
+function extractAndTranscribeAudio($videoPath) {
+    global $OPENAI_API_KEY;
+    
+    if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
+        return null; // ffmpeg not available
+    }
+    
+    $tmpAudio = sys_get_temp_dir() . '/audio_' . uniqid() . '.mp3';
+    
+    // Extract audio (max 25MB for OpenAI Whisper API)
+    $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vn -acodec mp3 -ab 64k -ar 16000 -t 300 %s',
+        escapeshellarg($videoPath),
+        escapeshellarg($tmpAudio)
+    );
+    shell_exec($cmd);
+    
+    if (!file_exists($tmpAudio) || filesize($tmpAudio) == 0) {
+        return null; // No audio or extraction failed
+    }
+    
+    // Transcribe with OpenAI Whisper
+    try {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://api.openai.com/v1/audio/transcriptions',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'file' => new CURLFile($tmpAudio, 'audio/mp3', 'audio.mp3'),
+                'model' => 'whisper-1',
+                'language' => 'en',
+                'response_format' => 'text'
+            ],
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $OPENAI_API_KEY
+            ],
+            CURLOPT_TIMEOUT => 30
+        ]);
+        
+        $response = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        
+        unlink($tmpAudio); // Cleanup
+        
+        if ($http_code === 200 && !empty(trim($response))) {
+            return trim($response);
+        }
+    } catch (Exception $e) {
+        error_log("Audio transcription failed: " . $e->getMessage());
+    }
+    
+    return null;
 }
 
 foreach ($media_files as $media) {
@@ -110,11 +166,23 @@ foreach ($media_files as $media) {
             foreach ($videoPathOptions as $vp) {
                 if (file_exists($vp)) {
                     $frames = extractVideoFrames($vp, 5, 4); // 4 frames every 5s (~20s coverage)
+                    $transcription = extractAndTranscribeAudio($vp); // Extract audio transcription
+                    
                     if ($frames) {
                         $media_content = array_merge($media_content, $frames);
-                        $media_summary[] = "🎬 $filename (" . count($frames) . " frames)";
                         $has_images = true;
                         $framesAdded = true;
+                    }
+                    
+                    // Add transcription if available
+                    if ($transcription) {
+                        $media_content[] = [
+                            'type' => 'text',
+                            'text' => "🎤 Audio transcription from $filename: \"$transcription\""
+                        ];
+                        $media_summary[] = "🎬 $filename (" . count($frames) . " frames + audio)";
+                    } else {
+                        $media_summary[] = "🎬 $filename (" . count($frames) . " frames)";
                     }
                     break;
                 }
