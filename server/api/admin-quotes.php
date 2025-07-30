@@ -169,6 +169,16 @@ try {
             $distance_km = 40; // Default fallback
         }
         
+        // If distance still fallback and we have address, try AI calculator for better accuracy
+        if ($distance_km == 40 && !empty($quote['address'])) {
+            try {
+                require_once __DIR__ . '/ai-distance-calculator.php';
+                $distance_km = calculateDistanceWithAI($quote['address']);
+            } catch (Exception $e) {
+                error_log("AI distance calc in dashboard failed: " . $e->getMessage());
+            }
+        }
+
         // Generate line items based on services and AI analysis
         $line_items = [];
         

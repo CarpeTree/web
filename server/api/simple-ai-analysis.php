@@ -157,6 +157,14 @@ try {
     ");
     $stmt->execute([json_encode(['analysis' => $ai_analysis, 'media' => $media_summary]), $quote_id]);
 
+    // Send or update admin notification with AI analysis details
+    try {
+        require_once __DIR__ . '/admin-notification.php';
+        sendAdminNotification($quote_id);
+    } catch (Exception $e) {
+        error_log("Admin notification after AI failed: " . $e->getMessage());
+    }
+
     echo json_encode([
         'success' => true,
         'quote_id' => $quote_id,
