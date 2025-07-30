@@ -18,7 +18,7 @@ Consider:
 - Return ONLY a JSON object with: {\"distance_km\": number, \"reasoning\": \"string\"}";
 
     $data = [
-        'model' => 'gpt-4o-mini', // Better for quick distance calculations  
+        'model' => (getenv('AI_MODEL_DISTANCE') ?: 'gpt-4o-mini'), // Better for quick distance calculations  
         'messages' => [
             [
                 'role' => 'user',
