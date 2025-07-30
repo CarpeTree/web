@@ -45,23 +45,42 @@ try {
 function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { // 0 = no limit
     $frames = [];
     error_log("extractVideoFrames called with: $videoPath");
-    if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
-        error_log("FFmpeg not found in /usr/bin/ffmpeg or PATH");
+    
+    // Check multiple possible FFmpeg locations
+    $ffmpeg_paths = [
+        '/usr/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+        '/home/u230128646/bin/ffmpeg',
+        trim(shell_exec('which ffmpeg'))
+    ];
+    
+    $ffmpeg_path = null;
+    foreach ($ffmpeg_paths as $path) {
+        if (!empty($path) && file_exists($path)) {
+            $ffmpeg_path = $path;
+            break;
+        }
+    }
+    
+    if (!$ffmpeg_path) {
+        error_log("FFmpeg not found in any of these paths: " . implode(', ', $ffmpeg_paths));
         return $frames; // ffmpeg not available
     }
-    error_log("FFmpeg found, proceeding with frame extraction");
+    error_log("FFmpeg found at: $ffmpeg_path");
     $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
     mkdir($tmpDir);
     
     // If maxFrames is 0, extract frames for entire video duration
     if ($maxFrames == 0) {
-        $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d %s/frame_%%03d.jpg',
+        $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vf fps=1/%d %s/frame_%%03d.jpg',
+            escapeshellarg($ffmpeg_path),
             escapeshellarg($videoPath),
             (int)$secondsInterval,
             escapeshellarg($tmpDir)
         );
     } else {
-        $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+        $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+            escapeshellarg($ffmpeg_path),
             escapeshellarg($videoPath),
             (int)$secondsInterval,
             (int)$maxFrames,
@@ -91,14 +110,31 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { 
 function extractAndTranscribeAudio($videoPath) {
     global $OPENAI_API_KEY;
     
-    if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
+    // Check multiple possible FFmpeg locations (same as extractVideoFrames)
+    $ffmpeg_paths = [
+        '/usr/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+        '/home/u230128646/bin/ffmpeg',
+        trim(shell_exec('which ffmpeg'))
+    ];
+    
+    $ffmpeg_path = null;
+    foreach ($ffmpeg_paths as $path) {
+        if (!empty($path) && file_exists($path)) {
+            $ffmpeg_path = $path;
+            break;
+        }
+    }
+    
+    if (!$ffmpeg_path) {
         return null; // ffmpeg not available
     }
     
     $tmpAudio = sys_get_temp_dir() . '/audio_' . uniqid() . '.mp3';
     
     // Extract audio (max 25MB for OpenAI Whisper API)
-    $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vn -acodec mp3 -ab 64k -ar 16000 -t 300 %s',
+    $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vn -acodec mp3 -ab 64k -ar 16000 -t 300 %s',
+        escapeshellarg($ffmpeg_path),
         escapeshellarg($videoPath),
         escapeshellarg($tmpAudio)
     );
