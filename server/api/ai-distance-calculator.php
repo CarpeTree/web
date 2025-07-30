@@ -26,7 +26,7 @@ Consider:
             ]
         ],
         'max_completion_tokens' => 150,
-        'temperature' => 0.1 // Low temperature for accurate, consistent results
+        // 'temperature' => 0.1 // o3 only supports default temperature (1)
     ];
 
     $curl = curl_init();

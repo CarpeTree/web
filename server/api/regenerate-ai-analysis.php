@@ -235,7 +235,7 @@ try {
                 'content' => $user_content
             ]
         ],
-        'temperature' => 0.3,
+        // 'temperature' => 0.3, // o3 only supports default temperature (1)
         'max_completion_tokens' => 2000
     ];
 

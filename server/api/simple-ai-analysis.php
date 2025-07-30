@@ -238,7 +238,7 @@ foreach ($media_files as $media) {
     $openai_request = [
         'model' => 'o3',
         'messages' => $messages,
-        'temperature' => 0.2,
+        // 'temperature' => 0.2, // o3 only supports default temperature (1)
         'max_completion_tokens' => 2000  // gpt-4o uses max_tokens
     ];
 
