@@ -80,29 +80,56 @@ try {
     // Helper to extract key frames from video using ffmpeg (same as simple-ai-analysis.php)
     function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { // 0 = no limit
         $frames = [];
-        if (!file_exists('/usr/bin/ffmpeg') && !shell_exec('which ffmpeg')) {
+        error_log("extractVideoFrames called with: $videoPath");
+        
+        // Check multiple possible FFmpeg locations
+        $ffmpeg_paths = [
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg',
+            '/home/u230128646/bin/ffmpeg'
+        ];
+        
+        $ffmpeg_path = null;
+        foreach ($ffmpeg_paths as $path) {
+            error_log("Checking FFmpeg path: $path");
+            if (file_exists($path)) {
+                $ffmpeg_path = $path;
+                error_log("FFmpeg found at: $path");
+                break;
+            } else {
+                error_log("FFmpeg not found at: $path");
+            }
+        }
+        
+        if (!$ffmpeg_path) {
+            error_log("FFmpeg not found in any of these paths: " . implode(', ', $ffmpeg_paths));
             return $frames; // ffmpeg not available
         }
+        
         $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
         mkdir($tmpDir);
         
         // If maxFrames is 0, extract frames for entire video duration
         if ($maxFrames == 0) {
-            $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d %s/frame_%%03d.jpg',
+            $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vf fps=1/%d %s/frame_%%03d.jpg',
+                escapeshellarg($ffmpeg_path),
                 escapeshellarg($videoPath),
                 (int)$secondsInterval,
                 escapeshellarg($tmpDir)
             );
         } else {
-            $cmd = sprintf('ffmpeg -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+            $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vf fps=1/%d -frames:v %d %s/frame_%%03d.jpg',
+                escapeshellarg($ffmpeg_path),
                 escapeshellarg($videoPath),
                 (int)$secondsInterval,
                 (int)$maxFrames,
                 escapeshellarg($tmpDir)
             );
         }
+        error_log("Executing FFmpeg command: $cmd");
         shell_exec($cmd);
         $files = glob($tmpDir . '/frame_*.jpg');
+        error_log("Found " . count($files) . " extracted frames");
         foreach ($files as $frameFile) {
             $imageData = base64_encode(file_get_contents($frameFile));
             $frames[] = [
@@ -163,7 +190,9 @@ try {
             // Extract key frames for analysis
             $videoPathOptions = [
                 __DIR__ . '/../../uploads/' . $quote_id . '/' . $filename,
-                __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $filename
+                __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $filename,
+                __DIR__ . '/../uploads/' . $quote_id . '/' . $filename,
+                __DIR__ . '/../uploads/quote_' . $quote_id . '/' . $filename
             ];
             $framesAdded = false;
             foreach ($videoPathOptions as $vp) {
