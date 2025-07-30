@@ -50,15 +50,18 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { 
     $ffmpeg_paths = [
         '/usr/bin/ffmpeg',
         '/usr/local/bin/ffmpeg',
-        '/home/u230128646/bin/ffmpeg',
-        trim(shell_exec('which ffmpeg'))
+        '/home/u230128646/bin/ffmpeg'
     ];
     
     $ffmpeg_path = null;
     foreach ($ffmpeg_paths as $path) {
-        if (!empty($path) && file_exists($path)) {
+        error_log("Checking FFmpeg path: $path");
+        if (file_exists($path)) {
             $ffmpeg_path = $path;
+            error_log("FFmpeg found at: $path");
             break;
+        } else {
+            error_log("FFmpeg not found at: $path");
         }
     }
     
@@ -66,7 +69,6 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { 
         error_log("FFmpeg not found in any of these paths: " . implode(', ', $ffmpeg_paths));
         return $frames; // ffmpeg not available
     }
-    error_log("FFmpeg found at: $ffmpeg_path");
     $tmpDir = sys_get_temp_dir() . '/frames_' . uniqid();
     mkdir($tmpDir);
     
