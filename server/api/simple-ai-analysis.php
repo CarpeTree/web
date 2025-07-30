@@ -170,11 +170,15 @@ foreach ($media_files as $media) {
             // Extract key frames for analysis
             $videoPathOptions = [
                 __DIR__ . '/../../uploads/' . $quote_id . '/' . $filename,
-                __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $filename
+                __DIR__ . '/../../uploads/quote_' . $quote_id . '/' . $filename,
+                __DIR__ . '/../uploads/' . $quote_id . '/' . $filename,
+                __DIR__ . '/../uploads/quote_' . $quote_id . '/' . $filename
             ];
             $framesAdded = false;
             foreach ($videoPathOptions as $vp) {
+                error_log("Checking video path: $vp");
                 if (file_exists($vp)) {
+                    error_log("Found video file at: $vp");
                     $frames = extractVideoFrames($vp, 5, 0); // Every 5s, entire video duration
                     $transcription = extractAndTranscribeAudio($vp); // Extract audio transcription
                     
