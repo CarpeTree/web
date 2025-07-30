@@ -25,6 +25,7 @@ try {
             q.ai_response_json, q.quote_created_at,
             c.name as customer_name, c.email as customer_email, c.phone as customer_phone, 
             c.address, c.referral_source, c.referrer_name,
+            c.geo_latitude, c.geo_longitude, c.geo_accuracy, c.ip_address,
             COUNT(m.id) as media_count
         FROM quotes q
         JOIN customers c ON q.customer_id = c.id
@@ -39,12 +40,6 @@ try {
     $formatted_quotes = [];
     
     foreach ($quotes as $quote) {
-        // Add safe defaults for geo fields that might not exist in database
-        $quote['geo_latitude'] = $quote['geo_latitude'] ?? null;
-        $quote['geo_longitude'] = $quote['geo_longitude'] ?? null;
-        $quote['geo_accuracy'] = $quote['geo_accuracy'] ?? null;
-        $quote['ip_address'] = $quote['ip_address'] ?? null;
-        
         // Get uploaded files for this quote (using correct media table) - optimized query
         $file_stmt = $pdo->prepare("SELECT id, filename, mime_type, file_type, quote_id, file_path, file_size, original_filename FROM media WHERE quote_id = ? LIMIT 10");
         $file_stmt->execute([$quote['id']]);
