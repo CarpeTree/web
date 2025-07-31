@@ -159,6 +159,31 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
                         <p style="color: #856404; margin: 0 0 0.5rem 0;">This customer has submitted quotes before. Check their history for context and pricing reference.</p>
                         <p style="color: #856404; margin: 0; font-size: 0.9em;"><strong>Detected by:</strong> ' . ($duplicate_match_info ?: 'customer record match') . '</p>
                     </div>' : '') . '
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #1976D2; margin-bottom: 15px;">🤖 AI Model Comparison - Choose Best Analysis</h3>
+                    <p><strong>Compare 3 AI models side-by-side to pick the best estimate:</strong></p>
+                    
+                    <div style="text-align: center; margin: 15px 0;">
+                        <a href="https://carpetree.com/o4-mini-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #4CAF50; margin: 5px; padding: 15px 20px;">
+                            🚀 o4-mini-2025-04-16<br><small>Fast & Cost-Effective</small>
+                        </a>
+                        
+                        <a href="https://carpetree.com/o3-pro-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #2196F3; margin: 5px; padding: 15px 20px;">
+                            🧠 o3-pro-2025-06-10<br><small>Premium Reasoning</small>
+                        </a>
+                        
+                        <a href="https://carpetree.com/gemini-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #FF9800; margin: 5px; padding: 15px 20px;">
+                            🔮 Gemini 2.5 Pro<br><small>Advanced Multimodal</small>
+                        </a>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="https://carpetree.com/model-comparison-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #9C27B0; padding: 15px 25px;">
+                            📊 View All 3 Models Side-by-Side
+                        </a>
+                    </div>
+                </div>
+
                 <div class="action-buttons">
                     <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #2D5A27; font-size: 16px; padding: 15px 25px;">
                         📊 Review Quote & View Media Gallery
@@ -179,7 +204,7 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
                     <tr><td><strong>Email:</strong></td><td><a href="mailto:' . htmlspecialchars($quote['email']) . '">' . htmlspecialchars($quote['email']) . '</a></td></tr>
                     <tr><td><strong>Phone:</strong></td><td><a href="tel:' . htmlspecialchars($quote['phone']) . '">' . htmlspecialchars($quote['phone'] ?: 'Not provided') . '</a></td></tr>
                     <tr><td><strong>Property Address:</strong></td><td>' . htmlspecialchars($quote['address'] ?: 'Not provided') . '</td></tr>
-                    <tr><td><strong>Distance from Nelson:</strong></td><td class="highlight">' . $distance_km . ' km</td></tr>' .
+                    <tr><td><strong>Distance from base:</strong></td><td class="highlight">' . $distance_km . ' km</td></tr>' .
                     ($quote['referral_source'] ? '<tr><td><strong>How they heard about us:</strong></td><td>' . htmlspecialchars(ucwords(str_replace('_', ' ', $quote['referral_source']))) . '</td></tr>' : '') .
                     ($quote['referrer_name'] ? '<tr><td><strong>Referred by:</strong></td><td>' . htmlspecialchars($quote['referrer_name']) . '</td></tr>' : '') .
                     '<tr><td><strong>Newsletter signup:</strong></td><td>' . ($quote['newsletter_opt_in'] ? 'Yes' : 'No') . '</td></tr>

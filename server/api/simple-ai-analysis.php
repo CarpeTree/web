@@ -40,6 +40,10 @@ try {
     $media_content = [];
     $media_summary = [];
     $has_images = false;
+    
+    // Check if we have Gemini API key for video analysis
+    $use_gemini_for_video = !empty($GOOGLE_GEMINI_API_KEY);
+    $video_files_for_gemini = [];
 
     // Helper to extract key frames and audio from video using ffmpeg
 function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { // 0 = no limit
@@ -48,9 +52,10 @@ function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 0) { 
     
     // Check multiple possible FFmpeg locations
     $ffmpeg_paths = [
-        '/usr/bin/ffmpeg',
-        '/usr/local/bin/ffmpeg',
-        '/home/u230128646/bin/ffmpeg'
+        '/opt/homebrew/bin/ffmpeg',  // Mac Homebrew (Apple Silicon)
+        '/usr/local/bin/ffmpeg',     // Mac Homebrew (Intel)
+        '/usr/bin/ffmpeg',           // Linux system
+        '/home/u230128646/bin/ffmpeg' // Hostinger custom
     ];
     
     $ffmpeg_path = null;
@@ -120,9 +125,10 @@ function extractAndTranscribeAudio($videoPath) {
     
     // Check multiple possible FFmpeg locations (same as extractVideoFrames)
     $ffmpeg_paths = [
-        '/usr/bin/ffmpeg',
-        '/usr/local/bin/ffmpeg',
-        '/home/u230128646/bin/ffmpeg',
+        '/opt/homebrew/bin/ffmpeg',  // Mac Homebrew (Apple Silicon)
+        '/usr/local/bin/ffmpeg',     // Mac Homebrew (Intel)
+        '/usr/bin/ffmpeg',           // Linux system
+        '/home/u230128646/bin/ffmpeg', // Hostinger custom
         trim(shell_exec('which ffmpeg'))
     ];
     
@@ -265,14 +271,37 @@ foreach ($media_files as $media) {
         }
     }
 
-    if (empty($media_content)) {
+    // Only require processable media if we don't have videos for Gemini
+    if (empty($media_content) && empty($video_files_for_gemini)) {
         throw new Exception("No processable media found");
     }
 
-    // Build OpenAI request
     $services = json_decode($quote['selected_services'], true) ?: [];
     $services_text = implode(', ', $services);
     
+    $ai_analysis = '';
+    
+    // Process videos with Gemini if available
+    if (!empty($video_files_for_gemini)) {
+        try {
+            require_once __DIR__ . '/../utils/gemini-client.php';
+            $gemini = new GeminiClient();
+            
+            foreach ($video_files_for_gemini as $video_info) {
+                $video_analysis = $gemini->analyzeVideo(
+                    $video_info['path'], 
+                    $services, 
+                    $quote['notes'] ?? ''
+                );
+                $ai_analysis .= "\n\n🎥 VIDEO ANALYSIS - {$video_info['filename']} (Gemini):\n" . $video_analysis['analysis'];
+            }
+        } catch (Exception $e) {
+            error_log("Gemini video analysis failed: " . $e->getMessage());
+            $ai_analysis .= "\n\n⚠️ Video analysis failed (Gemini error): " . $e->getMessage();
+        }
+    }
+    
+    // Build OpenAI request for images if we have them
     $prompt = "Analyze this tree service request. Customer selected: $services_text. " . 
               ($quote['notes'] ? "Customer notes: " . $quote['notes'] : "No additional notes.");
 
@@ -284,7 +313,7 @@ foreach ($media_files as $media) {
     $messages = [
         [
             'role' => 'system', 
-            'content' => 'You are a Board Master Certified Arborist (BMCA) specializing in comprehensive tree care sales and assessment for Carpe Tree\'em, a modern tree service company focused on preservation, longevity, and environmental stewardship.
+            'content' => "You are a Board Master Certified Arborist (BMCA) specializing in comprehensive tree care sales and assessment for Carpe Tree'em, a modern tree service company focused on preservation, longevity, and environmental stewardship.
 
 CORE EXPERTISE & ANALYSIS:
 - 20+ years experience in professional tree care and sales
@@ -329,7 +358,7 @@ Generate detailed quotes following Ed Gilman's framework:
 7. FOLLOW-UP: Long-term care recommendations and reassessment timeline
 8. PRICING WORKSHEET: Labour hours → costs → overhead/profit → final quote
 
-Present as professional specifications requiring minimal editing, with quantified cut lists and market-appropriate pricing for BC/Kootenay region. Include confidence ratings and equipment requirements for CRM integration.'
+Present as professional specifications requiring minimal editing, with quantified cut lists and market-appropriate pricing for BC/Kootenay region. Include confidence ratings and equipment requirements for CRM integration."
         ],
         [
             'role' => 'user',
@@ -337,49 +366,64 @@ Present as professional specifications requiring minimal editing, with quantifie
         ]
     ];
 
-    // ChatGPT o3 - Your proven tree care specialist with minimal editing required
-    $openai_request = [
-        'model' => 'o3',
-        'messages' => $messages,
-        // 'temperature' => 0.2, // o3 only supports default temperature (1)
-        'max_completion_tokens' => 2000  // gpt-4o uses max_tokens
-    ];
+    // Process images with OpenAI if we have them and API key
+    if (!empty($media_content) && !empty($OPENAI_API_KEY)) {
+        try {
+            // ChatGPT o3 - Your proven tree care specialist with minimal editing required
+            $openai_request = [
+                'model' => 'o3',
+                'messages' => $messages,
+                // 'temperature' => 0.2, // o3 only supports default temperature (1)
+                'max_completion_tokens' => 2000  // gpt-4o uses max_tokens
+            ];
 
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode($openai_request),
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $OPENAI_API_KEY
-        ],
-        CURLOPT_TIMEOUT => 60
-    ]);
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($openai_request),
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $OPENAI_API_KEY
+                ],
+                CURLOPT_TIMEOUT => 60
+            ]);
 
-    $response = curl_exec($curl);
-    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $curl_error = curl_error($curl);
-    curl_close($curl);
+            $response = curl_exec($curl);
+            $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curl_error = curl_error($curl);
+            curl_close($curl);
 
-    if ($http_code !== 200) {
-        error_log("OpenAI API error: HTTP $http_code, Response: $response, Curl error: $curl_error");
-        throw new Exception("OpenAI API error: HTTP $http_code - $response");
+            if ($http_code !== 200) {
+                error_log("OpenAI API error: HTTP $http_code, Response: $response, Curl error: $curl_error");
+                throw new Exception("OpenAI API error: HTTP $http_code - $response");
+            }
+
+            $ai_result = json_decode($response, true);
+            
+            if (!isset($ai_result['choices'][0]['message']['content'])) {
+                throw new Exception("Invalid AI response format");
+            }
+
+            $openai_analysis = $ai_result['choices'][0]['message']['content'];
+            $ai_analysis .= "\n\n📸 IMAGE ANALYSIS (OpenAI o3):\n" . $openai_analysis;
+            
+        } catch (Exception $e) {
+            error_log("OpenAI image analysis failed: " . $e->getMessage());
+            $ai_analysis .= "\n\n⚠️ Image analysis failed (OpenAI error): " . $e->getMessage();
+        }
     }
-
-    $ai_result = json_decode($response, true);
     
-    if (!isset($ai_result['choices'][0]['message']['content'])) {
-        throw new Exception("Invalid AI response format");
+    // If no analysis was performed, provide fallback
+    if (empty($ai_analysis)) {
+        $ai_analysis = "⚠️ AI analysis unavailable. Please configure OpenAI and/or Gemini API keys for automated analysis.\n\nManual assessment required for requested services: " . $services_text;
     }
-
-    $ai_analysis = $ai_result['choices'][0]['message']['content'];
 
     // Format the analysis  
-    $analysis_summary = "🤖 ChatGPT o3 Professional Tree Analysis Complete\n\n";
+    $analysis_summary = "🤖 AI Professional Tree Analysis Complete\n\n";
     $analysis_summary .= "📁 Media analyzed: " . implode(', ', $media_summary) . "\n\n";
-    $analysis_summary .= "🔍 AI Analysis:\n" . $ai_analysis;
+    $analysis_summary .= "🔍 Analysis Results:" . $ai_analysis;
 
     // Update quote with AI analysis
     $stmt = $pdo->prepare("

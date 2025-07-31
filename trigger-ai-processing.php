@@ -11,11 +11,11 @@ try {
         SELECT DISTINCT q.id, q.quote_status, c.email, c.name
         FROM quotes q
         JOIN customers c ON q.customer_id = c.id
-        LEFT JOIN uploaded_files f ON q.id = f.quote_id
+        LEFT JOIN media f ON q.id = f.quote_id
         WHERE f.id IS NOT NULL 
-        AND (q.quote_status = 'submitted' OR q.quote_status = '')
+        AND (q.quote_status = 'submitted' OR q.quote_status = 'ai_processing')
         AND q.ai_analysis_complete = 0
-        ORDER BY q.quote_created_at DESC
+        ORDER BY q.id DESC
     ");
     
     $stmt->execute();
@@ -35,7 +35,7 @@ try {
             
             // Trigger AI processing
             $ai_script = __DIR__ . '/server/api/aiQuote.php';
-            $command = "cd " . __DIR__ . "/server && php api/aiQuote.php {$quote['id']} > /dev/null 2>&1 &";
+            $command = "cd '" . __DIR__ . "/server' && php api/aiQuote.php {$quote['id']} > /dev/null 2>&1 &";
             
             echo "Command: $command\n";
             exec($command, $output, $return_code);

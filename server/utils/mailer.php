@@ -95,6 +95,8 @@ function loadEmailTemplate($template, $data) {
     $html = str_replace('{company_email}', 'sapport@carpetree.com', $html);
     global $SITE_URL;
     $html = str_replace('{logo_url}', $SITE_URL . '/images/carpeclear.png', $html);
+    $html = str_replace('{site_url}', $SITE_URL ?: 'https://yourdomain.com', $html);
+    $html = str_replace('{admin_url}', $SITE_URL . '/admin-dashboard.html', $html);
     
     return $html;
 }

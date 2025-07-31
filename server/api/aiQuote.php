@@ -22,7 +22,7 @@ try {
         SELECT q.*, c.email, c.name, c.phone 
         FROM quotes q 
         JOIN customers c ON q.customer_id = c.id 
-        WHERE q.id = ? AND q.quote_status = 'ai_processing'
+        WHERE q.id = ? AND (q.quote_status = 'ai_processing' OR q.quote_status = 'submitted')
     ");
     $stmt->execute([$quote_id]);
     $quote = $stmt->fetch();
@@ -45,8 +45,8 @@ try {
     }
 
     // Load AI system prompt and schema
-    $system_prompt = file_get_contents('../../ai/system_prompt.txt');
-    $schema = json_decode(file_get_contents('../../ai/schema.json'), true);
+    $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
+    $schema = json_decode(file_get_contents(__DIR__ . '/../../ai/schema.json'), true);
 
     if (!$system_prompt || !$schema) {
         throw new Exception("AI configuration files not found");
