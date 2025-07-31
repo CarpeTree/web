@@ -54,7 +54,7 @@ try {
     $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
     $analysis_urls = [
         'o4-mini-2025-04-16' => "$base_url/server/api/openai-o4-mini-analysis.php?quote_id=$quote_id",
-        'o3-pro-2025-06-10' => "$base_url/server/api/openai-o3-analysis.php?quote_id=$quote_id", 
+        'gpt-4o-premium' => "$base_url/server/api/openai-o3-analysis.php?quote_id=$quote_id", 
         'gemini-2.5-pro' => "$base_url/server/api/gemini-2-5-pro-analysis.php?quote_id=$quote_id"
     ];
     

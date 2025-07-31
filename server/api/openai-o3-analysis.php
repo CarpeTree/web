@@ -1,5 +1,5 @@
 <?php
-// OpenAI o3-pro-2025-06-10 Analysis - Premium reasoning model
+// OpenAI GPT-4o Analysis - Premium reasoning model (o3-pro placeholder)
 header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -106,7 +106,7 @@ try {
         ];
 
         $openai_request = [
-            'model' => 'o3-pro-2025-06-10',
+            'model' => 'gpt-4o',
             'messages' => $messages,
             'tools' => [$schema],
             'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
@@ -187,7 +187,7 @@ try {
     
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'o3-pro-2025-06-10',
+        'model_name' => 'gpt-4o',
         'provider' => 'openai',
         'input_tokens' => $input_tokens ?? 0,
         'output_tokens' => $output_tokens ?? 0,
@@ -201,7 +201,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'model' => 'o3-pro',
+                    'model' => 'gpt-4o',
         'quote_id' => $quote_id,
         'analysis' => $analysis_summary,
         'cost' => $cost,
@@ -217,7 +217,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'model' => 'o3',
+                    'model' => 'gpt-4o',
         'error' => $e->getMessage(),
         'quote_id' => $quote_id ?? null
     ]);
