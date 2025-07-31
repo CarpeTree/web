@@ -49,10 +49,19 @@ function sendAdminNotification($quote_id) {
             $services = json_decode($quote['selected_services'], true) ?: [];
         }
         
-        // Calculate distance using AI (O3 workhorse) with timeout protection
-        require_once __DIR__ . '/ai-distance-calculator.php';
+        // Calculate distance using Google Maps API
+        require_once __DIR__ . '/google-distance-calculator.php';
         try {
-            $distance_km = calculateDistanceWithAI($quote['address']);
+            $distance_result = calculateDistanceMultiSource(
+                $quote['address'], 
+                null, // No GPS coordinates in admin notification
+                null
+            );
+            if ($distance_result && $distance_result['distance_km'] > 0) {
+                $distance_km = $distance_result['distance_km'];
+            } else {
+                $distance_km = 40; // Fallback distance
+            }
         } catch (Exception $e) {
             error_log("Distance calculation failed in admin notification: " . $e->getMessage());
             $distance_km = 40; // Fallback distance

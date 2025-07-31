@@ -206,50 +206,35 @@ class GeminiClient {
     }
     
     private function buildVideoAnalysisPrompt($services, $notes) {
-        return "You are an expert certified arborist analyzing this video for Carpe Tree'em, a professional tree care service in British Columbia, Canada.
-
-ANALYSIS REQUIREMENTS:
-1. Identify tree species, health, and condition from the video
-2. Assess safety risks and structural integrity visible in the footage
-3. Evaluate proximity to structures, power lines, and property features
-4. Note any movement, wind response, or dynamic behavior of trees
-5. Identify hazardous conditions that may not be visible in still photos
-
-SERVICES REQUESTED: " . implode(', ', $services) . "
-
-CUSTOMER NOTES: $notes
-
-Please provide a detailed analysis including:
-- Tree species identification
-- Health assessment (disease, pest damage, structural issues)
-- Safety concerns and risk factors
-- Specific recommendations for the requested services
-- Estimated scope of work
-- Any urgent safety issues requiring immediate attention
-
-Focus on details that are uniquely visible in video format (movement, wind response, dynamic load behavior).";
+        // Load the standardized system prompt
+        $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
+        
+        $user_prompt = "📋 Customer Services Requested: " . implode(', ', $services) . "\n\n";
+        $user_prompt .= "🎬 VIDEO ANALYSIS FOCUS:\n";
+        $user_prompt .= "- Tree movement patterns and wind response behavior\n";
+        $user_prompt .= "- Dynamic load behavior and structural response\n";
+        $user_prompt .= "- Hazardous conditions that may not be visible in still photos\n";
+        $user_prompt .= "- Root zone stability and lean assessment during movement\n\n";
+        $user_prompt .= "Customer Notes: " . $notes . "\n\n";
+        $user_prompt .= "Please analyze this video and provide a comprehensive tree care assessment focusing on details uniquely visible in video format.";
+        
+        return $system_prompt . "\n\n" . $user_prompt;
     }
     
     private function buildImageAnalysisPrompt($services, $notes) {
-        return "You are an expert certified arborist analyzing this image for Carpe Tree'em, a professional tree care service in British Columbia, Canada.
-
-ANALYSIS REQUIREMENTS:
-1. Identify tree species, health, and condition
-2. Assess safety risks and structural integrity
-3. Evaluate proximity to structures, power lines, and property features
-4. Provide specific service recommendations
-
-SERVICES REQUESTED: " . implode(', ', $services) . "
-
-CUSTOMER NOTES: $notes
-
-Please provide a detailed analysis including:
-- Tree species identification
-- Health assessment (disease, pest damage, structural issues)
-- Safety concerns and risk factors
-- Specific recommendations for the requested services
-- Estimated scope of work
-- Priority level for intervention";
+        // Load the standardized system prompt
+        $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
+        
+        $user_prompt = "📋 Customer Services Requested: " . implode(', ', $services) . "\n\n";
+        $user_prompt .= "📸 IMAGE ANALYSIS FOCUS:\n";
+        $user_prompt .= "- Tree species identification using visible characteristics\n";
+        $user_prompt .= "- Structural assessment from static view\n";
+        $user_prompt .= "- Visual measurement estimation using reference objects\n";
+        $user_prompt .= "- Health assessment from visible symptoms\n\n";
+        $user_prompt .= "Customer Notes: " . $notes . "\n\n";
+        $user_prompt .= "Please analyze this image and provide a comprehensive tree care assessment.";
+        
+        return $system_prompt . "\n\n" . $user_prompt;
     }
     
     private function parseAnalysisResponse($response) {

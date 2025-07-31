@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 2.5 Pro Studio - Multimodal Thinking Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419, #1a1f2e);
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .studio-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, #1a1f2e, #151922);
+            border-right: 1px solid #2d3748;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #4285f4, #34a853, #ea4335, #fbbc04);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 16px;
+            min-width: 220px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .workspace {
+            flex: 1;
+            display: flex;
+        }
+        
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-panel {
+            width: 350px;
+            background: linear-gradient(180deg, #1a1f2e, #151922);
+            border-left: 1px solid #2d3748;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(180deg, #4285f4, #34a853);
+            border-radius: 2px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #4285f4, #34a853, #ea4335, #fbbc04);
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 6px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4285f4;
+        }
+        
+        .metric-subtext {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 3px;
+        }
+        
+        .thinking-controls {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 15px 0;
+        }
+        
+        .thinking-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(66, 133, 244, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(66, 133, 244, 0.2);
+        }
+        
+        .context-slider {
+            margin: 15px 0;
+        }
+        
+        .context-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .context-value {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #4a5568, #2d3748);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+        }
+        
+        .cost-tracker {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 15px 0;
+        }
+        
+        .cost-efficient-badge {
+            background: linear-gradient(135deg, #34a853, #0f9d58);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .cost-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .cost-label {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        
+        .cost-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #34a853;
+        }
+        
+        .multimodal-preview {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 2px dashed #4a5568;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .multimodal-preview:hover {
+            border-color: #4285f4;
+            background: linear-gradient(135deg, #1a1f2e, rgba(66, 133, 244, 0.1));
+        }
+        
+        .input-area {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 120px;
+            color: #fff;
+            font-size: 14px;
+            resize: vertical;
+            font-family: 'Google Sans', sans-serif;
+        }
+        
+        .input-area:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: #374151;
+            color: #fff;
+            border: 1px solid #4a5568;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+        }
+        
+        .response-area {
+            background: linear-gradient(135deg, #151922, #1a1f2e);
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+        }
+        
+        .thinking-process {
+            background: linear-gradient(135deg, #1a1f2e, rgba(66, 133, 244, 0.1));
+            border-left: 4px solid #4285f4;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #a0aec0;
+        }
+        
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+        
+        .benchmark-card {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .benchmark-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.2);
+        }
+        
+        .benchmark-name {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: 6px;
+        }
+        
+        .benchmark-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4285f4;
+        }
+        
+        .google-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4285f4, #34a853, #ea4335, #fbbc04);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 12px 0;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: #4a5568;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+        
+        .system-prompt-display {
+            background: linear-gradient(135deg, #151922, #1a1f2e);
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .media-item {
+            background: linear-gradient(135deg, #1a1f2e, #2d3748);
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .media-item:hover {
+            border-color: #4285f4;
+            transform: translateY(-2px);
+        }
+        
+        .media-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .media-label {
+            font-size: 11px;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="section">
+                <div class="section-title">Model Overview</div>
+                <div class="metric-card">
+                    <div class="metric-label">Model Version</div>
+                    <div class="metric-value">Gemini 2.5 Pro<span class="google-badge">GOOGLE</span></div>
+                    <div class="metric-subtext">Multimodal Thinking Model</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Context Window</div>
+                    <div class="metric-value">1M tokens</div>
+                    <div class="metric-subtext">~750,000 words (2M soon)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Max Output</div>
+                    <div class="metric-value">64K tokens</div>
+                    <div class="metric-subtext">~48,000 words</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Thinking Configuration</div>
+                <div class="thinking-controls">
+                    <div class="thinking-toggle">
+                        <span style="font-size: 14px;">🧠 Thinking Mode</span>
+                        <div class="toggle-switch active" onclick="toggleThinking(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="context-slider">
+                        <div class="context-display">
+                            <span style="font-size: 12px; color: #a0aec0;">Context Usage</span>
+                            <span class="context-value" id="contextValue">25%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="25" class="slider" id="contextSlider" onchange="updateContext(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Multimodal Input</div>
+                <div class="media-grid">
+                    <div class="media-item" onclick="selectMedia('text')">
+                        <div class="media-icon">📝</div>
+                        <div class="media-label">Text</div>
+                    </div>
+                    <div class="media-item" onclick="selectMedia('image')">
+                        <div class="media-icon">🖼️</div>
+                        <div class="media-label">Images</div>
+                    </div>
+                    <div class="media-item" onclick="selectMedia('video')">
+                        <div class="media-icon">🎬</div>
+                        <div class="media-label">Video</div>
+                    </div>
+                    <div class="media-item" onclick="selectMedia('audio')">
+                        <div class="media-icon">🎵</div>
+                        <div class="media-label">Audio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Performance Benchmarks</div>
+                <div class="benchmark-grid">
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">Global MMLU</div>
+                        <div class="benchmark-score">89.8%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">GPQA Diamond</div>
+                        <div class="benchmark-score">84%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">AIME 2024</div>
+                        <div class="benchmark-score">92%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">MMMU</div>
+                        <div class="benchmark-score">81.7%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Cost Tracking</div>
+                <div class="cost-tracker">
+                    <div class="cost-efficient-badge">💰 Cost Efficient</div>
+                    <div class="cost-display">
+                        <span class="cost-label">Input Cost:</span>
+                        <span class="cost-value" id="inputCost">$0.00125/1K tokens</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Output Cost:</span>
+                        <span class="cost-value" id="outputCost">$0.01000/1K tokens</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Session Total:</span>
+                        <span class="cost-value" id="sessionTotal">$0.00</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Today's Usage:</span>
+                        <span class="cost-value" id="todayTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <select class="model-selector">
+                    <option>OpenAI o4-mini-2025-04-16</option>
+                    <option>OpenAI o3-pro-2025-06-10</option>
+                    <option selected>Google Gemini 2.5 Pro</option>
+                </select>
+                <div style="color: #fff; font-weight: 600;">
+                    🚀 Multimodal Thinking Model
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="chat-area">
+                    <div class="section">
+                        <div class="section-title">System Prompt</div>
+                        <div class="system-prompt-display" id="systemPrompt">
+                            Loading system prompt from ai/system_prompt.txt...
+                        </div>
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Include System Prompt in Analysis</span>
+                            <div class="toggle-switch active" onclick="toggleSystemPrompt(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Multimodal Input</div>
+                        <div class="multimodal-preview" id="mediaPreview" onclick="uploadMedia()">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📎</div>
+                            <div style="color: #a0aec0;">Drop files here or click to upload</div>
+                            <div style="font-size: 12px; color: #718096; margin-top: 5px;">
+                                Supports images, video, audio, and documents
+                            </div>
+                        </div>
+                        
+                        <textarea class="input-area" id="userInput" placeholder="Enter your multimodal prompt here... Gemini can understand text, images, video, and audio simultaneously."></textarea>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="generateResponse()">🧠 Think & Analyze</button>
+                            <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+                            <button class="btn btn-secondary" onclick="saveSession()">Save Session</button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Response</div>
+                        <div class="response-area" id="responseArea">
+                            <div style="color: #888; text-align: center; padding: 40px;">
+                                Multimodal response will appear here after thinking...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="settings-panel">
+                    <div class="section">
+                        <div class="section-title">Generation Settings</div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-label">Token Count</div>
+                            <div class="metric-value" id="tokenCount">0 / 1,000,000</div>
+                            <div class="metric-subtext">Input tokens used</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Media Resolution</div>
+                            <div class="metric-value" id="mediaResolution">Auto</div>
+                            <div class="metric-subtext">Adaptive quality</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Model Capabilities</div>
+                        
+                        <div class="toggle">
+                            <span style="font-size: 14px;">🔍 Grounding with Search</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'grounding')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">🎬 Video Analysis</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'videoAnalysis')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">🎵 Audio Processing</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'audioProcessing')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">📊 Data Analysis</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'dataAnalysis')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Performance Metrics</div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value" id="avgLatency">~3.1s</div>
+                            <div class="metric-subtext">Thinking + generation</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Context Efficiency</div>
+                            <div class="metric-value" style="color: #34a853;">Excellent</div>
+                            <div class="metric-subtext">1M+ token support</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Multimodal Score</div>
+                            <div class="metric-value" style="color: #4285f4;">Outstanding</div>
+                            <div class="metric-subtext">Best-in-class</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Best Use Cases</div>
+                        <div style="font-size: 12px; color: #ccc; line-height: 1.4;">
+                            • Video content analysis<br>
+                            • Large document processing<br>
+                            • Multimodal understanding<br>
+                            • Creative applications<br>
+                            • Research with web grounding<br>
+                            • Audio transcription & analysis
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionCost = 0;
+        let uploadedMedia = [];
+        let currentFeatures = {
+            grounding: true,
+            videoAnalysis: true,
+            audioProcessing: true,
+            dataAnalysis: true,
+            thinkingMode: true,
+            systemPrompt: true
+        };
+
+        // Load system prompt
+        async function loadSystemPrompt() {
+            try {
+                const response = await fetch('/ai/system_prompt.txt');
+                const prompt = await response.text();
+                document.getElementById('systemPrompt').textContent = prompt;
+            } catch (error) {
+                document.getElementById('systemPrompt').textContent = 'Error loading system prompt: ' + error.message;
+            }
+        }
+
+        function updateContext(slider) {
+            document.getElementById('contextValue').textContent = slider.value + '%';
+        }
+
+        function toggleFeature(toggle, featureName) {
+            toggle.classList.toggle('active');
+            currentFeatures[featureName] = toggle.classList.contains('active');
+        }
+
+        function toggleSystemPrompt(toggle) {
+            toggle.classList.toggle('active');
+            currentFeatures.systemPrompt = toggle.classList.contains('active');
+        }
+
+        function toggleThinking(toggle) {
+            toggle.classList.toggle('active');
+            currentFeatures.thinkingMode = toggle.classList.contains('active');
+        }
+
+        function selectMedia(type) {
+            document.querySelectorAll('.media-item').forEach(item => item.style.borderColor = '#4a5568');
+            event.target.closest('.media-item').style.borderColor = '#4285f4';
+            console.log('Selected media type:', type);
+        }
+
+        function uploadMedia() {
+            // Create file input
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = 'image/*,video/*,audio/*,.pdf,.doc,.docx,.txt';
+            
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                uploadedMedia = uploadedMedia.concat(files);
+                updateMediaPreview();
+            };
+            
+            input.click();
+        }
+
+        function updateMediaPreview() {
+            const preview = document.getElementById('mediaPreview');
+            if (uploadedMedia.length > 0) {
+                preview.innerHTML = `
+                    <div style="font-size: 20px; margin-bottom: 8px;">📁</div>
+                    <div style="color: #4285f4; font-weight: 600;">${uploadedMedia.length} file(s) uploaded</div>
+                    <div style="font-size: 12px; color: #718096; margin-top: 5px;">
+                        Ready for multimodal analysis
+                    </div>
+                `;
+            }
+        }
+
+        function updateTokenCount(input) {
+            const baseTokens = Math.ceil(input.length / 4);
+            const mediaTokens = uploadedMedia.length * 100; // Estimate for media
+            const totalTokens = baseTokens + mediaTokens;
+            document.getElementById('tokenCount').textContent = `${totalTokens.toLocaleString()} / 1,000,000`;
+            updateEstimatedCost(totalTokens);
+        }
+
+        function updateEstimatedCost(inputTokens = 0) {
+            const outputTokens = Math.max(inputTokens * 0.3, 100);
+            const cost = inputTokens * 0.00000125 + outputTokens * 0.00001000;
+            // Cost display would be updated here
+        }
+
+        function calculateCost(inputTokens, outputTokens) {
+            const inputCost = inputTokens * 0.00000125;
+            const outputCost = outputTokens * 0.00001000;
+            return inputCost + outputCost;
+        }
+
+        async function generateResponse() {
+            const input = document.getElementById('userInput').value;
+            if (!input.trim() && uploadedMedia.length === 0) return;
+
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML = '<div style="color: #4285f4;">🧠 Gemini is thinking about your multimodal input...</div>';
+
+            try {
+                const formData = new FormData();
+                formData.append('prompt', input);
+                formData.append('features', JSON.stringify(currentFeatures));
+                
+                // Add media files
+                uploadedMedia.forEach((file, index) => {
+                    formData.append(`media_${index}`, file);
+                });
+
+                const response = await fetch('/server/api/gemini-2-5-pro-analysis.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let responseHtml = `<div style="white-space: pre-wrap;">${result.response}</div>`;
+                    
+                    // Show thinking process if available
+                    if (result.thinking_process && currentFeatures.thinkingMode) {
+                        responseHtml = `
+                            <div class="thinking-process">
+                                <strong>🧠 Thinking Process:</strong><br>
+                                ${result.thinking_process}
+                            </div>
+                            ${responseHtml}
+                        `;
+                    }
+                    
+                    responseArea.innerHTML = responseHtml;
+                    
+                    // Update cost tracking
+                    const cost = calculateCost(result.input_tokens || 0, result.output_tokens || 0);
+                    sessionCost += cost;
+                    document.getElementById('sessionTotal').textContent = `$${sessionCost.toFixed(4)}`;
+                    
+                    // Update performance metrics
+                    if (result.latency) {
+                        document.getElementById('avgLatency').textContent = `~${(result.latency / 1000).toFixed(1)}s`;
+                    }
+                } else {
+                    responseArea.innerHTML = `<div style="color: #ea4335;">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                responseArea.innerHTML = `<div style="color: #ea4335;">Network error: ${error.message}</div>`;
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('userInput').value = '';
+            document.getElementById('responseArea').innerHTML = '<div style="color: #888; text-align: center; padding: 40px;">Multimodal response will appear here after thinking...</div>';
+            uploadedMedia = [];
+            document.getElementById('mediaPreview').innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 10px;">📎</div>
+                <div style="color: #a0aec0;">Drop files here or click to upload</div>
+                <div style="font-size: 12px; color: #718096; margin-top: 5px;">
+                    Supports images, video, audio, and documents
+                </div>
+            `;
+            updateTokenCount('');
+        }
+
+        function saveSession() {
+            const sessionData = {
+                input: document.getElementById('userInput').value,
+                response: document.getElementById('responseArea').textContent,
+                media: uploadedMedia.map(f => f.name),
+                settings: currentFeatures,
+                cost: sessionCost,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('gemini_session_' + Date.now(), JSON.stringify(sessionData));
+            alert('Multimodal session saved successfully!');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemPrompt();
+            
+            document.getElementById('userInput').addEventListener('input', function() {
+                updateTokenCount(this.value);
+            });
+
+            // Load today's cost from backend
+            fetch('/server/api/get-daily-costs.php?model=gemini-2.5-pro')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('todayTotal').textContent = `$${data.today_cost.toFixed(4)}`;
+                    }
+                })
+                .catch(console.error);
+
+            // Drag and drop support
+            const preview = document.getElementById('mediaPreview');
+            preview.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                preview.style.borderColor = '#4285f4';
+            });
+            
+            preview.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                preview.style.borderColor = '#4a5568';
+            });
+            
+            preview.addEventListener('drop', (e) => {
+                e.preventDefault();
+                preview.style.borderColor = '#4a5568';
+                
+                const files = Array.from(e.dataTransfer.files);
+                uploadedMedia = uploadedMedia.concat(files);
+                updateMediaPreview();
+                updateTokenCount(document.getElementById('userInput').value);
+            });
+        });
+    </script>
+</body>
+</html>

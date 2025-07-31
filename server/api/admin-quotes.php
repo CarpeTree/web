@@ -22,9 +22,11 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             q.id, q.customer_id, q.quote_status, q.selected_services, q.notes,
-            q.ai_response_json, q.quote_created_at,
+            q.ai_response_json, q.quote_created_at, q.quote_expires_at,
+            q.ai_o4_mini_analysis, q.ai_o3_analysis, q.ai_gemini_analysis,
+            q.gps_lat, q.gps_lng, q.exif_lat, q.exif_lng, q.total_estimate,
             c.name as customer_name, c.email as customer_email, c.phone as customer_phone, 
-            c.address, c.referral_source, c.referrer_name,
+            c.address, c.referral_source, c.referrer_name, c.newsletter_opt_in,
             c.geo_latitude, c.geo_longitude, c.geo_accuracy, c.ip_address,
             COUNT(m.id) as media_count
         FROM quotes q
@@ -142,51 +144,32 @@ try {
             $services = json_decode($quote['selected_services'], true) ?: [];
         }
 
-        // Calculate distance using AI (O3 workhorse) - with caching and timeout protection
+        // Calculate distance using Google Maps API only
+        $distance_km = 40; // Default fallback
+        $travel_time = null;
+        $distance_source = 'fallback';
+        
         try {
-            // Calculate distance using multiple sources
-            $distance_km = 40; // Default fallback
+            require_once __DIR__ . '/google-distance-calculator.php';
+            $distance_result = calculateDistanceWithGoogleMaps(
+                $quote['address'], 
+                $quote['geo_latitude'], 
+                $quote['geo_longitude']
+            );
             
-            // First try GPS coordinates if available
-            if (!empty($quote['geo_latitude']) && !empty($quote['geo_longitude'])) {
-                try {
-                    $distance_km = calculateDistanceWithGPS($quote['geo_latitude'], $quote['geo_longitude']);
-                } catch (Exception $e) {
-                    error_log("GPS distance calculation failed: " . $e->getMessage());
-                }
-            }
-            
-            // If no GPS or GPS failed, try address
-            if ($distance_km == 40 && !empty($quote['address'])) {
-                try {
-                    $distance_km = fallbackDistanceEstimate($quote['address']);
-                } catch (Exception $e) {
-                    error_log("Address distance calculation failed: " . $e->getMessage());
-                }
+            if ($distance_result && $distance_result['distance_km'] > 0) {
+                $distance_km = $distance_result['distance_km'];
+                $travel_time = $distance_result['duration_with_traffic'] ?? null;
+                $distance_source = 'google_maps';
+            } else {
+                // Only use fallback if Google Maps completely fails
+                $distance_km = fallbackDistanceEstimate($quote['address']);
+                $distance_source = 'regional_estimate';
             }
         } catch (Exception $e) {
-            // Fallback if distance calculation fails
-            $distance_km = 40; // Default fallback
-        }
-        
-        // If distance still fallback and we have address, try Google Maps for better accuracy
-        if ($distance_km == 40 && !empty($quote['address'])) {
-            try {
-                require_once __DIR__ . '/google-distance-calculator.php';
-                $distance_result = calculateDistanceMultiSource(
-                    $quote['address'], 
-                    $quote['geo_latitude'], 
-                    $quote['geo_longitude']
-                );
-                if ($distance_result && $distance_result['distance_km'] > 0) {
-                    $distance_km = $distance_result['distance_km'];
-                    // Store additional travel info for potential display
-                    $quotes[$i]['travel_time'] = $distance_result['duration_with_traffic'] ?? null;
-                    $quotes[$i]['distance_source'] = $distance_result['source'] ?? 'calculated';
-                }
-            } catch (Exception $e) {
-                error_log("Google Maps distance calc in dashboard failed: " . $e->getMessage());
-            }
+            error_log("Google Maps distance calculation failed: " . $e->getMessage());
+            $distance_km = fallbackDistanceEstimate($quote['address']);
+            $distance_source = 'regional_estimate';
         }
 
         // Generate line items based on services and AI analysis
@@ -226,6 +209,8 @@ try {
             'phone' => $quote['customer_phone'], // Changed from $quote['phone']
             'address' => $quote['address'],
             'distance_km' => $distance_km,
+            'travel_time' => $travel_time,
+            'distance_source' => $distance_source,
             'vehicle_type' => 'truck', // Default
             'travel_cost' => $distance_km * 1.00, // Default truck rate
             'files' => $formatted_files,

@@ -129,11 +129,14 @@ Keep response under 500 words for efficiency.";
 
         $ai_result = json_decode($response, true);
         
-        if (!isset($ai_result['choices'][0]['message']['content'])) {
-            throw new Exception("Invalid o1-mini response format");
+        if (isset($ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'])) {
+            $function_args = json_decode($ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'], true);
+            $ai_analysis = json_encode($function_args, JSON_PRETTY_PRINT);
+        } elseif (isset($ai_result['choices'][0]['message']['content'])) {
+            $ai_analysis = $ai_result['choices'][0]['message']['content'];
+        } else {
+            throw new Exception("Invalid o4-mini response format");
         }
-
-        $ai_analysis = $ai_result['choices'][0]['message']['content'];
         
         // Calculate cost (o1-mini pricing)
         $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
@@ -163,17 +166,39 @@ Keep response under 500 words for efficiency.";
 
     $stmt = $pdo->prepare("
         UPDATE quotes 
-        SET ai_o1_mini_analysis = ?, updated_at = NOW()
+        SET ai_o4_mini_analysis = ?, updated_at = NOW()
         WHERE id = ?
     ");
     $stmt->execute([json_encode($analysis_data), $quote_id]);
 
+    // Track cost and performance
+    require_once __DIR__ . '/../utils/cost-tracker.php';
+    $cost_tracker = new CostTracker($pdo);
+    
+    $cost_data = $cost_tracker->trackUsage([
+        'quote_id' => $quote_id,
+        'model_name' => 'gpt-4o-mini',
+        'provider' => 'openai',
+        'input_tokens' => $input_tokens ?? 0,
+        'output_tokens' => $output_tokens ?? 0,
+        'processing_time_ms' => $processing_time,
+        'reasoning_effort' => 'low', // o4-mini is fast model
+        'media_files_processed' => count($media_files),
+        'transcriptions_generated' => 0, // Count actual transcriptions if available
+        'tools_used' => ['function_calling', 'vision', 'multimodal'],
+        'analysis_quality_score' => 0.85 // Good quality for cost-effective model
+    ]);
+
     echo json_encode([
         'success' => true,
-        'model' => 'o1-mini',
+        'model' => 'gpt-4o-mini',
         'quote_id' => $quote_id,
         'analysis' => $analysis_summary,
         'cost' => $cost,
+        'cost_tracking' => $cost_data,
+        'input_tokens' => $input_tokens ?? 0,
+        'output_tokens' => $output_tokens ?? 0,
+        'processing_time_ms' => $processing_time,
         'media_count' => count($media_files)
     ]);
 

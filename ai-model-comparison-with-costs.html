@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Comparison Dashboard - Real-time Cost Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .cost-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .cost-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .cost-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .cost-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+        
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .model-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .model-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .model-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .model-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-fast { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .badge-premium { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .badge-multimodal { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        
+        .model-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .cost-breakdown {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .cost-row:last-child {
+            margin-bottom: 0;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        
+        .performance-bars {
+            margin-top: 15px;
+        }
+        
+        .performance-item {
+            margin-bottom: 10px;
+        }
+        
+        .performance-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .performance-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .fill-excellent { background: linear-gradient(90deg, #4ecdc4, #44a08d); }
+        .fill-good { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .fill-average { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-dashboard {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: #fff;
+        }
+        
+        .btn-test {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 30px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+        
+        .system-prompt-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 30px;
+        }
+        
+        .system-prompt-display {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+        }
+        
+        .refresh-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🤖 AI Model Comparison Dashboard</h1>
+            <p>Real-time cost tracking and performance analytics for tree care analysis</p>
+            <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
+        </div>
+
+        <!-- Cost Overview -->
+        <div class="cost-overview">
+            <div class="cost-card">
+                <div class="cost-label">Today's Total Cost</div>
+                <div class="cost-value" id="todayTotal">$0.00</div>
+            </div>
+            <div class="cost-card">
+                <div class="cost-label">This Week</div>
+                <div class="cost-value" id="weekTotal">$0.00</div>
+            </div>
+            <div class="cost-card">
+                <div class="cost-label">This Month</div>
+                <div class="cost-value" id="monthTotal">$0.00</div>
+            </div>
+            <div class="cost-card">
+                <div class="cost-label">Total Requests</div>
+                <div class="cost-value" id="totalRequests">0</div>
+            </div>
+        </div>
+
+        <!-- Model Grid -->
+        <div class="model-grid">
+            <!-- OpenAI o4-mini -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">OpenAI o4-mini</div>
+                    <div class="model-badge badge-fast">FAST & EFFICIENT</div>
+                </div>
+                
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Context Window</div>
+                        <div class="stat-value">200K tokens</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Best For</div>
+                        <div class="stat-value">Cost-effective</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Latency</div>
+                        <div class="stat-value" id="o4-latency">~2.1s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today's Usage</div>
+                        <div class="stat-value" id="o4-requests">0 requests</div>
+                    </div>
+                </div>
+
+                <div class="cost-breakdown">
+                    <div class="cost-row">
+                        <span>Input Cost:</span>
+                        <span>$1.16/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Output Cost:</span>
+                        <span>$4.62/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Today's Cost:</span>
+                        <span id="o4-cost">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="performance-bars">
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Speed</span>
+                            <span>Excellent</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Cost Efficiency</span>
+                            <span>Outstanding</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 98%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Reasoning</span>
+                            <span>Good</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-good" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-dashboard" onclick="openDashboard('o4-mini')">Open Dashboard</button>
+                    <button class="btn btn-test" onclick="testModel('o4-mini')">Test Model</button>
+                </div>
+            </div>
+
+            <!-- OpenAI o3-pro -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">OpenAI o3-pro</div>
+                    <div class="model-badge badge-premium">PREMIUM REASONING</div>
+                </div>
+                
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Context Window</div>
+                        <div class="stat-value">200K tokens</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Best For</div>
+                        <div class="stat-value">Complex reasoning</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Latency</div>
+                        <div class="stat-value" id="o3-latency">~15.2s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today's Usage</div>
+                        <div class="stat-value" id="o3-requests">0 requests</div>
+                    </div>
+                </div>
+
+                <div class="cost-breakdown">
+                    <div class="cost-row">
+                        <span>Input Cost:</span>
+                        <span>$20.00/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Output Cost:</span>
+                        <span>$80.00/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Today's Cost:</span>
+                        <span id="o3-cost">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="performance-bars">
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Reasoning</span>
+                            <span>Exceptional</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 98%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Accuracy</span>
+                            <span>Outstanding</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 96%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Cost Efficiency</span>
+                            <span>Premium</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-average" style="width: 30%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-dashboard" onclick="openDashboard('o3-pro')">Open Dashboard</button>
+                    <button class="btn btn-test" onclick="testModel('o3-pro')">Test Model</button>
+                </div>
+            </div>
+
+            <!-- Gemini 2.5 Pro -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-name">Gemini 2.5 Pro</div>
+                    <div class="model-badge badge-multimodal">MULTIMODAL</div>
+                </div>
+                
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Context Window</div>
+                        <div class="stat-value">1M tokens</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Best For</div>
+                        <div class="stat-value">Multimodal</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Latency</div>
+                        <div class="stat-value" id="gemini-latency">~3.1s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today's Usage</div>
+                        <div class="stat-value" id="gemini-requests">0 requests</div>
+                    </div>
+                </div>
+
+                <div class="cost-breakdown">
+                    <div class="cost-row">
+                        <span>Input Cost:</span>
+                        <span>$1.25/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Output Cost:</span>
+                        <span>$10.00/M tokens</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Today's Cost:</span>
+                        <span id="gemini-cost">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="performance-bars">
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Multimodal</span>
+                            <span>Outstanding</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 96%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Context Length</span>
+                            <span>Excellent</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-excellent" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="performance-label">
+                            <span>Cost Efficiency</span>
+                            <span>Good</span>
+                        </div>
+                        <div class="performance-bar">
+                            <div class="performance-fill fill-good" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-dashboard" onclick="openDashboard('gemini-2.5-pro')">Open Dashboard</button>
+                    <button class="btn btn-test" onclick="testModel('gemini-2.5-pro')">Test Model</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table">
+            <h3 style="margin-bottom: 20px;">📊 Detailed Comparison</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>o4-mini</th>
+                            <th>o3-pro</th>
+                            <th>Gemini 2.5 Pro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Input Cost per 1M tokens</td>
+                            <td>$1.16</td>
+                            <td>$20.00</td>
+                            <td>$1.25</td>
+                        </tr>
+                        <tr>
+                            <td>Output Cost per 1M tokens</td>
+                            <td>$4.62</td>
+                            <td>$80.00</td>
+                            <td>$10.00</td>
+                        </tr>
+                        <tr>
+                            <td>Context Window</td>
+                            <td>200K tokens</td>
+                            <td>200K tokens</td>
+                            <td>1M tokens</td>
+                        </tr>
+                        <tr>
+                            <td>Reasoning Capability</td>
+                            <td>Good</td>
+                            <td>Exceptional</td>
+                            <td>Advanced</td>
+                        </tr>
+                        <tr>
+                            <td>Multimodal Support</td>
+                            <td>Yes</td>
+                            <td>Yes</td>
+                            <td>Outstanding</td>
+                        </tr>
+                        <tr>
+                            <td>Function Calling</td>
+                            <td>Yes</td>
+                            <td>Yes</td>
+                            <td>Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Typical Use Case</td>
+                            <td>Cost-effective analysis</td>
+                            <td>Complex reasoning</td>
+                            <td>Large context + multimodal</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Prompt Section -->
+        <div class="system-prompt-section">
+            <h3 style="margin-bottom: 20px;">📝 Shared System Prompt</h3>
+            <p style="margin-bottom: 15px; opacity: 0.8;">All models use the same standardized system prompt for consistent tree care analysis:</p>
+            <div class="system-prompt-display" id="systemPromptDisplay">
+                Loading system prompt...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load real-time data
+        async function refreshData() {
+            try {
+                // Load cost overview
+                const costResponse = await fetch('/server/api/get-daily-costs.php?model=all');
+                const costData = await costResponse.json();
+                
+                if (costData.success) {
+                    // Update overview
+                    const totals = costData.running_totals;
+                    document.getElementById('todayTotal').textContent = `$${totals.today_cost.toFixed(4)}`;
+                    document.getElementById('weekTotal').textContent = `$${totals.this_week_cost.toFixed(4)}`;
+                    document.getElementById('monthTotal').textContent = `$${totals.this_month_cost.toFixed(4)}`;
+                    document.getElementById('totalRequests').textContent = totals.today_requests;
+                    
+                    // Update model-specific data
+                    costData.daily_costs.forEach(model => {
+                        updateModelStats(model);
+                    });
+                }
+                
+                // Load system prompt
+                const promptResponse = await fetch('/ai/system_prompt.txt');
+                const prompt = await promptResponse.text();
+                document.getElementById('systemPromptDisplay').textContent = prompt;
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function updateModelStats(model) {
+            const modelName = model.model_name.toLowerCase();
+            
+            if (modelName.includes('o4') || modelName.includes('4o-mini')) {
+                document.getElementById('o4-requests').textContent = `${model.total_requests} requests`;
+                document.getElementById('o4-cost').textContent = `$${model.total_cost.toFixed(4)}`;
+                if (model.avg_processing_time_ms) {
+                    document.getElementById('o4-latency').textContent = `~${(model.avg_processing_time_ms / 1000).toFixed(1)}s`;
+                }
+            } else if (modelName.includes('o3') || modelName.includes('gpt-o3')) {
+                document.getElementById('o3-requests').textContent = `${model.total_requests} requests`;
+                document.getElementById('o3-cost').textContent = `$${model.total_cost.toFixed(4)}`;
+                if (model.avg_processing_time_ms) {
+                    document.getElementById('o3-latency').textContent = `~${(model.avg_processing_time_ms / 1000).toFixed(1)}s`;
+                }
+            } else if (modelName.includes('gemini')) {
+                document.getElementById('gemini-requests').textContent = `${model.total_requests} requests`;
+                document.getElementById('gemini-cost').textContent = `$${model.total_cost.toFixed(4)}`;
+                if (model.avg_processing_time_ms) {
+                    document.getElementById('gemini-latency').textContent = `~${(model.avg_processing_time_ms / 1000).toFixed(1)}s`;
+                }
+            }
+        }
+
+        function openDashboard(model) {
+            const dashboards = {
+                'o4-mini': '/openai-o4-mini-dashboard.html',
+                'o3-pro': '/openai-o3-pro-dashboard.html',
+                'gemini-2.5-pro': '/gemini-25-pro-dashboard.html'
+            };
+            
+            if (dashboards[model]) {
+                window.open(dashboards[model], '_blank');
+            }
+        }
+
+        function testModel(model) {
+            // This would integrate with your quote testing system
+            alert(`Testing ${model} model... (integrate with existing quote system)`);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshData, 30000);
+        });
+    </script>
+</body>
+</html>

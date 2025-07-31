@@ -163,7 +163,7 @@ Keep response under 500 words for efficiency.";
 
     $stmt = $pdo->prepare("
         UPDATE quotes 
-        SET ai_o1_mini_analysis = ?, updated_at = NOW()
+        SET ai_o4_mini_analysis = ?, updated_at = NOW()
         WHERE id = ?
     ");
     $stmt->execute([json_encode($analysis_data), $quote_id]);

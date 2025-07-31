@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI o3-pro Studio - Advanced Reasoning Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .studio-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: #111111;
+            border-right: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a1a2e, #16213e);
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .model-selector {
+            background: #2a2a3e;
+            border: 1px solid #4c4c6d;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 16px;
+            min-width: 220px;
+        }
+        
+        .workspace {
+            flex: 1;
+            display: flex;
+        }
+        
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .settings-panel {
+            width: 350px;
+            background: #111111;
+            border-left: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e6e6ff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid #4c4c6d;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #a8a8ff;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #8b5cf6;
+        }
+        
+        .metric-subtext {
+            font-size: 11px;
+            color: #777;
+            margin-top: 2px;
+        }
+        
+        .reasoning-controls {
+            background: #1a1a2e;
+            border: 1px solid #4c4c6d;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .reasoning-level {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .reasoning-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            margin: 0 5px;
+            background: #2a2a3e;
+            border: 1px solid #4c4c6d;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .reasoning-option.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: #8b5cf6;
+            color: #fff;
+        }
+        
+        .thinking-indicator {
+            background: #1a1a2e;
+            border: 1px solid #4c4c6d;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .thinking-animation {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .thinking-dots {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: thinking 1.4s infinite ease-in-out both;
+        }
+        
+        .thinking-dots:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes thinking {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .cost-tracker {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid #4c4c6d;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .cost-warning {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .cost-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .cost-label {
+            font-size: 12px;
+            color: #a8a8ff;
+        }
+        
+        .cost-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+        
+        .cost-value.high {
+            color: #ef4444;
+        }
+        
+        .input-area {
+            background: #1a1a2e;
+            border: 1px solid #4c4c6d;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 120px;
+            color: #fff;
+            font-size: 14px;
+            resize: vertical;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .input-area:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: #374151;
+            color: #fff;
+            border: 1px solid #555;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+        
+        .response-area {
+            background: #111111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+        }
+        
+        .thinking-process {
+            background: #1a1a2e;
+            border-left: 3px solid #8b5cf6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #a8a8ff;
+        }
+        
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .benchmark-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid #4c4c6d;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .benchmark-name {
+            font-size: 11px;
+            color: #a8a8ff;
+            margin-bottom: 5px;
+        }
+        
+        .benchmark-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #8b5cf6;
+        }
+        
+        .premium-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 12px 0;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #333;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(20px);
+        }
+        
+        .system-prompt-display {
+            background: #111111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="section">
+                <div class="section-title">Model Overview</div>
+                <div class="metric-card">
+                    <div class="metric-label">Model Version</div>
+                    <div class="metric-value">o3-pro-2025-06-10<span class="premium-badge">PREMIUM</span></div>
+                    <div class="metric-subtext">Advanced Reasoning Model</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Context Window</div>
+                    <div class="metric-value">200K tokens</div>
+                    <div class="metric-subtext">~150,000 words</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Max Output</div>
+                    <div class="metric-value">100K tokens</div>
+                    <div class="metric-subtext">~75,000 words</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Reasoning Configuration</div>
+                <div class="reasoning-controls">
+                    <div style="margin-bottom: 10px; font-size: 12px; color: #a8a8ff;">Reasoning Effort Level:</div>
+                    <div class="reasoning-level">
+                        <div class="reasoning-option" onclick="setReasoningLevel(this, 'low')">Low</div>
+                        <div class="reasoning-option active" onclick="setReasoningLevel(this, 'medium')">Medium</div>
+                        <div class="reasoning-option" onclick="setReasoningLevel(this, 'high')">High</div>
+                    </div>
+                    <div style="font-size: 11px; color: #777; margin-top: 8px;">
+                        Higher levels use more compute for deeper reasoning
+                    </div>
+                </div>
+
+                <div class="toggle">
+                    <span style="font-size: 14px;">Thinking Mode</span>
+                    <div class="toggle-switch active" onclick="toggleThinking(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="toggle">
+                    <span style="font-size: 14px;">Chain of Thought</span>
+                    <div class="toggle-switch active" onclick="toggleCoT(this)">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Performance Benchmarks</div>
+                <div class="benchmark-grid">
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">AIME 2024</div>
+                        <div class="benchmark-score">91.6%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">GPQA Diamond</div>
+                        <div class="benchmark-score">83.3%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">SWE-Bench</div>
+                        <div class="benchmark-score">69.1%</div>
+                    </div>
+                    <div class="benchmark-card">
+                        <div class="benchmark-name">MMMU</div>
+                        <div class="benchmark-score">82.9%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Premium Cost Tracking</div>
+                <div class="cost-tracker">
+                    <div class="cost-warning">⚠️ Premium Model - Monitor Usage</div>
+                    <div class="cost-display">
+                        <span class="cost-label">Input Cost:</span>
+                        <span class="cost-value high" id="inputCost">$0.02000/1K tokens</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Output Cost:</span>
+                        <span class="cost-value high" id="outputCost">$0.08000/1K tokens</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Session Total:</span>
+                        <span class="cost-value" id="sessionTotal">$0.00</span>
+                    </div>
+                    <div class="cost-display">
+                        <span class="cost-label">Today's Usage:</span>
+                        <span class="cost-value" id="todayTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <select class="model-selector">
+                    <option>OpenAI o4-mini-2025-04-16</option>
+                    <option selected>OpenAI o3-pro-2025-06-10</option>
+                    <option>Google Gemini 2.5 Pro</option>
+                </select>
+                <div>
+                    <span style="background: linear-gradient(135deg, #8b5cf6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;">Premium Reasoning Model</span>
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="chat-area">
+                    <div class="section">
+                        <div class="section-title">System Prompt</div>
+                        <div class="system-prompt-display" id="systemPrompt">
+                            Loading system prompt from ai/system_prompt.txt...
+                        </div>
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Include System Prompt in Analysis</span>
+                            <div class="toggle-switch active" onclick="toggleSystemPrompt(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Input</div>
+                        <textarea class="input-area" id="userInput" placeholder="Enter complex reasoning tasks here... (supports multimodal input and deep analysis)"></textarea>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="generateResponse()">🧠 Deep Reasoning</button>
+                            <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+                            <button class="btn btn-secondary" onclick="saveSession()">Save Session</button>
+                        </div>
+                    </div>
+
+                    <div class="thinking-indicator" id="thinkingIndicator" style="display: none;">
+                        <div class="thinking-animation">
+                            <div class="thinking-dots"></div>
+                            <div class="thinking-dots"></div>
+                            <div class="thinking-dots"></div>
+                        </div>
+                        <div>Model is thinking deeply...</div>
+                        <div style="font-size: 12px; color: #777; margin-top: 5px;">
+                            This may take 15-30 seconds for complex reasoning
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Response</div>
+                        <div class="response-area" id="responseArea">
+                            <div style="color: #888; text-align: center; padding: 40px;">
+                                Premium response will appear here after deep reasoning...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="settings-panel">
+                    <div class="section">
+                        <div class="section-title">Generation Settings</div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-label">Token Count</div>
+                            <div class="metric-value" id="tokenCount">0 / 200,000</div>
+                            <div class="metric-subtext">Input tokens used</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Estimated Cost</div>
+                            <div class="metric-value" id="estimatedCost">$0.00</div>
+                            <div class="metric-subtext">For current input</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Advanced Features</div>
+                        
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Function Calling</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'functionCalling')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Structured Output</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'structuredOutput')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Tool Use</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'toolUse')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle">
+                            <span style="font-size: 14px;">Vision Analysis</span>
+                            <div class="toggle-switch active" onclick="toggleFeature(this, 'vision')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Performance Metrics</div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value" id="avgLatency">~15.2s</div>
+                            <div class="metric-subtext">Deep reasoning time</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Quality Score</div>
+                            <div class="metric-value" style="color: #8b5cf6;">Exceptional</div>
+                            <div class="metric-subtext">Premium accuracy</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Reasoning Depth</div>
+                            <div class="metric-value" id="reasoningDepth">High</div>
+                            <div class="metric-subtext">Current setting</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Best Use Cases</div>
+                        <div style="font-size: 12px; color: #ccc; line-height: 1.4;">
+                            • Complex mathematical problems<br>
+                            • Advanced scientific reasoning<br>
+                            • Software engineering tasks<br>
+                            • Multi-step logical analysis<br>
+                            • Research and analysis<br>
+                            • Premium enterprise tasks
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionCost = 0;
+        let reasoningLevel = 'medium';
+        let currentFeatures = {
+            functionCalling: true,
+            structuredOutput: true,
+            toolUse: true,
+            vision: true,
+            thinkingMode: true,
+            chainOfThought: true,
+            systemPrompt: true
+        };
+
+        // Load system prompt
+        async function loadSystemPrompt() {
+            try {
+                const response = await fetch('/ai/system_prompt.txt');
+                const prompt = await response.text();
+                document.getElementById('systemPrompt').textContent = prompt;
+            } catch (error) {
+                document.getElementById('systemPrompt').textContent = 'Error loading system prompt: ' + error.message;
+            }
+        }
+
+        function setReasoningLevel(element, level) {
+            document.querySelectorAll('.reasoning-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+            reasoningLevel = level;
+            document.getElementById('reasoningDepth').textContent = level.charAt(0).toUpperCase() + level.slice(1);
+            updateEstimatedCost();
+        }
+
+        function toggleFeature(toggle, featureName) {
+            toggle.classList.toggle('active');
+            currentFeatures[featureName] = toggle.classList.contains('active');
+        }
+
+        function toggleSystemPrompt(toggle) {
+            toggle.classList.toggle('active');
+            currentFeatures.systemPrompt = toggle.classList.contains('active');
+        }
+
+        function toggleThinking(toggle) {
+            toggle.classList.toggle('active');
+            currentFeatures.thinkingMode = toggle.classList.contains('active');
+        }
+
+        function toggleCoT(toggle) {
+            toggle.classList.toggle('active');
+            currentFeatures.chainOfThought = toggle.classList.contains('active');
+        }
+
+        function updateTokenCount(input) {
+            const tokens = Math.ceil(input.length / 4);
+            document.getElementById('tokenCount').textContent = `${tokens.toLocaleString()} / 200,000`;
+            updateEstimatedCost(tokens);
+        }
+
+        function updateEstimatedCost(inputTokens = 0) {
+            const outputTokens = Math.max(inputTokens * 0.5, 100); // Estimate
+            const multiplier = reasoningLevel === 'high' ? 2 : reasoningLevel === 'medium' ? 1.5 : 1;
+            const cost = (inputTokens * 0.000020 + outputTokens * 0.000080) * multiplier;
+            document.getElementById('estimatedCost').textContent = `$${cost.toFixed(4)}`;
+        }
+
+        function calculateCost(inputTokens, outputTokens) {
+            const inputCost = inputTokens * 0.000020;
+            const outputCost = outputTokens * 0.000080;
+            return inputCost + outputCost;
+        }
+
+        async function generateResponse() {
+            const input = document.getElementById('userInput').value;
+            if (!input.trim()) return;
+
+            const responseArea = document.getElementById('responseArea');
+            const thinkingIndicator = document.getElementById('thinkingIndicator');
+            
+            // Show thinking indicator
+            thinkingIndicator.style.display = 'block';
+            responseArea.innerHTML = '<div style="color: #8b5cf6;">🧠 Engaging deep reasoning...</div>';
+
+            try {
+                const response = await fetch('/server/api/openai-o3-analysis.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: input,
+                        features: currentFeatures,
+                        reasoning_level: reasoningLevel
+                    })
+                });
+
+                const result = await response.json();
+                
+                // Hide thinking indicator
+                thinkingIndicator.style.display = 'none';
+                
+                if (result.success) {
+                    let responseHtml = `<div style="white-space: pre-wrap;">${result.response}</div>`;
+                    
+                    // Show thinking process if available
+                    if (result.thinking_process && currentFeatures.thinkingMode) {
+                        responseHtml = `
+                            <div class="thinking-process">
+                                <strong>🧠 Reasoning Process:</strong><br>
+                                ${result.thinking_process}
+                            </div>
+                            ${responseHtml}
+                        `;
+                    }
+                    
+                    responseArea.innerHTML = responseHtml;
+                    
+                    // Update cost tracking
+                    const cost = calculateCost(result.input_tokens || 0, result.output_tokens || 0);
+                    sessionCost += cost;
+                    document.getElementById('sessionTotal').textContent = `$${sessionCost.toFixed(4)}`;
+                    
+                    // Update performance metrics
+                    if (result.latency) {
+                        document.getElementById('avgLatency').textContent = `~${(result.latency / 1000).toFixed(1)}s`;
+                    }
+                } else {
+                    responseArea.innerHTML = `<div style="color: #ef4444;">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                thinkingIndicator.style.display = 'none';
+                responseArea.innerHTML = `<div style="color: #ef4444;">Network error: ${error.message}</div>`;
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('userInput').value = '';
+            document.getElementById('responseArea').innerHTML = '<div style="color: #888; text-align: center; padding: 40px;">Premium response will appear here after deep reasoning...</div>';
+            document.getElementById('thinkingIndicator').style.display = 'none';
+            updateTokenCount('');
+        }
+
+        function saveSession() {
+            const sessionData = {
+                input: document.getElementById('userInput').value,
+                response: document.getElementById('responseArea').textContent,
+                settings: currentFeatures,
+                reasoningLevel: reasoningLevel,
+                cost: sessionCost,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('o3_pro_session_' + Date.now(), JSON.stringify(sessionData));
+            alert('Premium session saved successfully!');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemPrompt();
+            
+            document.getElementById('userInput').addEventListener('input', function() {
+                updateTokenCount(this.value);
+            });
+
+            // Load today's cost from backend
+            fetch('/server/api/get-daily-costs.php?model=o3-pro')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('todayTotal').textContent = `$${data.today_cost.toFixed(4)}`;
+                    }
+                })
+                .catch(console.error);
+        });
+    </script>
+</body>
+</html>
