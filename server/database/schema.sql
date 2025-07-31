@@ -24,7 +24,7 @@ CREATE TABLE customers (
 CREATE TABLE quotes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
-    quote_status ENUM('submitted', 'ai_processing', 'draft_ready', 'sent_to_client', 'accepted', 'rejected', 'expired') DEFAULT 'submitted',
+    quote_status ENUM('submitted', 'ai_processing', 'multi_ai_processing', 'draft_ready', 'multi_ai_complete', 'sent_to_client', 'accepted', 'rejected', 'expired') DEFAULT 'submitted',
     quote_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     quote_expires_at TIMESTAMP DEFAULT (DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 6 MONTH)),
     selected_services JSON,

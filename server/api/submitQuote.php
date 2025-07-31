@@ -366,32 +366,23 @@ try {
     // Trigger AI processing for quotes with media files (asynchronous)
     if (!empty($uploaded_files)) {
         try {
-            // Update status to indicate AI processing has started
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
+            // Update status to indicate multi-AI processing has started
+            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'multi_ai_processing' WHERE id = ?");
             $stmt->execute([$quote_id]);
             
-            // Trigger context assessment first
-            // TODO: Fix context assessment - temporarily disabled due to undefined callOpenAI function
-            // require_once __DIR__ . '/../utils/context-assessor.php';
-            // $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
-            // error_log("Context assessment for quote $quote_id: " . json_encode($context_assessment));
-            
-            // Trigger AI analysis
+            // Trigger multi-model AI analysis (o4-mini, o3-pro, Gemini 2.5 Pro)
             $ai_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
-                     '://' . $_SERVER['HTTP_HOST'] . '/server/api/simple-ai-analysis.php';
-            
-            $post_data = http_build_query(['quote_id' => $quote_id, 'triggered_by' => 'submitQuote']);
+                     '://' . $_SERVER['HTTP_HOST'] . '/trigger-multi-model-analysis.php?quote_id=' . $quote_id;
             
             $context = stream_context_create([
                 'http' => [
-                    'method' => 'POST',
-                    'header' => 'Content-Type: application/x-www-form-urlencoded',
-                    'content' => $post_data,
-                    'timeout' => 2
+                    'method' => 'GET',
+                    'timeout' => 2 // Quick trigger, processing happens async
                 ]
             ]);
             
-            // Non-blocking call
+            // Non-blocking call to trigger multi-model analysis
+            // Admin notification will be sent automatically after all models complete
             @file_get_contents($ai_url, false, $context);
             
         } catch (Exception $e) {

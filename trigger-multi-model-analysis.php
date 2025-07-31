@@ -122,6 +122,20 @@ try {
     echo "\n🎉 Multi-model analysis complete!\n";
     echo "📊 View comparison at: /model-comparison-dashboard.html?quote_id=$quote_id\n";
     
+    // Send admin notification now that ALL AI models have completed
+    echo "\n📧 Sending admin notification...\n";
+    try {
+        require_once __DIR__ . '/server/api/admin-notification.php';
+        $admin_notification_sent = sendAdminNotification($quote_id);
+        if ($admin_notification_sent) {
+            echo "✅ Admin notification sent successfully!\n";
+        } else {
+            echo "❌ Failed to send admin notification\n";
+        }
+    } catch (Exception $e) {
+        echo "❌ Admin notification error: " . $e->getMessage() . "\n";
+    }
+    
     // Summary
     $total_cost = array_sum(array_column($results, 'cost'));
     echo "\n💰 Total cost across all models: $" . number_format($total_cost, 4) . "\n";
