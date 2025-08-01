@@ -221,12 +221,17 @@ try {
         // Format AI summary
         $ai_summary = formatAISummary($ai_response, count($files) > 0);
 
+        // Get cost and token data from the cost log
+        $cost_stmt = $pdo->prepare("SELECT SUM(total_cost) as total_cost, SUM(input_tokens + output_tokens) as total_tokens FROM ai_cost_log WHERE quote_id = ?");
+        $cost_stmt->execute([$quote['id']]);
+        $cost_data = $cost_stmt->fetch(PDO::FETCH_ASSOC);
+
         $formatted_quotes[] = [
             'id' => $quote['id'],
             'status' => $quote['quote_status'],
             'customer_name' => $quote['customer_name'],
             'customer_email' => $quote['customer_email'],
-            'phone' => $quote['customer_phone'], // Changed from $quote['phone']
+            'phone' => $quote['customer_phone'],
             'address' => $quote['address'],
             'distance_km' => $distance_km,
             'travel_time' => $travel_time,
@@ -242,12 +247,14 @@ try {
             'discount_type' => 'dollar',
             'discount_value' => 0,
             'final_total' => 0,
-            'geo_latitude' => $quote['geo_latitude'], // Added GPS latitude
-            'geo_longitude' => $quote['geo_longitude'], // Added GPS longitude
-            'geo_accuracy' => $quote['geo_accuracy'], // Added GPS accuracy
-            'ip_address' => $quote['ip_address'], // Added IP address
-            'exif_locations' => $formatted_exif, // Added EXIF location data
-            'context_assessment' => $formatted_assessment // Added context assessment data
+            'geo_latitude' => $quote['geo_latitude'],
+            'geo_longitude' => $quote['geo_longitude'],
+            'geo_accuracy' => $quote['geo_accuracy'],
+            'ip_address' => $quote['ip_address'],
+            'exif_locations' => $formatted_exif,
+            'context_assessment' => $formatted_assessment,
+            'total_cost' => $cost_data['total_cost'] ?? 0,
+            'total_tokens' => $cost_data['total_tokens'] ?? 0
         ];
     }
 
