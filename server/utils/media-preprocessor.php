@@ -126,13 +126,7 @@ class MediaPreprocessor {
     private function processVideo($file_path, $filename) {
         // Extract video frames
         $frames = $this->extractVideoFrames($file_path);
-        if ($frames) {
-            $this->aggregated_context['visual_content'] = array_merge(
-                $this->aggregated_context['visual_content'], 
-                $frames
-            );
-        }
-        
+
         // Extract and transcribe audio from video
         $transcription = $this->extractAndTranscribeAudio($file_path);
         if ($transcription) {
@@ -141,10 +135,20 @@ class MediaPreprocessor {
                 'text' => $transcription
             ];
         }
-        
-        $frame_count = count($frames);
-        $audio_note = $transcription ? " + audio transcription" : "";
-        $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames{$audio_note})";
+
+        if (!empty($frames)) {
+            $this->aggregated_context['visual_content'] = array_merge(
+                $this->aggregated_context['visual_content'],
+                $frames
+            );
+            $frame_count = count($frames);
+            $audio_note = $transcription ? " + audio transcription" : "";
+            $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted{$audio_note})";
+        } else {
+            // This 'else' block now correctly handles all video processing failures
+            $audio_note = $transcription ? " (audio only transcribed)" : "";
+            $this->aggregated_context['media_summary'][] = "🎬 {$filename} (Video frame extraction failed{$audio_note})";
+        }
     }
     
     private function processAudio($file_path, $filename) {
@@ -163,6 +167,11 @@ class MediaPreprocessor {
     }
     
     private function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 6) {
+        if (!function_exists('shell_exec') || (function_exists('ini_get') && str_contains(ini_get('disable_functions'), 'shell_exec'))) {
+            error_log("shell_exec() disabled on server - cannot extract video frames for " . basename($videoPath));
+            return [];
+        }
+
         $ffmpeg_paths = [
             '/opt/homebrew/bin/ffmpeg',
             '/usr/local/bin/ffmpeg',
@@ -180,13 +189,13 @@ class MediaPreprocessor {
         }
         
         if (!$ffmpeg_path) {
-            error_log("FFmpeg not found - cannot extract video frames");
+            error_log("FFmpeg not found - cannot extract video frames for " . basename($videoPath));
             return [];
         }
         
         $frames = [];
         $tmpDir = sys_get_temp_dir() . '/video_frames_' . uniqid();
-        mkdir($tmpDir);
+        @mkdir($tmpDir);
         
         try {
             // Extract frames
@@ -198,9 +207,7 @@ class MediaPreprocessor {
                 escapeshellarg($tmpDir)
             );
             
-            if (function_exists('shell_exec')) {
-                shell_exec($cmd);
-            }
+            shell_exec($cmd);
             
             // Convert frames to base64
             for ($i = 1; $i <= $maxFrames; $i++) {
@@ -214,13 +221,19 @@ class MediaPreprocessor {
                             'detail' => 'high'
                         ]
                     ];
-                    unlink($frameFile);
                 }
             }
             
         } finally {
+            // Clean up remaining frame files if they exist
             if (is_dir($tmpDir)) {
-                rmdir($tmpDir);
+                $files = glob($tmpDir . '/*');
+                foreach($files as $file){
+                    if(is_file($file)) {
+                        @unlink($file);
+                    }
+                }
+                @rmdir($tmpDir);
             }
         }
         
@@ -231,6 +244,11 @@ class MediaPreprocessor {
         global $OPENAI_API_KEY;
         
         if (empty($OPENAI_API_KEY)) {
+            return null;
+        }
+
+        if (!function_exists('shell_exec') || (function_exists('ini_get') && str_contains(ini_get('disable_functions'), 'shell_exec'))) {
+            error_log("shell_exec() disabled on server - cannot extract audio from video: " . basename($videoPath));
             return null;
         }
         
@@ -251,6 +269,7 @@ class MediaPreprocessor {
         }
         
         if (!$ffmpeg_path) {
+            error_log("FFmpeg not found - cannot extract audio from video: " . basename($videoPath));
             return null;
         }
         
@@ -263,18 +282,14 @@ class MediaPreprocessor {
             escapeshellarg($tmpAudio)
         );
         
-        if (function_exists('shell_exec')) {
-            shell_exec($cmd);
-        } else {
-            return null;
-        }
+        shell_exec($cmd);
         
         if (!file_exists($tmpAudio) || filesize($tmpAudio) == 0) {
             return null;
         }
         
         $transcription = $this->transcribeWithWhisper($tmpAudio);
-        unlink($tmpAudio);
+        @unlink($tmpAudio);
         
         return $transcription;
     }
