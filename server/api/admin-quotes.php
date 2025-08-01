@@ -181,15 +181,11 @@ try {
                 $distance_km = $distance_result['distance_km'];
                 $travel_time = $distance_result['duration_with_traffic'] ?? null;
                 $distance_source = 'google_maps';
-            } else {
-                // Only use fallback if Google Maps completely fails
-                $distance_km = fallbackDistanceEstimate($quote['address']);
-                $distance_source = 'regional_estimate';
             }
         } catch (Exception $e) {
             error_log("Google Maps distance calculation failed: " . $e->getMessage());
-            $distance_km = fallbackDistanceEstimate($quote['address']);
-            $distance_source = 'regional_estimate';
+            $distance_km = 40; // Set default fallback directly
+            $distance_source = 'fallback_estimate';
         }
 
         // Generate line items based on services and AI analysis
