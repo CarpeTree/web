@@ -307,25 +307,33 @@
                         break;
                 }
 
-                if (quote[fieldName]) {
-                    analysis_data = JSON.parse(quote[fieldName]);
-                    
+                if (quote[fieldName] && typeof quote[fieldName] === 'string') {
+                    try {
+                        analysis_data = JSON.parse(quote[fieldName]);
+                    } catch (e) {
+                        console.error('Failed to parse analysis JSON for model:', model, e);
+                        analysis_data = { analysis: 'Error: Invalid JSON format.' };
+                    }
+                }
+
+                if (analysis_data) {
                     // Update stats
                     document.getElementById(`${elementPrefix}-cost`).textContent = 
                         `$${(analysis_data.cost || 0).toFixed(4)}`;
                     document.getElementById(`${elementPrefix}-status`).textContent = '✅';
                     
-                    if (analysis_data.tokens_used) {
-                        document.getElementById(`${elementPrefix}-tokens`).textContent = 
-                            analysis_data.tokens_used.toLocaleString();
+                    if (analysis_data.input_tokens && analysis_data.output_tokens) {
+                        const totalTokens = analysis_data.input_tokens + analysis_data.output_tokens;
+                        document.getElementById(`${elementPrefix}-tokens`).textContent = totalTokens.toLocaleString();
                     } else if (analysis_data.media_count) {
                         document.getElementById(`${elementPrefix}-media`).textContent = 
                             analysis_data.media_count;
                     }
                     
                     // Update analysis content
-                    document.getElementById(`${elementPrefix}-analysis`).textContent = 
-                        analysis_data.analysis || 'Analysis completed but content not available';
+                    // The actual analysis is nested inside another 'analysis' object
+                    const analysisContent = analysis_data.analysis ? JSON.stringify(analysis_data.analysis, null, 2) : 'Analysis completed but content not available';
+                    document.getElementById(`${elementPrefix}-analysis`).textContent = analysisContent;
                 } else {
                     document.getElementById(`${elementPrefix}-analysis`).innerHTML = 
                         '<div class="error">No analysis data available for this model</div>';
@@ -341,19 +349,58 @@
         }
 
         async function refreshAnalysis() {
-            // Reset all to loading state
+            // Reset UI and show loading indicators
             ['o4', 'o3', 'gemini'].forEach(prefix => {
                 document.getElementById(`${prefix}-analysis`).innerHTML = 
-                    '<div class="loading">Refreshing...</div>';
+                    '<div class="loading">Triggering new analysis...</div>';
                 document.getElementById(`${prefix}-status`).textContent = '⏳';
             });
+            
+            try {
+                // Trigger all three models to run in the background
+                const response = await fetch(`server/api/trigger-all-analyses.php?quote_id=${quoteId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Start polling for results
+                    pollForResults();
+                } else {
+                    throw new Error(result.error || 'Failed to trigger analyses');
+                }
+            } catch (error) {
+                console.error('Failed to trigger analyses:', error);
+                alert('Error: ' + error.message);
+            }
+        }
 
-            // Load all analyses
+        let pollInterval;
+        function pollForResults() {
+            // Clear any existing polling
+            if (pollInterval) clearInterval(pollInterval);
+            
+            // Poll every 5 seconds
+            pollInterval = setInterval(async () => {
+                const isComplete = await loadAllAnalyses();
+                if (isComplete) {
+                    clearInterval(pollInterval);
+                }
+            }, 5000);
+        }
+
+        async function loadAllAnalyses() {
             await Promise.all([
                 loadModelAnalysis('o4-mini', 'o4'),
                 loadModelAnalysis('o3', 'o3'),
                 loadModelAnalysis('gemini', 'gemini')
             ]);
+            
+            // Check if all are complete
+            const statuses = [
+                document.getElementById('o4-status').textContent,
+                document.getElementById('o3-status').textContent,
+                document.getElementById('gemini-status').textContent
+            ];
+            return statuses.every(s => s === '✅' || s === '❌');
         }
 
         // Initial load
