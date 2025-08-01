@@ -184,8 +184,7 @@ try {
             }
         } catch (Exception $e) {
             error_log("Google Maps distance calculation failed: " . $e->getMessage());
-            $distance_km = 40; // Set default fallback directly
-            $distance_source = 'fallback_estimate';
+            throw $e;
         }
 
         // Generate line items based on services and AI analysis
