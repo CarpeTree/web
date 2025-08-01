@@ -358,7 +358,11 @@
             
             try {
                 // Trigger all three models to run in the background
-                const response = await fetch(`/server/api/trigger-all-analyses.php?quote_id=${quoteId}`);
+                const response = await fetch(`/server/api/trigger-all-analyses.php?quote_id=${quoteId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `quote_id=${quoteId}`
+                });
                 const result = await response.json();
                 
                 if (result.success) {
