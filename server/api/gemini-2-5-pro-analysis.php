@@ -1,4 +1,9 @@
 <?php
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Google Gemini 2.5 Pro Analysis - Advanced multimodal reasoning
 header('Content-Type: application/json');
 error_reporting(E_ALL);
