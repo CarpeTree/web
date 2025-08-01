@@ -156,12 +156,5 @@ try {
 }
 
 
-function formatFileSize($bytes) {
-    if ($bytes >= 1048576) {
-        return round($bytes / 1048576, 1) . 'MB';
-    } elseif ($bytes >= 1024) {
-        return round($bytes / 1024, 1) . 'KB';
-    }
-    return $bytes . 'B';
-}
+require_once __DIR__ . '/../utils/utils.php';
 ?>
