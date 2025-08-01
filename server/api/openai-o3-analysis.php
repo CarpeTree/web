@@ -1,5 +1,5 @@
 <?php
-// OpenAI o3-pro Analysis - Premium reasoning model via OpenRouter API
+// OpenAI o3 Analysis - Advanced reasoning model via OpenRouter API
 header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -106,7 +106,7 @@ try {
         ];
 
         $openai_request = [
-            'model' => 'openai/o3-pro',
+            'model' => 'openai/o3',
             'messages' => $messages,
             'tools' => [$schema],
             'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
@@ -145,21 +145,21 @@ try {
         } elseif (isset($ai_result['choices'][0]['message']['content'])) {
             $ai_analysis = $ai_result['choices'][0]['message']['content'];
         } else {
-            throw new Exception("Invalid o3-pro-2025-06-10 response format");
+            throw new Exception("Invalid o3 response format");
         }
         
-        // Calculate cost (o3 pricing - higher cost for premium reasoning)
+        // Calculate cost (o3 pricing - advanced reasoning at budget-friendly rates)
         $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
         $output_tokens = $ai_result['usage']['completion_tokens'] ?? 0;
-        $cost = ($input_tokens * 0.000020) + ($output_tokens * 0.000080); // o3-pro: $20/$80 per M tokens
+        $cost = ($input_tokens * 0.000002) + ($output_tokens * 0.000008); // o3: $2/$8 per M tokens
         
     } else {
-        $ai_analysis = "⚠️ o3-pro analysis unavailable. API key: " . (empty($OPENAI_API_KEY) ? "missing" : "set") . ", Media: " . count($aggregated_context['visual_content']) . " items";
+        $ai_analysis = "⚠️ o3 analysis unavailable. API key: " . (empty($OPENAI_API_KEY) ? "missing" : "set") . ", Media: " . count($aggregated_context['visual_content']) . " items";
         $cost = 0;
     }
 
     // Format the analysis
-    $analysis_summary = "🧠 OpenAI o3-pro Analysis (Premium Reasoning via OpenRouter)\n\n";
+    $analysis_summary = "🧠 OpenAI o3 Analysis (Advanced Reasoning via OpenRouter)\n\n";
     $analysis_summary .= "📁 Media: " . implode(', ', $aggregated_context['media_summary']) . "\n";
     $analysis_summary .= "💰 Cost: $" . number_format($cost, 4) . "\n\n";
     $analysis_summary .= "🔍 Detailed Analysis:\n" . $ai_analysis;
@@ -189,7 +189,7 @@ try {
     
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'openai/o3-pro',
+        'model_name' => 'openai/o3',
         'provider' => 'openrouter',
         'input_tokens' => $input_tokens ?? 0,
         'output_tokens' => $output_tokens ?? 0,
@@ -203,7 +203,7 @@ try {
 
     echo json_encode([
         'success' => true,
-                    'model' => 'openai/o3-pro',
+                    'model' => 'openai/o3',
         'quote_id' => $quote_id,
         'analysis' => $analysis_summary,
         'cost' => $cost,
@@ -219,7 +219,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-                    'model' => 'openai/o3-pro',
+                    'model' => 'openai/o3',
         'error' => $e->getMessage(),
         'quote_id' => $quote_id ?? null
     ]);
