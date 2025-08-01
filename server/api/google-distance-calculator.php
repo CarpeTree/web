@@ -83,38 +83,7 @@ function calculateDistanceWithGoogleMaps($customer_address, $customer_lat = null
     ];
 }
 
-function calculateDistanceMultiSource($customer_address, $customer_lat = null, $customer_lng = null) {
-    // Priority order: Google Maps > AI > Fallback
-    
-    // 1. Try Google Maps first (most accurate)
-    $google_result = calculateDistanceWithGoogleMaps($customer_address, $customer_lat, $customer_lng);
-    if ($google_result) {
-        return $google_result;
-    }
-    
-    // 2. Fallback to AI calculation
-    require_once __DIR__ . '/ai-distance-calculator.php';
-    $ai_distance = calculateDistanceWithAI($customer_address, 3); // Short timeout
-    if ($ai_distance && $ai_distance > 0) {
-        error_log("Using AI distance calculation as fallback: {$ai_distance}km");
-        return [
-            'distance_km' => $ai_distance,
-            'duration' => estimateDriveTime($ai_distance),
-            'duration_with_traffic' => estimateDriveTime($ai_distance, true),
-            'source' => 'ai_calculation'
-        ];
-    }
-    
-    // 3. Final fallback to regional estimates
-    $fallback_distance = fallbackDistanceEstimate($customer_address);
-    error_log("Using fallback distance estimate: {$fallback_distance}km");
-    return [
-        'distance_km' => $fallback_distance,
-        'duration' => estimateDriveTime($fallback_distance),
-        'duration_with_traffic' => estimateDriveTime($fallback_distance, true),
-        'source' => 'fallback_estimate'
-    ];
-}
+
 
 function estimateDriveTime($distance_km, $with_traffic = false) {
     // Estimate drive time based on BC mountain/highway driving
