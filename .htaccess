@@ -9,4 +9,9 @@ php_value memory_limit 512M
 php_flag file_uploads On
 
 # Set maximum file uploads
-php_value max_file_uploads 10 
+php_value max_file_uploads 10
+
+# Rewrite API calls to the correct directory
+RewriteEngine On
+RewriteRule ^server/api/(.*)$ server/api/$1 [L]
+ 
