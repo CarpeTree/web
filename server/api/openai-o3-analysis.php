@@ -1,5 +1,5 @@
 <?php
-// OpenAI o3 Analysis - Advanced reasoning model via OpenRouter API
+// OpenAI o3 Analysis - Advanced reasoning model via Direct OpenAI API
 header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -106,7 +106,7 @@ try {
         ];
 
         $openai_request = [
-            'model' => 'openai/o3',
+            'model' => 'o3',
             'messages' => $messages,
             'tools' => [$schema],
             'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
@@ -116,15 +116,13 @@ try {
 
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'https://openrouter.ai/api/v1/chat/completions',
+            CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($openai_request),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $OPENAI_API_KEY,
-                'HTTP-Referer: https://carpetree.com',
-                'X-Title: Carpe Tree\'em AI Analysis'
+                'Authorization: Bearer ' . $OPENAI_API_KEY
             ],
             CURLOPT_TIMEOUT => 120 // Longer timeout for detailed reasoning
         ]);
@@ -159,7 +157,7 @@ try {
     }
 
     // Format the analysis
-    $analysis_summary = "🧠 OpenAI o3 Analysis (Advanced Reasoning via OpenRouter)\n\n";
+    $analysis_summary = "🧠 OpenAI o3 Analysis (Advanced Reasoning via Direct API)\n\n";
     $analysis_summary .= "📁 Media: " . implode(', ', $aggregated_context['media_summary']) . "\n";
     $analysis_summary .= "💰 Cost: $" . number_format($cost, 4) . "\n\n";
     $analysis_summary .= "🔍 Detailed Analysis:\n" . $ai_analysis;
@@ -189,8 +187,8 @@ try {
     
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'openai/o3',
-        'provider' => 'openrouter',
+        'model_name' => 'o3',
+        'provider' => 'openai',
         'input_tokens' => $input_tokens ?? 0,
         'output_tokens' => $output_tokens ?? 0,
         'processing_time_ms' => $processing_time,
@@ -203,7 +201,7 @@ try {
 
     echo json_encode([
         'success' => true,
-                    'model' => 'openai/o3',
+                    'model' => 'o3',
         'quote_id' => $quote_id,
         'analysis' => $analysis_summary,
         'cost' => $cost,
@@ -219,7 +217,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-                    'model' => 'openai/o3',
+                    'model' => 'o3',
         'error' => $e->getMessage(),
         'quote_id' => $quote_id ?? null
     ]);
