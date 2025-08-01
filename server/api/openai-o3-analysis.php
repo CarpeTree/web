@@ -1,4 +1,7 @@
 <?php
+phpinfo();
+exit;
+
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
     $error = error_get_last();
