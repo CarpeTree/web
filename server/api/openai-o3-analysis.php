@@ -139,7 +139,7 @@ try {
         curl_close($curl);
 
         if ($http_code !== 200) {
-            throw new Exception("OpenAI o3-pro-2025-06-10 API error: HTTP $http_code");
+            throw new Exception("OpenAI o3 API error: HTTP $http_code");
         }
 
         $ai_result = json_decode($response, true);
@@ -171,7 +171,7 @@ try {
 
     // Store results in database with model identifier
     $analysis_data = [
-        'model' => 'o3-pro-2025-06-10',
+        'model' => 'o3',
         'analysis' => $ai_analysis,
         'cost' => $cost,
         'media_count' => count($media_files),

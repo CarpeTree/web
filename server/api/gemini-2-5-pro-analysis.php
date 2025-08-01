@@ -71,7 +71,7 @@ try {
 
     // Format the analysis
     $analysis_summary = "🔮 Google Gemini 2.5 Pro Analysis (Advanced Multimodal)\n\n";
-    $analysis_summary .= "📁 Media: " . implode(', ', array_column($media_summary, 'filename')) . "\n";
+    $analysis_summary .= "📁 Media: " . implode(', ', array_column($aggregated_context['media_summary'], 'filename')) . "\n";
     $analysis_summary .= "💰 Cost: $" . number_format($total_cost, 4) . "\n\n";
     $analysis_summary .= "🔍 Multimodal Analysis:" . $ai_analysis;
 
