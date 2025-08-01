@@ -283,25 +283,28 @@ try {
     
     // Commit transaction FIRST
     $pdo->commit();
-    
-    // Ensure compatibility view for legacy code (uploaded_files) - AFTER commit
-    try {
-        $pdo->exec("CREATE OR REPLACE VIEW uploaded_files AS
-            SELECT
-                id,
-                quote_id,
-                filename,
-                original_filename,
-                file_path,
-                file_size,
-                mime_type,
-                uploaded_at,
-                NULL AS file_hash,
-                exif_data
-            FROM media");
-    } catch (Exception $e) {
-        // log but don't block submission
-        error_log('Failed to create uploaded_files view: ' . $e->getMessage());
+
+    // Run AI Pre-flight Check
+    $preflight_passed = false;
+    $preflight_message = 'AI pre-flight check did not run.';
+    if ($files_uploaded) {
+        try {
+            $preflight_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/server/api/preflight-check.php';
+            $preflight_response = file_get_contents($preflight_url . '?quote_id=' . $quote_id);
+            $preflight_data = json_decode($preflight_response, true);
+
+            if ($preflight_data['success'] && $preflight_data['preflight_check']['sufficient']) {
+                $preflight_passed = true;
+                // Trigger full multi-model analysis in the background
+                $trigger_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/server/api/trigger-all-analyses.php';
+                file_get_contents($trigger_url . '?quote_id=' . $quote_id);
+            } else {
+                $preflight_message = "Submission received, but more information is needed: " . implode(', ', $preflight_data['preflight_check']['missing_items']);
+            }
+        } catch (Exception $e) {
+            error_log("Pre-flight check failed for quote $quote_id: " . $e->getMessage());
+            $preflight_message = 'Could not complete AI pre-flight check due to a server error.';
+        }
     }
     
     // Send immediate confirmation email (quick) - only if mailer available
@@ -327,9 +330,13 @@ try {
         error_log("Confirmation email skipped - mailer not available");
     }
     
-    // Determine message
-    if (!empty($uploaded_files)) {
-        $message = 'Quote submitted successfully. AI analysis will begin shortly.';
+    // Determine message based on pre-flight check
+    if ($files_uploaded) {
+        if ($preflight_passed) {
+            $message = 'Quote submitted successfully. AI analysis will begin shortly.';
+        } else {
+            $message = $preflight_message;
+        }
     } else {
         $message = 'Quote submitted successfully. We will contact you to schedule an in-person assessment.';
     }
