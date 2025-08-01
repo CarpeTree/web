@@ -1,4 +1,20 @@
 <?php
+// Custom shutdown function to catch fatal errors
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'model' => 'o4-mini',
+            'error' => 'A fatal error occurred: ' . $error['message'],
+            'file' => $error['file'],
+            'line' => $error['line'],
+            'quote_id' => $_GET['quote_id'] ?? null
+        ]);
+    }
+});
+
 // OpenAI o4-mini-2025-04-16 Analysis - Fast and cost-effective
 header('Content-Type: application/json');
 error_reporting(E_ALL);
