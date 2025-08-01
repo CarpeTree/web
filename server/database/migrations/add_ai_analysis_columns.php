@@ -1,6 +1,6 @@
 <?php
 // Migration script to add AI analysis columns to the quotes table
-require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../../config/database-simple.php';
 
 try {
     echo "Running migration: Add AI analysis columns...\n";
