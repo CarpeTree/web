@@ -263,67 +263,7 @@ try {
     ]);
 }
 
-function calculateDistanceWithGPS($lat, $lng) {
-    // Base location (Nelson, BC - approximate center of service area)
-    $base_lat = 49.4911;
-    $base_lng = -117.2919;
-    
-    // Calculate distance using Haversine formula
-    $earth_radius = 6371; // Earth's radius in kilometers
-    
-    $lat_diff = deg2rad($lat - $base_lat);
-    $lng_diff = deg2rad($lng - $base_lng);
-    
-    $a = sin($lat_diff/2) * sin($lat_diff/2) +
-         cos(deg2rad($base_lat)) * cos(deg2rad($lat)) *
-         sin($lng_diff/2) * sin($lng_diff/2);
-    
-    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-    $distance = $earth_radius * $c;
-    
-    return round($distance, 1);
-}
 
-function calculateDistance($customer_address) {
-    // Base location: 4530 Blewitt Rd., Nelson BC
-    $base_lat = 49.4928;
-    $base_lng = -117.2948;
-    
-    // Try to geocode customer address (simplified - you can enhance this)
-    // For now, return approximate distances based on common areas
-    $address_lower = strtolower($customer_address);
-    
-    if (strpos($address_lower, 'nelson') !== false) {
-        return 10; // Fixed distance for Nelson area
-    } elseif (strpos($address_lower, 'moyie') !== false) {
-        return 200; // Moyie Lake is ~200km from Nelson (near Cranbrook)
-    } elseif (strpos($address_lower, 'slocan') !== false) {
-        return 55; // Slocan Valley/Pools area - about 55km from Nelson
-    } elseif (strpos($address_lower, 'castlegar') !== false) {
-        return 25;
-    } elseif (strpos($address_lower, 'cranbrook') !== false) {
-        return 180; // Cranbrook area
-    } elseif (strpos($address_lower, 'trail') !== false) {
-        return 45;
-    } elseif (strpos($address_lower, 'rossland') !== false) {
-        return 35;
-    } elseif (strpos($address_lower, 'salmo') !== false) {
-        return 55;
-    } elseif (strpos($address_lower, 'kaslo') !== false) {
-        return 75;
-    } elseif (strpos($address_lower, 'new denver') !== false) {
-        return 85;
-    } elseif (strpos($address_lower, 'nakusp') !== false) {
-        return 120;
-    } elseif (strpos($address_lower, 'vancouver') !== false) {
-        return 650;
-    } elseif (strpos($address_lower, 'calgary') !== false) {
-        return 420;
-    } else {
-        // Default for unknown addresses - consistent 40km estimate
-        return 40;
-    }
-}
 
 function generateLineItems($services, $ai_response, $has_media) {
     $line_items = [];
