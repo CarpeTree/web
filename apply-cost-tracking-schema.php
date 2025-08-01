@@ -5,6 +5,9 @@ error_reporting(E_ALL);
 
 header('Content-Type: text/plain');
 
+// Include the Composer autoloader
+require_once __DIR__ . '/server/vendor/autoload.php';
+
 require_once __DIR__ . '/server/config/database.php';
 
 $message = " अप कॉस्ट ट्रैकिंग स्कीमा लागू करना...\n";
