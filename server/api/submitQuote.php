@@ -334,6 +334,8 @@ try {
         $message = 'Quote submitted successfully. We will contact you to schedule an in-person assessment.';
     }
     
+    error_log("Quote submission $quote_id successful, sending response to client.");
+    
     // Return success response IMMEDIATELY
     echo json_encode([
         'success' => true,
@@ -349,7 +351,10 @@ try {
     
     // Send admin notification asynchronously (after response sent)
     if (function_exists('fastcgi_finish_request')) {
+        error_log("Flushing buffer and closing connection for quote $quote_id before async processing.");
         fastcgi_finish_request();
+    } else {
+        error_log("fastcgi_finish_request not available for quote $quote_id, async processing may be blocking.");
     }
     
     // Send admin notification only if no uploaded_files (to avoid duplicate once AI analysis sends)
@@ -383,7 +388,13 @@ try {
             
             // Non-blocking call to trigger multi-model analysis
             // Admin notification will be sent automatically after all models complete
-            @file_get_contents($ai_url, false, $context);
+            $result = file_get_contents($ai_url, false, $context);
+            if ($result === false) {
+                $error = error_get_last();
+                error_log("Failed to trigger AI URL for quote $quote_id: " . ($error['message'] ?? 'Unknown error'));
+            } else {
+                error_log("Successfully triggered AI URL for quote $quote_id.");
+            }
             
         } catch (Exception $e) {
             error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());

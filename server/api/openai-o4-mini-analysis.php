@@ -119,7 +119,10 @@ Keep response under 500 words for efficiency.";
             CURLOPT_TIMEOUT => 30 // Shorter timeout for o1-mini
         ]);
 
+        $start_time = microtime(true);
         $response = curl_exec($curl);
+        $processing_time = (microtime(true) - $start_time) * 1000; // in milliseconds
+
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 

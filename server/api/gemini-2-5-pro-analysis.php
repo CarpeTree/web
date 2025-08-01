@@ -39,52 +39,27 @@ try {
     $services = json_decode($quote['selected_services'], true) ?: [];
     $services_text = implode(', ', $services);
     
-    $media_summary = [];
-    $ai_analysis = '';
+    require_once __DIR__ . '/../utils/media-preprocessor.php';
+    $media_preprocessor = new MediaPreprocessor($pdo, $GOOGLE_GEMINI_API_KEY);
+    $aggregated_context = $media_preprocessor->aggregateContext($quote_id);
+
     $total_cost = 0;
+    $processing_time = 0;
     
     if (!empty($GOOGLE_GEMINI_API_KEY)) {
         try {
             require_once __DIR__ . '/../utils/gemini-client.php';
-            $gemini = new GeminiClient();
+            $gemini = new GeminiClient($GOOGLE_GEMINI_API_KEY);
             
-            // Process each media file with Gemini 2.5 Pro
-            foreach ($media_files as $media) {
-                $file_path = $media['file_path'];
-                $file_type = $media['file_type'];
-                
-                if (!file_exists($file_path)) {
-                    error_log("Media file not found: $file_path");
-                    continue;
-                }
-                
-                $media_summary[] = [
-                    'filename' => $media['filename'],
-                    'type' => $file_type,
-                    'size' => formatFileSize($media['file_size'] ?? 0)
-                ];
-                
-                if ($file_type === 'image') {
-                    $analysis = $gemini->analyzeImageWithModel(
-                        $file_path, 
-                        $services, 
-                        $quote['notes'] ?? '',
-                        'gemini-2.5-pro' // Specify the exact model
-                    );
-                    $ai_analysis .= "\n\n📸 IMAGE ANALYSIS - {$media['filename']} (Gemini 2.5 Pro):\n" . $analysis['analysis'];
-                    $total_cost += $analysis['cost'] ?? 0;
-                    
-                } elseif ($file_type === 'video') {
-                    $analysis = $gemini->analyzeVideoWithModel(
-                        $file_path, 
-                        $services, 
-                        $quote['notes'] ?? '',
-                        'gemini-2.5-pro' // Specify the exact model
-                    );
-                    $ai_analysis .= "\n\n🎥 VIDEO ANALYSIS - {$media['filename']} (Gemini 2.5 Pro):\n" . $analysis['analysis'];
-                    $total_cost += $analysis['cost'] ?? 0;
-                }
-            }
+            // Process the entire aggregated context with Gemini 2.5 Pro
+            $start_time = microtime(true);
+            $analysis = $gemini->analyzeAggregatedContextWithModel(
+                $aggregated_context,
+                'gemini-2.5-pro' // Specify the exact model
+            );
+            $processing_time = (microtime(true) - $start_time) * 1000; // in milliseconds
+            $ai_analysis = $analysis['analysis'];
+            $total_cost = $analysis['cost'] ?? 0;
             
         } catch (Exception $e) {
             error_log("Gemini 2.5 Pro analysis failed: " . $e->getMessage());
@@ -116,12 +91,32 @@ try {
     ");
     $stmt->execute([json_encode($analysis_data), $quote_id]);
 
+    // Track cost and performance
+    require_once __DIR__ . '/../utils/cost-tracker.php';
+    $cost_tracker = new CostTracker($pdo);
+    
+    $cost_data = $cost_tracker->trackUsage([
+        'quote_id' => $quote_id,
+        'model_name' => 'gemini-2.5-pro',
+        'provider' => 'google',
+        'input_tokens' => 0, // Gemini API does not provide token counts
+        'output_tokens' => 0,
+        'processing_time_ms' => $processing_time,
+        'reasoning_effort' => 'high',
+        'media_files_processed' => count($media_files),
+        'transcriptions_generated' => 0,
+        'tools_used' => ['multimodal_reasoning', 'vision_analysis'],
+        'analysis_quality_score' => 0.9
+    ]);
+
     echo json_encode([
         'success' => true,
         'model' => 'gemini-2.5-pro',
         'quote_id' => $quote_id,
         'analysis' => $analysis_summary,
         'cost' => $total_cost,
+        'cost_tracking' => $cost_data,
+        'processing_time_ms' => $processing_time,
         'media_count' => count($media_files)
     ]);
 

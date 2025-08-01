@@ -87,7 +87,11 @@ try {
     $schema_json = file_get_contents(__DIR__ . '/../../ai/schema.json');
     $schema = json_decode($schema_json, true);
     
-    // Use the aggregated context from preprocessor - o3-pro gets the FULL context
+    require_once __DIR__ . '/../utils/media-preprocessor.php';
+    $media_preprocessor = new MediaPreprocessor($pdo, $GEMINI_API_KEY);
+    $aggregated_context = $media_preprocessor->aggregateContext($quote_id);
+
+    // Use the aggregated context from preprocessor - o3 gets the FULL context
     $user_prompt = $aggregated_context['context_text'] . "\n\nUse your advanced reasoning capabilities to provide the most thorough professional assessment.";
 
     if (!empty($OPENAI_API_KEY) && !empty($aggregated_context['visual_content'])) {
@@ -127,7 +131,10 @@ try {
             CURLOPT_TIMEOUT => 120 // Longer timeout for detailed reasoning
         ]);
 
+        $start_time = microtime(true);
         $response = curl_exec($curl);
+        $processing_time = (microtime(true) - $start_time) * 1000; // in milliseconds
+
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
