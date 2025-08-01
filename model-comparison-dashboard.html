@@ -212,7 +212,7 @@
             <!-- o3 Card -->
             <div class="model-card o3">
                 <div class="model-header">
-                    <div class="model-name">o3-pro-2025-06-10</div>
+                    <div class="model-name">o3</div>
                     <div class="model-badge badge-premium">PREMIUM REASONING</div>
                 </div>
                 <div class="model-stats">
@@ -271,7 +271,7 @@
 
         async function loadQuoteInfo() {
             try {
-                const response = await fetch(`server/api/admin-quotes.php`);
+                const response = await fetch(`server/api/admin-quotes.php?quote_id=${quoteId}`);
                 const data = await response.json();
                 
                 const quote = data.quotes?.find(q => q.id == quoteId);
@@ -286,7 +286,7 @@
 
         async function loadModelAnalysis(model, elementPrefix) {
             try {
-                const response = await fetch(`server/api/admin-quotes.php`);
+                const response = await fetch(`server/api/admin-quotes.php?quote_id=${quoteId}`);
                 const data = await response.json();
                 
                 const quote = data.quotes?.find(q => q.id == quoteId);
