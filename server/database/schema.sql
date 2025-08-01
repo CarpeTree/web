@@ -41,6 +41,7 @@ CREATE TABLE quotes (
     ai_gemini_analysis JSON,
     scheduled_at TIMESTAMP NULL,
     google_event_id VARCHAR(255),
+    preflight_check_status JSON,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     INDEX idx_status (quote_status),
