@@ -1,4 +1,20 @@
 <?php
+// Custom shutdown function to catch fatal errors
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'model' => 'gemini-2-5-pro',
+            'error' => 'A fatal error occurred: ' . $error['message'],
+            'file' => $error['file'],
+            'line' => $error['line'],
+            'quote_id' => $_GET['quote_id'] ?? null
+        ]);
+    }
+});
+
 // Custom error handler to display fatal errors
 set_error_handler(function ($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
