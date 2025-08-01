@@ -271,7 +271,7 @@
 
         async function loadQuoteInfo() {
             try {
-                const response = await fetch(`server/api/admin-quotes.php?quote_id=${quoteId}`);
+                const response = await fetch(`/server/api/admin-quotes.php?quote_id=${quoteId}`);
                 const data = await response.json();
                 
                 const quote = data.quotes?.find(q => q.id == quoteId);
@@ -286,7 +286,7 @@
 
         async function loadModelAnalysis(model, elementPrefix) {
             try {
-                const response = await fetch(`server/api/admin-quotes.php?quote_id=${quoteId}`);
+                const response = await fetch(`/server/api/admin-quotes.php?quote_id=${quoteId}`);
                 const data = await response.json();
                 
                 const quote = data.quotes?.find(q => q.id == quoteId);
@@ -358,7 +358,7 @@
             
             try {
                 // Trigger all three models to run in the background
-                const response = await fetch(`server/api/trigger-all-analyses.php?quote_id=${quoteId}`);
+                const response = await fetch(`/server/api/trigger-all-analyses.php?quote_id=${quoteId}`);
                 const result = await response.json();
                 
                 if (result.success) {
