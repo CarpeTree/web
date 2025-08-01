@@ -301,7 +301,7 @@ REGENERATION CONTEXT:
 Admin has requested regenerated analysis with additional context. Provide enhanced assessment incorporating any new information while maintaining professional standards and confidence ratings.
 
 OUTPUT REQUIREMENTS (Ed Gilman Specification Format):
-Generate detailed quotes following Ed Gilman's framework:
+Generate detailed quotes following Ed Gilman\'s framework:
 1. PRUNING OBJECTIVE: Clear statement of goals and tree preservation priorities
 2. TREE SUMMARY: Species, dimensions (height/DBH in dual units), scaffold mapping
 3. WORK SCOPE & DOSE: Cut counts by diameter class and branch location/direction  
