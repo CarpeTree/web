@@ -248,4 +248,17 @@ JOIN trees t ON tw.tree_id = t.id
 JOIN quotes q ON tw.quote_id = q.id
 JOIN customers c ON q.customer_id = c.id
 WHERE tw.status IN ('quoted', 'approved', 'in_progress')
-ORDER BY q.scheduled_at ASC; 
+ORDER BY q.scheduled_at ASC;
+
+CREATE TABLE ai_cost_log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    quote_id INT NOT NULL,
+    model_name VARCHAR(50),
+    provider VARCHAR(50),
+    input_tokens INT,
+    output_tokens INT,
+    total_cost DECIMAL(10, 6),
+    processing_time_ms INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE
+); 

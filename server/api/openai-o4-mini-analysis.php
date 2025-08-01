@@ -1,4 +1,6 @@
 <?php
+// OpenAI o4-mini Analysis Script
+
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
     $error = error_get_last();
@@ -17,7 +19,7 @@ register_shutdown_function(function () {
     }
 });
 
-ini_set('display_errors', 0); // Errors are caught by shutdown function
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 header('Content-Type: application/json');
 
@@ -73,11 +75,12 @@ try {
     ];
 
     $openai_request = [
-        'model' => 'o4-mini-2025-04-16',
+        'model' => 'o4-mini',
         'messages' => $messages,
         'tools' => [['type' => 'function', 'function' => $json_schema]],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
-        'max_tokens' => 2000 // Generous limit for a mini model
+        'max_tokens' => 4000,
+        'temperature' => 0.2
     ];
 
     // 6. EXECUTE API CALL
@@ -91,7 +94,7 @@ try {
             'Content-Type: application/json',
             'Authorization: Bearer ' . $OPENAI_API_KEY
         ],
-        CURLOPT_TIMEOUT => 90 // Increased timeout for potentially complex vision tasks
+        CURLOPT_TIMEOUT => 120
     ]);
 
     $start_time = microtime(true);
@@ -120,7 +123,7 @@ try {
     $cost_tracker = new CostTracker($pdo);
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'o4-mini-2025-04-16',
+        'model_name' => 'o4-mini',
         'provider' => 'openai',
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
@@ -128,8 +131,8 @@ try {
     ]);
 
     $analysis_data_to_store = [
-        'model' => 'o4-mini-2025-04-16',
-        'analysis' => json_decode($ai_analysis_json, true), // store as array
+        'model' => 'o4-mini',
+        'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
         'timestamp' => date('Y-m-d H:i:s'),
@@ -145,13 +148,13 @@ try {
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([
         'success' => true,
-        'model' => 'o4-mini-2025-04-16',
+        'model' => 'o4-mini',
         'quote_id' => $quote_id,
         'analysis' => $analysis_data_to_store,
         'cost_tracking' => $cost_data
     ]);
 
-} catch (Throwable $e) { // Catch both Exceptions and Errors
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
