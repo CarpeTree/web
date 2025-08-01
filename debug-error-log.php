@@ -6,6 +6,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Create a test error
+trigger_error("This is a test error to find the error log location.", E_USER_NOTICE);
+
 $error_log_path = __DIR__ . '/error_log';
 
 echo "<h1>Reading Error Log</h1>";
