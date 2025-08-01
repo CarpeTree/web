@@ -317,21 +317,22 @@
                 }
 
                 if (analysis_data) {
+                    console.log(`Received analysis data for ${model}:`, analysis_data);
+
                     // Update stats
                     document.getElementById(`${elementPrefix}-cost`).textContent = 
                         `$${(analysis_data.cost || 0).toFixed(4)}`;
                     document.getElementById(`${elementPrefix}-status`).textContent = '✅';
                     
-                    if (analysis_data.input_tokens && analysis_data.output_tokens) {
-                        const totalTokens = analysis_data.input_tokens + analysis_data.output_tokens;
+                    if (analysis_data.input_tokens !== undefined && analysis_data.output_tokens !== undefined) {
+                        const totalTokens = parseInt(analysis_data.input_tokens, 10) + parseInt(analysis_data.output_tokens, 10);
                         document.getElementById(`${elementPrefix}-tokens`).textContent = totalTokens.toLocaleString();
-                    } else if (analysis_data.media_count) {
+                    } else if (analysis_data.media_count !== undefined) {
                         document.getElementById(`${elementPrefix}-media`).textContent = 
                             analysis_data.media_count;
                     }
                     
                     // Update analysis content
-                    // The actual analysis is nested inside another 'analysis' object
                     const analysisContent = analysis_data.analysis ? JSON.stringify(analysis_data.analysis, null, 2) : 'Analysis completed but content not available';
                     document.getElementById(`${elementPrefix}-analysis`).textContent = analysisContent;
                 } else {
