@@ -30,7 +30,8 @@ try {
         mkdir($log_dir, 0775, true);
     }
 
-    if (function_exists('exec')) {
+    $exec_disabled = in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))));
+    if (function_exists('exec') && !$exec_disabled) {
         foreach ($scripts as $model => $script_path) {
             $cmd = 'php ' . escapeshellarg($script_path) . ' ' . escapeshellarg($quote_id) .
                    ' >> ' . escapeshellarg($log_dir . '/ai_analysis.log') . ' 2>&1 &';
