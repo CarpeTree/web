@@ -91,7 +91,7 @@ require_once __DIR__ . '/../config/database-simple.php';
     $openai_request = [
         'model' => 'o4-mini',
         'messages' => $messages,
-        'tools' => [['type' => 'function', 'function' => $json_schema]],
+        'tools' => [$json_schema],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
         'max_completion_tokens' => 4000,
         

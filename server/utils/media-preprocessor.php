@@ -422,5 +422,39 @@ class MediaPreprocessor {
     public function getAggregatedContext() {
         return $this->aggregated_context;
     }
+    
+    /**
+     * Preprocess media specifically for Google Gemini API format
+     */
+    public function preprocessForGemini() {
+        // First run the standard preprocessing
+        $standard_context = $this->preprocessAllMedia();
+        
+        // Convert visual content to Gemini's format
+        $media_parts = [];
+        foreach ($this->aggregated_context['visual_content'] as $visual_item) {
+            if ($visual_item['type'] === 'image_url') {
+                // Convert OpenAI format to Gemini format
+                $base64_data = $visual_item['image_url']['url'];
+                if (preg_match('/data:([^;]+);base64,(.+)/', $base64_data, $matches)) {
+                    $mime_type = $matches[1];
+                    $base64_content = $matches[2];
+                    
+                    $media_parts[] = [
+                        'inlineData' => [
+                            'mimeType' => $mime_type,
+                            'data' => $base64_content
+                        ]
+                    ];
+                }
+            }
+        }
+        
+        return [
+            'context_text' => $standard_context['context_text'],
+            'media_parts' => $media_parts,
+            'media_summary' => $standard_context['media_summary']
+        ];
+    }
 }
 ?>

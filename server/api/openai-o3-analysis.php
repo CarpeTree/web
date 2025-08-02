@@ -135,7 +135,7 @@ Present as professional specifications requiring minimal editing, with quantifie
     $openai_request = [
         'model' => 'o3', // Using the direct o3 model
         'messages' => $messages,
-        'tools' => [['type' => 'function', 'function' => $json_schema]],
+        'tools' => [$json_schema],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
         'max_completion_tokens' => 4000,
         
