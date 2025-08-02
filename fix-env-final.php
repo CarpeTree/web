@@ -9,10 +9,25 @@ $target_env = '/home/u230128646/domains/carpetree.com/public_html/.env';
 // Check if .env exists in config directory
 if (file_exists($source_env)) {
     copy($source_env, $target_env);
-    echo "1. ✅ Copied .env from config directory to web root\n";
+    echo "1. ✅ Copied .env from server/config/ to web root\n";
 } else {
-    echo "1. ❌ .env file not found in config directory\n";
-    echo "   You need to manually copy your .env file to the web root\n";
+    echo "1. ❌ .env file not found at: $source_env\n";
+    // Try the actual location you mentioned
+    $source_env = '/home/u230128646/domains/carpetree.com/public_html/server/config/.env';
+    if (file_exists($source_env)) {
+        copy($source_env, $target_env);
+        echo "1. ✅ Found and copied .env from server/config/\n";
+    } else {
+        echo "   Available files in server/config/:\n";
+        if (is_dir('/home/u230128646/domains/carpetree.com/public_html/server/config/')) {
+            $files = scandir('/home/u230128646/domains/carpetree.com/public_html/server/config/');
+            foreach ($files as $file) {
+                if ($file != '.' && $file != '..') {
+                    echo "   - $file\n";
+                }
+            }
+        }
+    }
 }
 
 // 2. Update debug script to use config variables instead of getenv()
