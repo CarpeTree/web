@@ -32,10 +32,10 @@ class OpenAIClient {
             ];
             
             $response = $this->makeAPICall('chat/completions', [
-                'model' => 'gpt-4o',  // Using latest model that supports vision
+                'model' => 'o3', // Using o3 vision model
                 'messages' => $messages,
-                'max_tokens' => 4000,
-                'temperature' => 0.3
+                'max_completion_tokens' => 4000,
+                
             ]);
             
             return $this->parseTreeAnalysisResponse($response);

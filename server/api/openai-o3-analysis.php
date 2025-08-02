@@ -20,10 +20,15 @@ register_shutdown_function(function () {
 ini_set('display_errors', 0); // Errors are caught by shutdown function
 error_reporting(E_ALL);
 header('Content-Type: application/json');
+ignore_user_abort(true);
+set_time_limit(600);
 
 try {
     // 1. SETUP & CONFIG
     $quote_id = $_POST['quote_id'] ?? $_GET['quote_id'] ?? null;
+    if (!$quote_id && isset($argv[1])) {
+        $quote_id = $argv[1];
+    }
     if (!$quote_id) {
         throw new Exception("Quote ID is required.");
     }
@@ -123,8 +128,8 @@ Present as professional specifications requiring minimal editing, with quantifie
         'messages' => $messages,
         'tools' => [['type' => 'function', 'function' => $json_schema]],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
-        'max_tokens' => 4000,
-        'temperature' => 0.1
+        'max_completion_tokens' => 4000,
+        
     ];
 
     // 6. EXECUTE API CALL
@@ -176,7 +181,7 @@ Present as professional specifications requiring minimal editing, with quantifie
 
     $analysis_data_to_store = [
         'model' => 'o3',
-        'analysis' => json_decode($ai_analysis_json, true), // store as array
+        'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
         'timestamp' => date('Y-m-d H:i:s'),

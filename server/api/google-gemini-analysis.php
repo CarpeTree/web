@@ -1,5 +1,5 @@
 <?php
-// OpenAI o4-mini Analysis Script
+// Google Gemini 2.5 Pro Analysis Script
 
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
@@ -9,7 +9,7 @@ register_shutdown_function(function () {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'model' => 'o4-mini',
+            'model' => 'gemini-2.5-pro',
             'error' => 'A fatal error occurred: ' . $error['message'],
             'file' => $error['file'],
             'line' => $error['line'],
@@ -57,12 +57,12 @@ try {
         throw new Exception("No media files found for analysis.");
     }
 
-    // 3. PREPROCESS CONTEXT
+    // 3. PREPROCESS CONTEXT FOR GEMINI
     $preprocessor = new MediaPreprocessor($quote_id, $media_files, $quote_data);
-    $aggregated_context = $preprocessor->preprocessAllMedia();
+    $aggregated_context = $preprocessor->preprocessForGemini();
     
     $context_text = $aggregated_context['context_text'];
-    $visual_content = $aggregated_context['visual_content'];
+    $media_parts = $aggregated_context['media_parts'];
 
     // 4. LOAD AI PROMPTS & SCHEMA
     $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
@@ -73,33 +73,28 @@ try {
         throw new Exception("Failed to load AI prompt or schema.");
     }
 
-    // 5. PREPARE OPENAI API REQUEST
-    $messages = [
-        ['role' => 'system', 'content' => $system_prompt],
-        ['role' => 'user', 'content' => array_merge([['type' => 'text', 'text' => $context_text]], $visual_content)]
-    ];
-
-    $openai_request = [
-        'model' => 'o4-mini',
-        'messages' => $messages,
-        'tools' => [['type' => 'function', 'function' => $json_schema]],
-        'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
-        'max_completion_tokens' => 4000,
-        
+    // 5. PREPARE GEMINI API REQUEST
+    $gemini_request = [
+        'contents' => [
+            'role' => 'user',
+            'parts' => array_merge([['text' => $context_text]], $media_parts)
+        ],
+        'system_instruction' => ['role' => 'system', 'parts' => [['text' => $system_prompt]]],
+        'tools' => [['function_declarations' => [$json_schema]]],
+        'tool_config' => ['function_calling_config' => ['mode' => 'ANY']]
     ];
 
     // 6. EXECUTE API CALL
     $curl = curl_init();
     curl_setopt_array($curl, [
-        CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
+        CURLOPT_URL => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=' . $GOOGLE_GEMINI_API_KEY,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode($openai_request),
+        CURLOPT_POSTFIELDS => json_encode($gemini_request),
         CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $OPENAI_API_KEY
+            'Content-Type: application/json'
         ],
-        CURLOPT_TIMEOUT => 120
+        CURLOPT_TIMEOUT => 180
     ]);
 
     $start_time = microtime(true);
@@ -110,34 +105,34 @@ try {
     $processing_time = (microtime(true) - $start_time) * 1000;
 
     if ($http_code !== 200) {
-        throw new Exception("OpenAI o4-mini API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
+        throw new Exception("Google Gemini API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
     }
 
     // 7. PARSE RESPONSE & CALCULATE COST
-    $ai_result = json_decode($response, true);
-    $ai_analysis_json = $ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'] ?? null;
+    $gemini_result = json_decode($response, true);
+    $ai_analysis_json = $gemini_result['candidates'][0]['content']['parts'][0]['functionCall']['args'] ?? null;
 
     if (!$ai_analysis_json) {
-        throw new Exception("Invalid o4-mini response format or missing tool call. Full response: " . $response);
+        throw new Exception("Invalid Gemini response format or missing tool call. Full response: " . $response);
     }
     
-    $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
-    $output_tokens = $ai_result['usage']['completion_tokens'] ?? 0;
+    $input_tokens = $gemini_result['usageMetadata']['promptTokenCount'] ?? 0;
+    $output_tokens = $gemini_result['usageMetadata']['candidatesTokenCount'] ?? 0;
     
     // 8. STORE RESULTS & TRACK COST
     $cost_tracker = new CostTracker($pdo);
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'o4-mini',
-        'provider' => 'openai',
+        'model_name' => 'gemini-2.5-pro',
+        'provider' => 'google',
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
         'processing_time_ms' => $processing_time,
     ]);
 
     $analysis_data_to_store = [
-        'model' => 'o4-mini',
-        'analysis' => json_decode($ai_analysis_json, true),
+        'model' => 'gemini-2.5-pro',
+        'analysis' => $ai_analysis_json,
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
         'timestamp' => date('Y-m-d H:i:s'),
@@ -147,13 +142,13 @@ try {
         'media_summary' => $aggregated_context['media_summary']
     ];
 
-    $stmt = $pdo->prepare("UPDATE quotes SET ai_o4_mini_analysis = ?, updated_at = NOW() WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE quotes SET ai_gemini_analysis = ?, updated_at = NOW() WHERE id = ?");
     $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
 
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([
         'success' => true,
-        'model' => 'o4-mini',
+        'model' => 'gemini-2.5-pro',
         'quote_id' => $quote_id,
         'analysis' => $analysis_data_to_store,
         'cost_tracking' => $cost_data
@@ -163,7 +158,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'model' => 'o4-mini',
+        'model' => 'gemini-2.5-pro',
         'error' => $e->getMessage(),
         'file' => $e->getFile(),
         'line' => $e->getLine(),

@@ -18,39 +18,23 @@ try {
 
     $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 
-    $models = [
-        'o3' => $base_url . '/server/api/openai-o3-analysis.php',
-        'o4-mini' => $base_url . '/server/api/openai-o4-mini-analysis.php',
-        'gemini' => $base_url . '/server/api/google-gemini-analysis.php'
+    // Launch each AI analysis script with PHP-CLI in the background
+    $scripts = [
+        'o3' => __DIR__ . '/openai-o3-analysis.php',
+        'o4-mini' => __DIR__ . '/openai-o4-mini-analysis.php',
+        'gemini' => __DIR__ . '/google-gemini-analysis.php'
     ];
 
-    $multi_curl = curl_multi_init();
-    $requests = [];
-
-    foreach ($models as $model => $url) {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url . '?quote_id=' . $quote_id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 5, // 5-second timeout to initiate the script
-            CURLOPT_NOSIGNAL => 1,
-            CURLOPT_CUSTOMREQUEST => 'GET'
-        ]);
-        curl_multi_add_handle($multi_curl, $ch);
-        $requests[$model] = $ch;
+    $log_dir = __DIR__ . '/../logs';
+    if (!is_dir($log_dir)) {
+        mkdir($log_dir, 0775, true);
     }
 
-    // Execute all requests asynchronously
-    $running = null;
-    do {
-        curl_multi_exec($multi_curl, $running);
-    } while ($running > 0);
-
-    // Close handles
-    foreach ($requests as $ch) {
-        curl_multi_remove_handle($multi_curl, $ch);
+    foreach ($scripts as $model => $script_path) {
+        $cmd = 'php ' . escapeshellarg($script_path) . ' ' . escapeshellarg($quote_id) .
+               ' >> ' . escapeshellarg($log_dir . '/ai_analysis.log') . ' 2>&1 &';
+        exec($cmd);
     }
-    curl_multi_close($multi_curl);
 
     // The scripts are now running in the background.
     // We can add a check later to see if they are all complete.
