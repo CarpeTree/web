@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 try {
-    $quote_id = $_POST['quote_id'] ?? null;
+    $quote_id = $_POST['quote_id'] ?? $_GET['quote_id'] ?? null;
     if (!$quote_id) {
         throw new Exception("Quote ID is required.");
     }
