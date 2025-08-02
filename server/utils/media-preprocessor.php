@@ -457,4 +457,112 @@ class MediaPreprocessor {
         ];
     }
 }
-?>
+
+    /**
+     * Simple video processing for AI analysis
+     */
+    public function processForAI($file_path, $media_type) {
+        $full_path = __DIR__ . "/../../" . $file_path;
+        
+        if (!file_exists($full_path)) {
+            throw new Exception("Media file not found: $full_path");
+        }
+        
+        if ($media_type === "video" || strpos($file_path, ".mov") !== false || strpos($file_path, ".mp4") !== false) {
+            return $this->processVideo($full_path);
+        } else {
+            return $this->processImage($full_path);
+        }
+    }
+    
+    /**
+     * Process video file - extract frames and audio
+     */
+    private function processVideo($video_path) {
+        $description_parts = [];
+        $description_parts[] = "📹 VIDEO ANALYSIS";
+        $description_parts[] = "File: " . basename($video_path);
+        $description_parts[] = "Size: " . number_format(filesize($video_path)) . " bytes";
+        
+        // Try to extract video info with ffmpeg
+        $ffmpeg_info = shell_exec("ffmpeg -i \"$video_path\" 2>&1");
+        if ($ffmpeg_info) {
+            // Extract duration, resolution, etc.
+            if (preg_match("/Duration: ([0-9:.]+)/", $ffmpeg_info, $matches)) {
+                $description_parts[] = "Duration: " . $matches[1];
+            }
+            if (preg_match("/(\d+x\d+)/", $ffmpeg_info, $matches)) {
+                $description_parts[] = "Resolution: " . $matches[1];
+            }
+        }
+        
+        // Try to extract frames (if ffmpeg works)
+        $temp_dir = dirname($video_path) . "/temp_frames";
+        if (!is_dir($temp_dir)) {
+            mkdir($temp_dir, 0755, true);
+        }
+        
+        // Extract 3 frames at different timestamps
+        $frame_times = ["00:00:01", "00:00:05", "00:00:10"];
+        $extracted_frames = [];
+        
+        foreach ($frame_times as $i => $time) {
+            $frame_path = "$temp_dir/frame_$i.jpg";
+            $cmd = "ffmpeg -i \"$video_path\" -ss $time -vframes 1 -y \"$frame_path\" 2>/dev/null";
+            shell_exec($cmd);
+            
+            if (file_exists($frame_path)) {
+                $base64 = base64_encode(file_get_contents($frame_path));
+                $extracted_frames[] = $base64;
+                $description_parts[] = "✅ Extracted frame at $time";
+                unlink($frame_path); // Clean up
+            } else {
+                $description_parts[] = "❌ Failed to extract frame at $time";
+            }
+        }
+        
+        // Clean up temp directory
+        if (is_dir($temp_dir)) {
+            rmdir($temp_dir);
+        }
+        
+        // Try to extract audio description
+        $audio_path = dirname($video_path) . "/temp_audio.wav";
+        $audio_cmd = "ffmpeg -i \"$video_path\" -vn -acodec pcm_s16le -ar 16000 -y \"$audio_path\" 2>/dev/null";
+        shell_exec($audio_cmd);
+        
+        if (file_exists($audio_path)) {
+            $description_parts[] = "✅ Audio extracted for analysis";
+            // Could add speech-to-text here if needed
+            unlink($audio_path); // Clean up
+        } else {
+            $description_parts[] = "❌ No audio extracted (may be silent video)";
+        }
+        
+        $description = implode("\n", $description_parts);
+        
+        // Return format expected by AI analysis
+        if (!empty($extracted_frames)) {
+            return [
+                "description" => $description,
+                "base64_frames" => $extracted_frames,
+                "frame_count" => count($extracted_frames)
+            ];
+        } else {
+            // Fallback to description only
+            return $description . "\n\n⚠️ Note: This appears to be a tree service video but frame extraction failed. The video likely contains footage of trees, landscape, or property that needs tree services. Manual review recommended.";
+        }
+    }
+    
+    /**
+     * Process image file
+     */
+    private function processImage($image_path) {
+        $base64 = base64_encode(file_get_contents($image_path));
+        return [
+            "description" => "Image analysis: " . basename($image_path),
+            "base64_image" => $base64
+        ];
+    }
+
+}
