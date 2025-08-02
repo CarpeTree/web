@@ -149,7 +149,30 @@ require_once __DIR__ . '/../config/config.php';
         'processing_time_ms' => $processing_time,
     ]);
 
-    $analysis_data_to_store = [
+    
+        // Validate and clean up JSON response before storing
+        $parsed_analysis = json_decode($ai_response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("Invalid JSON response from AI: " . json_last_error_msg());
+        }
+        
+        // Fix array formatting issues in recommendations
+        if (isset($parsed_analysis["analysis"]["recommendations"]) && is_array($parsed_analysis["analysis"]["recommendations"])) {
+            $fixed_recommendations = [];
+            foreach ($parsed_analysis["analysis"]["recommendations"] as $rec) {
+                if (is_string($rec) && trim($rec) !== "") {
+                    $fixed_recommendations[] = trim($rec);
+                } elseif (is_array($rec)) {
+                    // Convert array to string representation
+                    $fixed_recommendations[] = implode(", ", array_filter($rec, "is_string"));
+                }
+            }
+            $parsed_analysis["analysis"]["recommendations"] = array_filter($fixed_recommendations);
+        }
+        
+        $ai_response = json_encode($parsed_analysis);
+
+$analysis_data_to_store = [
         'model' => 'o4-mini',
         'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
