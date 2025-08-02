@@ -285,66 +285,65 @@
         }
 
         async function loadModelAnalysis(model, elementPrefix) {
+            console.log(`Starting to load analysis for ${model}...`);
             try {
                 const response = await fetch(`/server/api/admin-quotes.php?quote_id=${quoteId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
+                console.log('Received data from admin-quotes.php:', data);
                 
                 const quote = data.quotes?.find(q => q.id == quoteId);
-                if (!quote) return;
-
-                let analysis_data = null;
-                let fieldName = '';
-                
-                switch(model) {
-                    case 'o4-mini':
-                        fieldName = 'ai_o4_mini_analysis';
-                        break;
-                    case 'o3':
-                        fieldName = 'ai_o3_analysis';
-                        break;
-                    case 'gemini':
-                        fieldName = 'ai_gemini_analysis';
-                        break;
+                if (!quote) {
+                    console.error(`Quote with ID ${quoteId} not found in response.`);
+                    return;
                 }
 
+                const fieldName = `ai_${model.replace('-', '_')}_analysis`;
+                console.log(`Looking for data in field: ${fieldName}`);
+                
                 if (quote[fieldName] && typeof quote[fieldName] === 'string') {
+                    let analysis_data;
                     try {
                         analysis_data = JSON.parse(quote[fieldName]);
                     } catch (e) {
-                        console.error('Failed to parse analysis JSON for model:', model, e);
-                        analysis_data = { analysis: 'Error: Invalid JSON format.' };
+                        console.error(`Failed to parse JSON for ${model}:`, e);
+                        document.getElementById(`${elementPrefix}-analysis`).textContent = `Error: Invalid JSON format. Raw data: ${quote[fieldName]}`;
+                        document.getElementById(`${elementPrefix}-status`).textContent = '❌';
+                        return;
                     }
-                }
 
-                if (analysis_data) {
-                    console.log(`Received analysis data for ${model}:`, analysis_data);
+                    console.log(`Successfully parsed data for ${model}:`, analysis_data);
 
                     // Update stats
-                    document.getElementById(`${elementPrefix}-cost`).textContent = 
-                        `$${(analysis_data.cost || 0).toFixed(4)}`;
+                    document.getElementById(`${elementPrefix}-cost`).textContent = `$${(analysis_data.cost || 0).toFixed(4)}`;
                     document.getElementById(`${elementPrefix}-status`).textContent = '✅';
                     
-                    if (analysis_data.input_tokens !== undefined && analysis_data.output_tokens !== undefined) {
+                    const tokenElement = document.getElementById(`${elementPrefix}-tokens`);
+                    if (tokenElement && analysis_data.input_tokens !== undefined && analysis_data.output_tokens !== undefined) {
                         const totalTokens = parseInt(analysis_data.input_tokens, 10) + parseInt(analysis_data.output_tokens, 10);
-                        document.getElementById(`${elementPrefix}-tokens`).textContent = totalTokens.toLocaleString();
-                    } else if (analysis_data.media_count !== undefined) {
-                        document.getElementById(`${elementPrefix}-media`).textContent = 
-                            analysis_data.media_count;
+                        tokenElement.textContent = totalTokens.toLocaleString();
                     }
                     
-                    // Update analysis content
-                    const analysisContent = analysis_data.analysis ? JSON.stringify(analysis_data.analysis, null, 2) : 'Analysis completed but content not available';
+                    const mediaElement = document.getElementById(`${elementPrefix}-media`);
+                    if (mediaElement && analysis_data.media_count !== undefined) {
+                        mediaElement.textContent = analysis_data.media_count;
+                    }
+                    
+                    // Display the raw JSON analysis content
+                    const analysisContent = analysis_data.analysis ? JSON.stringify(analysis_data.analysis, null, 2) : 'Analysis completed, but no content was returned.';
                     document.getElementById(`${elementPrefix}-analysis`).textContent = analysisContent;
+
                 } else {
-                    document.getElementById(`${elementPrefix}-analysis`).innerHTML = 
-                        '<div class="error">No analysis data available for this model</div>';
+                    console.log(`No analysis data found for ${model} in the quote object.`);
+                    document.getElementById(`${elementPrefix}-analysis`).innerHTML = `<div class="error">No analysis data available for this model.</div>`;
                     document.getElementById(`${elementPrefix}-status`).textContent = '❌';
                 }
                 
             } catch (error) {
-                console.error(`Failed to load ${model} analysis:`, error);
-                document.getElementById(`${elementPrefix}-analysis`).innerHTML = 
-                    '<div class="error">Failed to load analysis data</div>';
+                console.error(`Major failure in loadModelAnalysis for ${model}:`, error);
+                document.getElementById(`${elementPrefix}-analysis`).innerHTML = `<div class="error">Failed to load or process analysis data. Check console.</div>`;
                 document.getElementById(`${elementPrefix}-status`).textContent = '❌';
             }
         }

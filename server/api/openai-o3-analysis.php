@@ -42,8 +42,13 @@ if (php_sapi_name() !== 'cli') {
     }
 }
 
-require_once __DIR__ . '/../config/database-simple.php';
-    require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/config.php';
+    
+    // Get database connection
+    $pdo = getDatabaseConnection();
+    if (!$pdo) {
+        throw new Exception("Database connection failed. Please try again later.");
+    }
     require_once __DIR__ . '/../utils/media-preprocessor.php';
     require_once __DIR__ . '/../utils/cost-tracker.php';
 
@@ -200,8 +205,24 @@ Present as professional specifications requiring minimal editing, with quantifie
         'media_summary' => $aggregated_context['media_summary']
     ];
 
-    $stmt = $pdo->prepare("UPDATE quotes SET ai_o3_analysis = ?, updated_at = NOW() WHERE id = ?");
-    $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
+    // Save with connection recovery for long-running o3 analysis
+    try {
+        $stmt = $pdo->prepare("UPDATE quotes SET ai_o3_analysis = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
+    } catch (PDOException $e) {
+        if (strpos($e->getMessage(), 'server has gone away') !== false) {
+            // Reconnect and retry
+            $pdo = getDatabaseConnection();
+            if ($pdo) {
+                $stmt = $pdo->prepare("UPDATE quotes SET ai_o3_analysis = ?, updated_at = NOW() WHERE id = ?");
+                $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
+            } else {
+                throw new Exception("Database reconnection failed: " . $e->getMessage());
+            }
+        } else {
+            throw $e;
+        }
+    }
 
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([

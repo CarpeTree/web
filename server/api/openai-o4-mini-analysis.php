@@ -44,8 +44,13 @@ if (php_sapi_name() !== 'cli') {
     }
 }
 
-require_once __DIR__ . '/../config/database-simple.php';
-    require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/config.php';
+    
+    // Get database connection
+    $pdo = getDatabaseConnection();
+    if (!$pdo) {
+        throw new Exception("Database connection failed. Please try again later.");
+    }
     require_once __DIR__ . '/../utils/media-preprocessor.php';
     require_once __DIR__ . '/../utils/cost-tracker.php';
 
