@@ -30,10 +30,31 @@ try {
         mkdir($log_dir, 0775, true);
     }
 
-    foreach ($scripts as $model => $script_path) {
-        $cmd = 'php ' . escapeshellarg($script_path) . ' ' . escapeshellarg($quote_id) .
-               ' >> ' . escapeshellarg($log_dir . '/ai_analysis.log') . ' 2>&1 &';
-        exec($cmd);
+    if (function_exists('exec')) {
+        foreach ($scripts as $model => $script_path) {
+            $cmd = 'php ' . escapeshellarg($script_path) . ' ' . escapeshellarg($quote_id) .
+                   ' >> ' . escapeshellarg($log_dir . '/ai_analysis.log') . ' 2>&1 &';
+            exec($cmd);
+        }
+    } else {
+        // Fallback to HTTP non-blocking trigger if exec is disabled
+        $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+        $endpoints = [
+            $base_url . '/server/api/openai-o3-analysis.php?quote_id=' . $quote_id,
+            $base_url . '/server/api/openai-o4-mini-analysis.php?quote_id=' . $quote_id,
+            $base_url . '/server/api/google-gemini-analysis.php?quote_id=' . $quote_id
+        ];
+        foreach ($endpoints as $url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_NOSIGNAL => 1,
+                CURLOPT_CUSTOMREQUEST => 'GET'
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+        }
     }
 
     // The scripts are now running in the background.

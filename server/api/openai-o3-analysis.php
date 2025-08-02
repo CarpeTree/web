@@ -33,7 +33,16 @@ try {
         throw new Exception("Quote ID is required.");
     }
 
-    require_once __DIR__ . '/../config/database-simple.php';
+    // If running via HTTP, send immediate 200 and continue in background
+if (php_sapi_name() !== 'cli') {
+    header('X-Accel-Buffering: no');
+    echo json_encode(['success' => true, 'queued' => true, 'model' => 'o3', 'quote_id' => $quote_id]);
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+}
+
+require_once __DIR__ . '/../config/database-simple.php';
     require_once __DIR__ . '/../config/config.php';
     require_once __DIR__ . '/../utils/media-preprocessor.php';
     require_once __DIR__ . '/../utils/cost-tracker.php';
