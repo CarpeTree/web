@@ -61,7 +61,7 @@ class MediaPreprocessor {
         // Process each media file and extract ALL information first
         foreach ($this->media_files as $media) {
             $file_path = $media['file_path'];
-            $file_type = $media['file_type'];
+            $file_type = $media['mime_type'] ?? $media['file_type'] ?? 'unknown';
             $filename = $media['filename'];
             
             if (!file_exists($file_path)) {
@@ -69,16 +69,16 @@ class MediaPreprocessor {
                 continue;
             }
             
-            switch ($file_type) {
-                case 'image':
-                    $this->processImage($file_path, $filename);
-                    break;
-                case 'video':
-                    $this->processVideo($file_path, $filename);
-                    break;
-                case 'audio':
-                    $this->processAudio($file_path, $filename);
-                    break;
+            // Process based on file type
+            if (strpos(strtolower($file_type), 'video') !== false || 
+                preg_match('/\.(mp4|mov|avi|mkv|webm)$/i', $filename)) {
+                $this->processVideo($file_path, $filename);
+            } else if (strpos(strtolower($file_type), 'image') !== false || 
+                      preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $filename)) {
+                $this->processImage($file_path, $filename);
+            } else if (strpos(strtolower($file_type), 'audio') !== false || 
+                      preg_match('/\.(mp3|wav|m4a|aac)$/i', $filename)) {
+                $this->processAudio($file_path, $filename);
             }
         }
         
@@ -124,28 +124,27 @@ class MediaPreprocessor {
     }
     
     private function processVideo($file_path, $filename) {
-        // Try advanced frame extraction first
-        $extraction_result = $this->extractVideoFramesAdvanced($file_path, $this->quote_id);
+        // Use the working proc_open method instead of shell_exec method
+        $frames = $this->extractVideoFrames($file_path, 5, 6);
         
-        if (!empty($extraction_result['frames'])) {
+        if (!empty($frames)) {
             // Success! We have actual frames
             $this->aggregated_context['visual_content'] = array_merge(
                 $this->aggregated_context['visual_content'],
-                $extraction_result['frames']
+                $frames
             );
             
-            $frame_count = count($extraction_result['frames']);
-            $method = $extraction_result['method'];
-            $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted via {$method})";
+            $frame_count = count($frames);
+            $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted via proc_open)";
             
             // Also try audio transcription
-        $transcription = $this->extractAndTranscribeAudio($file_path);
-        if ($transcription) {
-            $this->aggregated_context['transcriptions'][] = [
-                'source' => "Video: {$filename}",
-                'text' => $transcription
-            ];
-        }
+            $transcription = $this->extractAndTranscribeAudio($file_path);
+            if ($transcription) {
+                $this->aggregated_context['transcriptions'][] = [
+                    'source' => "Video: {$filename}",
+                    'text' => $transcription
+                ];
+            }
 
             error_log("Successfully processed video {$filename} with {$frame_count} frames for Quote #{$this->quote_id}");
             return;
@@ -190,7 +189,7 @@ class MediaPreprocessor {
                 $timePos = $i * $secondsInterval;
                 $frameFile = sprintf('%s/frame_%03d.jpg', $tmpDir, $i + 1);
                 
-                // Use Method 4: stream copy approach that works on Hostinger
+                // Use single-threaded JPEG encoding that works on Hostinger
                 $cmd = [
                     $ffmpeg_path,
                     '-hide_banner',
@@ -198,7 +197,8 @@ class MediaPreprocessor {
                     '-ss', (string)$timePos,
                     '-i', $videoPath,
                     '-vframes', '1',
-                    '-c:v', 'copy',
+                    '-threads', '1',
+                    '-q:v', '2',
                     '-y',
                     $frameFile
                 ];
