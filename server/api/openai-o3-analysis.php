@@ -138,13 +138,25 @@ Present as professional specifications requiring minimal editing, with quantifie
     ];
 
     $openai_request = [
-        'model' => 'o3', // Using the direct o3 model
+        'model' => 'o3', // Using the o3 model as requested
         'messages' => $messages,
         'tools' => [$json_schema],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
-        'max_completion_tokens' => 4000,
+        'max_completion_tokens' => 100000,
         
     ];
+
+    // Validate API key
+    if (empty($OPENAI_API_KEY)) {
+        throw new Exception("OpenAI API key not configured or empty");
+    }
+    
+    // Log API request for debugging
+    error_log("OpenAI API request for quote #{$quote_id}: " . json_encode([
+        "model" => $openai_request["model"],
+        "message_count" => count($openai_request["messages"]),
+        "has_tools" => !empty($openai_request["tools"])
+    ]));
 
     // 6. EXECUTE API CALL
     $curl = curl_init();
@@ -195,7 +207,11 @@ Present as professional specifications requiring minimal editing, with quantifie
 
     
         // Validate and clean up JSON response before storing
-        $parsed_analysis = json_decode($ai_response, true);
+        if (empty($response)) {
+            throw new Exception("Empty response from OpenAI API. Check API key and request.");
+        }
+        
+        $parsed_analysis = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception("Invalid JSON response from AI: " . json_last_error_msg());
         }

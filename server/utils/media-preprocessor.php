@@ -124,15 +124,21 @@ class MediaPreprocessor {
     }
     
     private function processVideo($file_path, $filename) {
-        // Check if ffmpeg processing is available
-        $can_process_video = function_exists('shell_exec') && 
-                            !str_contains(ini_get('disable_functions'), 'shell_exec');
+        // Try advanced frame extraction first
+        $extraction_result = $this->extractVideoFramesAdvanced($file_path, $this->quote_id);
         
-        if ($can_process_video) {
-            // Extract video frames
-            $frames = $this->extractVideoFrames($file_path);
-
-            // Extract and transcribe audio from video
+        if (!empty($extraction_result['frames'])) {
+            // Success! We have actual frames
+            $this->aggregated_context['visual_content'] = array_merge(
+                $this->aggregated_context['visual_content'],
+                $extraction_result['frames']
+            );
+            
+            $frame_count = count($extraction_result['frames']);
+            $method = $extraction_result['method'];
+            $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted via {$method})";
+            
+            // Also try audio transcription
             $transcription = $this->extractAndTranscribeAudio($file_path);
             if ($transcription) {
                 $this->aggregated_context['transcriptions'][] = [
@@ -140,17 +146,9 @@ class MediaPreprocessor {
                     'text' => $transcription
                 ];
             }
-
-            if (!empty($frames)) {
-                $this->aggregated_context['visual_content'] = array_merge(
-                    $this->aggregated_context['visual_content'],
-                    $frames
-                );
-                $frame_count = count($frames);
-                $audio_note = $transcription ? " + audio transcription" : "";
-                $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted{$audio_note})";
-                return;
-            }
+            
+            error_log("Successfully processed video {$filename} with {$frame_count} frames for Quote #{$this->quote_id}");
+            return;
         }
         
         // Fallback: Provide detailed video description for AI analysis
@@ -462,6 +460,7 @@ class MediaPreprocessor {
             'media_parts' => $media_parts,
             'media_summary' => $standard_context['media_summary']
         ];
+    }
 
     /**
      * Fallback when ffmpeg is not available - provide detailed description
@@ -487,114 +486,83 @@ class MediaPreprocessor {
         
         return true;
     }
-    }
-}
 
     /**
-     * Simple video processing for AI analysis
+     * Extract video frames and save to disk for display and AI analysis
      */
-    public function processForAI($file_path, $media_type) {
-        $full_path = __DIR__ . "/../../" . $file_path;
-        
-        if (!file_exists($full_path)) {
-            throw new Exception("Media file not found: $full_path");
+    private function extractVideoFramesAdvanced($video_path, $quote_id) {
+        $frames_dir = __DIR__ . "/../../uploads/frames/quote_{$quote_id}";
+        if (!is_dir($frames_dir)) {
+            mkdir($frames_dir, 0755, true);
         }
         
-        if ($media_type === "video" || strpos($file_path, ".mov") !== false || strpos($file_path, ".mp4") !== false) {
-            return $this->processVideo($full_path);
-        } else {
-            return $this->processImage($full_path);
-        }
-    }
-    
-    /**
-     * Process video file - extract frames and audio
-     */
-    private function processVideo($video_path) {
-        $description_parts = [];
-        $description_parts[] = "📹 VIDEO ANALYSIS";
-        $description_parts[] = "File: " . basename($video_path);
-        $description_parts[] = "Size: " . number_format(filesize($video_path)) . " bytes";
-        
-        // Try to extract video info with ffmpeg
-        $ffmpeg_info = shell_exec("ffmpeg -i \"$video_path\" 2>&1");
-        if ($ffmpeg_info) {
-            // Extract duration, resolution, etc.
-            if (preg_match("/Duration: ([0-9:.]+)/", $ffmpeg_info, $matches)) {
-                $description_parts[] = "Duration: " . $matches[1];
-            }
-            if (preg_match("/(\d+x\d+)/", $ffmpeg_info, $matches)) {
-                $description_parts[] = "Resolution: " . $matches[1];
-            }
+        // Clean existing frames
+        $existing_frames = glob($frames_dir . "/*.jpg");
+        foreach ($existing_frames as $frame) {
+            unlink($frame);
         }
         
-        // Try to extract frames (if ffmpeg works)
-        $temp_dir = dirname($video_path) . "/temp_frames";
-        if (!is_dir($temp_dir)) {
-            mkdir($temp_dir, 0755, true);
-        }
+        $frames = [];
+        $frame_paths = [];
         
-        // Extract 3 frames at different timestamps
-        $frame_times = ["00:00:01", "00:00:05", "00:00:10"];
-        $extracted_frames = [];
+        // Check if shell_exec and ffmpeg are available
+        $ffmpeg_available = false;
+        $ffmpeg_path = null;
         
-        foreach ($frame_times as $i => $time) {
-            $frame_path = "$temp_dir/frame_$i.jpg";
-            $cmd = "ffmpeg -i \"$video_path\" -ss $time -vframes 1 -y \"$frame_path\" 2>/dev/null";
-            shell_exec($cmd);
+        // First check if shell_exec is available
+        if (function_exists('shell_exec') && !str_contains(ini_get('disable_functions'), 'shell_exec')) {
+            error_log("shell_exec is available, checking for ffmpeg...");
+            $ffmpeg_paths = ["/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "ffmpeg"];
             
-            if (file_exists($frame_path)) {
-                $base64 = base64_encode(file_get_contents($frame_path));
-                $extracted_frames[] = $base64;
-                $description_parts[] = "✅ Extracted frame at $time";
-                unlink($frame_path); // Clean up
-            } else {
-                $description_parts[] = "❌ Failed to extract frame at $time";
+            foreach ($ffmpeg_paths as $path) {
+                $test = shell_exec("which {$path} 2>/dev/null");
+                if (!empty($test)) {
+                    $ffmpeg_path = trim($test);
+                    $ffmpeg_available = true;
+                    break;
+                }
+            }
+        } else {
+            error_log("shell_exec is NOT available on this server - using fallback for Quote #{$quote_id}");
+        }
+        
+        if ($ffmpeg_available && function_exists("shell_exec") && !str_contains(ini_get("disable_functions"), "shell_exec")) {
+            // Extract 6 frames at different intervals
+            $intervals = [5, 15, 30, 45, 60, 90]; // seconds
+            
+            foreach ($intervals as $i => $seconds) {
+                $frame_file = "{$frames_dir}/frame_" . sprintf("%02d", $i+1) . "_{$seconds}s.jpg";
+                $cmd = "{$ffmpeg_path} -ss {$seconds} -i " . escapeshellarg($video_path) . 
+                       " -vframes 1 -q:v 2 -y " . escapeshellarg($frame_file) . " 2>/dev/null";
+                
+                shell_exec($cmd);
+                
+                if (file_exists($frame_file) && filesize($frame_file) > 1000) {
+                    $frame_paths[] = $frame_file;
+                    
+                    // Convert to base64 for AI
+                    $imageData = base64_encode(file_get_contents($frame_file));
+                    $frames[] = [
+                        "type" => "image_url",
+                        "image_url" => [
+                            "url" => "data:image/jpeg;base64," . $imageData,
+                            "detail" => "high"
+                        ]
+                    ];
+                    
+                    error_log("Extracted frame " . ($i+1) . " at {$seconds}s for Quote #{$quote_id}");
+                }
+            }
+            
+            if (!empty($frames)) {
+                error_log("Successfully extracted " . count($frames) . " frames for Quote #{$quote_id}");
             }
         }
         
-        // Clean up temp directory
-        if (is_dir($temp_dir)) {
-            rmdir($temp_dir);
-        }
-        
-        // Try to extract audio description
-        $audio_path = dirname($video_path) . "/temp_audio.wav";
-        $audio_cmd = "ffmpeg -i \"$video_path\" -vn -acodec pcm_s16le -ar 16000 -y \"$audio_path\" 2>/dev/null";
-        shell_exec($audio_cmd);
-        
-        if (file_exists($audio_path)) {
-            $description_parts[] = "✅ Audio extracted for analysis";
-            // Could add speech-to-text here if needed
-            unlink($audio_path); // Clean up
-        } else {
-            $description_parts[] = "❌ No audio extracted (may be silent video)";
-        }
-        
-        $description = implode("\n", $description_parts);
-        
-        // Return format expected by AI analysis
-        if (!empty($extracted_frames)) {
-            return [
-                "description" => $description,
-                "base64_frames" => $extracted_frames,
-                "frame_count" => count($extracted_frames)
-            ];
-        } else {
-            // Fallback to description only
-            return $description . "\n\n⚠️ Note: This appears to be a tree service video but frame extraction failed. The video likely contains footage of trees, landscape, or property that needs tree services. Manual review recommended.";
-        }
-    }
-    
-    /**
-     * Process image file
-     */
-    private function processImage($image_path) {
-        $base64 = base64_encode(file_get_contents($image_path));
         return [
-            "description" => "Image analysis: " . basename($image_path),
-            "base64_image" => $base64
+            "frames" => $frames,
+            "frame_paths" => $frame_paths,
+            "method" => $ffmpeg_available ? "ffmpeg" : "fallback"
         ];
     }
-
 }

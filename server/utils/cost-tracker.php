@@ -30,19 +30,48 @@ class CostTracker {
         $output_cost = ($this->cost_rates[$provider][$model]['output'] / 1000000) * $output_tokens;
         $total_cost = $input_cost + $output_cost;
 
-        $stmt = $this->pdo->prepare("
-            INSERT INTO ai_cost_log (quote_id, model_name, provider, input_tokens, output_tokens, total_cost, processing_time_ms)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $data['quote_id'],
-            $model,
-            $provider,
-            $input_tokens,
-            $output_tokens,
-            $total_cost,
-            $data['processing_time_ms']
-        ]);
+        // Handle database connection recovery
+        try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO ai_cost_log (quote_id, model_name, provider, input_tokens, output_tokens, total_cost, processing_time_ms)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $data['quote_id'],
+                $model,
+                $provider,
+                $input_tokens,
+                $output_tokens,
+                $total_cost,
+                $data['processing_time_ms']
+            ]);
+        } catch (PDOException $e) {
+            if (strpos($e->getMessage(), 'server has gone away') !== false) {
+                // Reconnect and retry
+                $this->pdo = getDatabaseConnection();
+                if ($this->pdo) {
+                    $stmt = $this->pdo->prepare("
+                        INSERT INTO ai_cost_log (quote_id, model_name, provider, input_tokens, output_tokens, total_cost, processing_time_ms)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ");
+                    $stmt->execute([
+                        $data['quote_id'],
+                        $model,
+                        $provider,
+                        $input_tokens,
+                        $output_tokens,
+                        $total_cost,
+                        $data['processing_time_ms']
+                    ]);
+                } else {
+                    error_log("CostTracker: Database reconnection failed: " . $e->getMessage());
+                    // Continue without saving cost - don't fail the entire analysis
+                }
+            } else {
+                error_log("CostTracker: Database error: " . $e->getMessage());
+                // Continue without saving cost - don't fail the entire analysis
+            }
+        }
 
         return [
             'total_cost' => $total_cost,
