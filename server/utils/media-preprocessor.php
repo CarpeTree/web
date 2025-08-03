@@ -139,14 +139,14 @@ class MediaPreprocessor {
             $this->aggregated_context['media_summary'][] = "🎬 {$filename} ({$frame_count} frames extracted via {$method})";
             
             // Also try audio transcription
-            $transcription = $this->extractAndTranscribeAudio($file_path);
-            if ($transcription) {
-                $this->aggregated_context['transcriptions'][] = [
-                    'source' => "Video: {$filename}",
-                    'text' => $transcription
-                ];
-            }
-            
+        $transcription = $this->extractAndTranscribeAudio($file_path);
+        if ($transcription) {
+            $this->aggregated_context['transcriptions'][] = [
+                'source' => "Video: {$filename}",
+                'text' => $transcription
+            ];
+        }
+
             error_log("Successfully processed video {$filename} with {$frame_count} frames for Quote #{$this->quote_id}");
             return;
         }
@@ -172,29 +172,11 @@ class MediaPreprocessor {
     }
     
     private function extractVideoFrames($videoPath, $secondsInterval = 5, $maxFrames = 6) {
-        if (!function_exists('shell_exec') || (function_exists('ini_get') && str_contains(ini_get('disable_functions'), 'shell_exec'))) {
-            error_log("shell_exec() disabled on server - cannot extract video frames for " . basename($videoPath));
-            return [];
-        }
-
-        $ffmpeg_paths = [
-            '/opt/homebrew/bin/ffmpeg',
-            '/usr/local/bin/ffmpeg',
-            '/usr/bin/ffmpeg',
-            '/home/u230128646/bin/ffmpeg',
-            trim(shell_exec('which ffmpeg') ?? '')
-        ];
+        // Use proc_open instead of shell_exec since it's disabled on Hostinger
+        $ffmpeg_path = '/home/u230128646/bin/ffmpeg';
         
-        $ffmpeg_path = null;
-        foreach ($ffmpeg_paths as $path) {
-            if (!empty($path) && file_exists($path)) {
-                $ffmpeg_path = $path;
-                break;
-            }
-        }
-        
-        if (!$ffmpeg_path) {
-            error_log("FFmpeg not found - cannot extract video frames for " . basename($videoPath));
+        if (!file_exists($ffmpeg_path)) {
+            error_log("FFmpeg not found at {$ffmpeg_path} - cannot extract frames from video: " . basename($videoPath));
             return [];
         }
         
@@ -203,21 +185,42 @@ class MediaPreprocessor {
         @mkdir($tmpDir);
         
         try {
-            // Extract frames
-            $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vf "fps=1/%d,scale=1024:-1" -q:v 5 -frames:v %d %s/frame_%%03d.jpg',
-                escapeshellarg($ffmpeg_path),
-                escapeshellarg($videoPath),
-                $secondsInterval,
-                $maxFrames,
-                escapeshellarg($tmpDir)
-            );
-            
-            shell_exec($cmd);
-            
-            // Convert frames to base64
-            for ($i = 1; $i <= $maxFrames; $i++) {
-                $frameFile = sprintf('%s/frame_%03d.jpg', $tmpDir, $i);
-                if (file_exists($frameFile)) {
+            // Extract frames using proc_open with Method 4 (-c:v copy) approach that works on Hostinger
+            for ($i = 0; $i < $maxFrames; $i++) {
+                $timePos = $i * $secondsInterval;
+                $frameFile = sprintf('%s/frame_%03d.jpg', $tmpDir, $i + 1);
+                
+                // Use Method 4: stream copy approach that works on Hostinger
+                $cmd = [
+                    $ffmpeg_path,
+                    '-hide_banner',
+                    '-loglevel', 'error',
+                    '-ss', (string)$timePos,
+                    '-i', $videoPath,
+                    '-vframes', '1',
+                    '-c:v', 'copy',
+                    '-y',
+                    $frameFile
+                ];
+                
+                $descriptorspec = [
+                    0 => ['pipe', 'r'],  // stdin
+                    1 => ['pipe', 'w'],  // stdout  
+                    2 => ['pipe', 'w']   // stderr
+                ];
+                
+                $process = proc_open($cmd, $descriptorspec, $pipes);
+                
+                if (is_resource($process)) {
+                    fclose($pipes[0]);
+                    $stdout = stream_get_contents($pipes[1]);
+                    $stderr = stream_get_contents($pipes[2]);
+                    fclose($pipes[1]);
+                    fclose($pipes[2]);
+                    
+                    $return_code = proc_close($process);
+                    
+                    if ($return_code === 0 && file_exists($frameFile)) {
                     $imageData = base64_encode(file_get_contents($frameFile));
                     $frames[] = [
                         'type' => 'image_url',
@@ -226,11 +229,15 @@ class MediaPreprocessor {
                             'detail' => 'high'
                         ]
                     ];
+                        error_log("Successfully extracted frame {$i} at {$timePos}s from " . basename($videoPath));
+                    } else {
+                        error_log("Failed to extract frame {$i} at {$timePos}s: return_code={$return_code}, stderr={$stderr}");
+                    }
                 }
             }
             
         } finally {
-            // Clean up remaining frame files if they exist
+            // Clean up frame files
             if (is_dir($tmpDir)) {
                 $files = glob($tmpDir . '/*');
                 foreach($files as $file){
@@ -242,6 +249,7 @@ class MediaPreprocessor {
             }
         }
         
+        error_log("Extracted " . count($frames) . " frames from " . basename($videoPath));
         return $frames;
     }
     
@@ -252,46 +260,62 @@ class MediaPreprocessor {
             return null;
         }
 
-        if (!function_exists('shell_exec') || (function_exists('ini_get') && str_contains(ini_get('disable_functions'), 'shell_exec'))) {
-            error_log("shell_exec() disabled on server - cannot extract audio from video: " . basename($videoPath));
-            return null;
-        }
+        // Use proc_open instead of shell_exec since it's disabled on Hostinger
+        $ffmpeg_path = '/home/u230128646/bin/ffmpeg';
         
-        $ffmpeg_paths = [
-            '/opt/homebrew/bin/ffmpeg',
-            '/usr/local/bin/ffmpeg', 
-            '/usr/bin/ffmpeg',
-            '/home/u230128646/bin/ffmpeg',
-            trim(shell_exec('which ffmpeg') ?? '')
-        ];
-        
-        $ffmpeg_path = null;
-        foreach ($ffmpeg_paths as $path) {
-            if (!empty($path) && file_exists($path)) {
-                $ffmpeg_path = $path;
-                break;
-            }
-        }
-        
-        if (!$ffmpeg_path) {
-            error_log("FFmpeg not found - cannot extract audio from video: " . basename($videoPath));
+        if (!file_exists($ffmpeg_path)) {
+            error_log("FFmpeg not found at {$ffmpeg_path} - cannot extract audio from video: " . basename($videoPath));
             return null;
         }
         
         $tmpAudio = sys_get_temp_dir() . '/audio_' . uniqid() . '.mp3';
         
-        // Extract audio (max 25MB for OpenAI Whisper)
-        $cmd = sprintf('%s -hide_banner -loglevel error -i %s -vn -acodec mp3 -ab 64k -ar 16000 -t 300 %s',
-            escapeshellarg($ffmpeg_path),
-            escapeshellarg($videoPath),
-            escapeshellarg($tmpAudio)
-        );
+        // Extract audio (max 25MB for OpenAI Whisper) using proc_open
+        $cmd = [
+            $ffmpeg_path,
+            '-hide_banner',
+            '-loglevel', 'error',
+            '-i', $videoPath,
+            '-vn',
+            '-acodec', 'mp3',
+            '-ab', '64k',
+            '-ar', '16000',
+            '-t', '300',
+            $tmpAudio
+        ];
         
-        shell_exec($cmd);
+        $descriptorspec = [
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout  
+            2 => ['pipe', 'w']   // stderr
+        ];
         
-        if (!file_exists($tmpAudio) || filesize($tmpAudio) == 0) {
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+        
+        if (!is_resource($process)) {
+            error_log("Failed to start audio extraction process for " . basename($videoPath));
             return null;
         }
+        
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        
+        $return_code = proc_close($process);
+        
+        if ($return_code !== 0) {
+            error_log("Audio extraction failed: return_code={$return_code}, stderr={$stderr}");
+            return null;
+        }
+        
+        if (!file_exists($tmpAudio) || filesize($tmpAudio) == 0) {
+            error_log("Audio extraction produced no output file");
+            return null;
+        }
+        
+        error_log("Successfully extracted audio from " . basename($videoPath) . " (" . round(filesize($tmpAudio)/1024, 1) . "KB)");
         
         $transcription = $this->transcribeWithWhisper($tmpAudio);
         @unlink($tmpAudio);
