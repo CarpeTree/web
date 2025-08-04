@@ -21,6 +21,160 @@ class MediaPreprocessor {
     }
     
     /**
+     * Convert video to Gemini-optimized format for maximum compatibility
+     * Handles iPhone MOV, H.265, and other problematic encodings
+     */
+    private function convertVideoForGemini($inputPath, $outputPath = null) {
+        $ffmpeg_path = '/home/u230128646/bin/ffmpeg';
+        
+        if (!file_exists($ffmpeg_path)) {
+            error_log("FFmpeg not found - cannot convert video: " . basename($inputPath));
+            return $inputPath; // Return original if conversion unavailable
+        }
+        
+        // Generate optimized output path if not provided
+        if ($outputPath === null) {
+            $pathInfo = pathinfo($inputPath);
+            $outputPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '_gemini_optimized.mp4';
+        }
+        
+        // Gemini-optimized conversion settings
+        $cmd = [
+            $ffmpeg_path,
+            '-hide_banner',
+            '-loglevel', 'error',
+            '-i', $inputPath,
+            // Video codec: H.264 (widely compatible)
+            '-c:v', 'libx264',
+            '-preset', 'fast', // Balance speed vs compression
+            '-crf', '23', // Good quality-size balance
+            // Audio codec: AAC (universally supported)
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-ar', '44100', // Standard sample rate
+            // Format optimizations
+            '-movflags', '+faststart', // Enable streaming/progressive download
+            '-pix_fmt', 'yuv420p', // Maximum compatibility pixel format
+            // Resolution: Keep original but ensure even dimensions
+            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+            // Duration limit for processing efficiency (10 minutes max)
+            '-t', '600',
+            '-y', // Overwrite output
+            $outputPath
+        ];
+        
+        $descriptorspec = [
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout  
+            2 => ['pipe', 'w']   // stderr
+        ];
+        
+        error_log("Converting video for Gemini compatibility: " . basename($inputPath));
+        
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+        
+        if (!is_resource($process)) {
+            error_log("Failed to start video conversion process");
+            return $inputPath; // Return original on failure
+        }
+        
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        
+        $return_code = proc_close($process);
+        
+        if ($return_code === 0 && file_exists($outputPath) && filesize($outputPath) > 0) {
+            $originalSize = round(filesize($inputPath) / (1024*1024), 1);
+            $convertedSize = round(filesize($outputPath) / (1024*1024), 1);
+            error_log("✅ Video conversion successful: {$originalSize}MB → {$convertedSize}MB (" . basename($outputPath) . ")");
+            return $outputPath;
+        } else {
+            error_log("❌ Video conversion failed: return_code={$return_code}, stderr={$stderr}");
+            // Clean up failed output file
+            if (file_exists($outputPath)) {
+                @unlink($outputPath);
+            }
+            return $inputPath; // Return original on failure
+        }
+    }
+    
+    /**
+     * Check if video needs conversion for Gemini compatibility
+     */
+    private function needsGeminiConversion($videoPath) {
+        $ffmpeg_path = '/home/u230128646/bin/ffmpeg';
+        
+        if (!file_exists($ffmpeg_path)) {
+            return false; // Can't convert anyway
+        }
+        
+        // Get video info using ffprobe
+        $cmd = [
+            str_replace('ffmpeg', 'ffprobe', $ffmpeg_path),
+            '-v', 'quiet',
+            '-show_format',
+            '-show_streams',
+            '-of', 'json',
+            $videoPath
+        ];
+        
+        $descriptorspec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w']
+        ];
+        
+        $process = proc_open($cmd, $descriptorspec, $pipes);
+        
+        if (!is_resource($process)) {
+            return false;
+        }
+        
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+        
+        $info = json_decode($output, true);
+        
+        if (!$info || !isset($info['streams'])) {
+            return false;
+        }
+        
+        // Check for problematic encodings that need conversion
+        foreach ($info['streams'] as $stream) {
+            if ($stream['codec_type'] === 'video') {
+                $codec = strtolower($stream['codec_name'] ?? '');
+                
+                // Convert if using problematic codecs
+                if (in_array($codec, ['hevc', 'h265', 'av1', 'vp9', 'prores'])) {
+                    error_log("Video uses {$codec} codec - conversion recommended for Gemini compatibility");
+                    return true;
+                }
+                
+                // Check pixel format
+                $pix_fmt = strtolower($stream['pix_fmt'] ?? '');
+                if (!in_array($pix_fmt, ['yuv420p', 'yuv422p', 'yuv444p'])) {
+                    error_log("Video uses {$pix_fmt} pixel format - conversion recommended");
+                    return true;
+                }
+            }
+        }
+        
+        // Check file size (convert if over 50MB for better processing)
+        if (filesize($videoPath) > 50 * 1024 * 1024) {
+            error_log("Large video file (" . round(filesize($videoPath)/(1024*1024), 1) . "MB) - conversion recommended for efficiency");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Process ALL media files and aggregate context BEFORE main LLM analysis
      */
     public function preprocessAllMedia() {
@@ -107,6 +261,89 @@ class MediaPreprocessor {
         return $this->aggregated_context;
     }
     
+    /**
+     * Preprocess media specifically for Gemini API
+     * Converts videos to optimal format for Gemini analysis
+     */
+    public function preprocessForGemini() {
+        $processed_files = [];
+        
+        foreach ($this->media_files as $file) {
+            $file_path = $file['file_path'];
+            $filename = $file['filename'];
+            $mime_type = $file['mime_type'];
+            
+            // Handle video files with automatic conversion
+            if (strpos(strtolower($mime_type), 'video') !== false || 
+                preg_match('/\.(mp4|mov|avi|mkv|webm)$/i', $filename)) {
+                
+                error_log("🎬 Preprocessing video for Gemini: {$filename}");
+                
+                // Check if conversion is needed
+                if ($this->needsGeminiConversion($file_path)) {
+                    error_log("🔄 Converting {$filename} for Gemini compatibility...");
+                    $convertedPath = $this->convertVideoForGemini($file_path);
+                    
+                    if ($convertedPath !== $file_path) {
+                        // Use converted file for Gemini
+                        $processed_files[] = [
+                            'file_path' => $convertedPath,
+                            'filename' => $filename . ' (Gemini-optimized)',
+                            'mime_type' => 'video/mp4',
+                            'original_path' => $file_path,
+                            'converted' => true
+                        ];
+                        error_log("✅ Video converted successfully for Gemini: " . basename($convertedPath));
+                    } else {
+                        // Conversion failed, use original
+                        $processed_files[] = [
+                            'file_path' => $file_path,
+                            'filename' => $filename,
+                            'mime_type' => $mime_type,
+                            'converted' => false
+                        ];
+                        error_log("⚠️ Video conversion failed, using original file");
+                    }
+                } else {
+                    // No conversion needed
+                    $processed_files[] = [
+                        'file_path' => $file_path,
+                        'filename' => $filename,
+                        'mime_type' => $mime_type,
+                        'converted' => false
+                    ];
+                    error_log("✅ Video is already Gemini-compatible: {$filename}");
+                }
+            } else {
+                // Non-video files pass through unchanged
+                $processed_files[] = [
+                    'file_path' => $file_path,
+                    'filename' => $filename,
+                    'mime_type' => $mime_type,
+                    'converted' => false
+                ];
+            }
+        }
+        
+        return $processed_files;
+    }
+    
+    /**
+     * Clean up any converted files after processing
+     */
+    public function cleanupConvertedFiles($processed_files) {
+        foreach ($processed_files as $file) {
+            if (isset($file['converted']) && $file['converted'] && 
+                isset($file['original_path']) && 
+                $file['file_path'] !== $file['original_path'] && 
+                file_exists($file['file_path'])) {
+                
+                @unlink($file['file_path']);
+                error_log("🧹 Cleaned up converted file: " . basename($file['file_path']));
+            }
+        }
+    }
+    
     private function processImage($file_path, $filename) {
         $imageData = base64_encode(file_get_contents($file_path));
         $mime_type = mime_content_type($file_path);
@@ -124,6 +361,24 @@ class MediaPreprocessor {
     }
     
     private function processVideo($file_path, $filename) {
+        // 🎯 AUTOMATIC GEMINI VIDEO CONVERSION
+        $originalPath = $file_path;
+        $convertedPath = null;
+        
+        // Check if video needs conversion for Gemini compatibility
+        if ($this->needsGeminiConversion($file_path)) {
+            error_log("🔄 Converting {$filename} for optimal Gemini compatibility...");
+            $convertedPath = $this->convertVideoForGemini($file_path);
+            
+            if ($convertedPath !== $file_path) {
+                // Conversion successful, use converted file
+                $file_path = $convertedPath;
+                error_log("✅ Using converted video for processing: " . basename($convertedPath));
+            }
+        } else {
+            error_log("✅ Video {$filename} is already Gemini-compatible, no conversion needed");
+        }
+        
         // Use the working proc_open method instead of shell_exec method
         $frames = $this->extractVideoFrames($file_path, 5, 6);
         
@@ -147,12 +402,24 @@ class MediaPreprocessor {
             }
 
             error_log("Successfully processed video {$filename} with {$frame_count} frames for Quote #{$this->quote_id}");
+            
+            // Clean up converted file if we created one
+            if ($convertedPath && $convertedPath !== $originalPath && file_exists($convertedPath)) {
+                @unlink($convertedPath);
+                error_log("🧹 Cleaned up converted video file: " . basename($convertedPath));
+            }
             return;
         }
         
         // Fallback: Provide detailed video description for AI analysis
         error_log("Using video fallback description for: {$filename}");
         $this->describeVideoFallback($file_path, $filename);
+        
+        // Clean up converted file if we created one (even on fallback)
+        if ($convertedPath && $convertedPath !== $originalPath && file_exists($convertedPath)) {
+            @unlink($convertedPath);
+            error_log("🧹 Cleaned up converted video file: " . basename($convertedPath));
+        }
     }
     
     private function processAudio($file_path, $filename) {
@@ -453,9 +720,9 @@ class MediaPreprocessor {
     }
     
     /**
-     * Preprocess media specifically for Google Gemini API format
+     * Convert processed content to Google Gemini API format
      */
-    public function preprocessForGemini() {
+    public function formatForGemini() {
         // First run the standard preprocessing
         $standard_context = $this->preprocessAllMedia();
         

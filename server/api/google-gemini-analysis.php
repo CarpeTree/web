@@ -71,12 +71,38 @@ require_once __DIR__ . '/../config/config.php';
         throw new Exception("No media files found for analysis.");
     }
 
-    // 3. PREPROCESS CONTEXT FOR GEMINI
+    // 3. PREPROCESS MEDIA FOR GEMINI COMPATIBILITY
     $preprocessor = new MediaPreprocessor($quote_id, $media_files, $quote_data);
-    $aggregated_context = $preprocessor->preprocessForGemini();
+    $processed_files = $preprocessor->preprocessForGemini();
+    
+    // Update media files with converted versions for processing
+    $converted_media_files = [];
+    foreach ($processed_files as $file) {
+        $converted_media_files[] = [
+            'file_path' => $file['file_path'],
+            'filename' => $file['filename'],
+            'mime_type' => $file['mime_type']
+        ];
+    }
+    
+    // Now process with converted files
+    $preprocessor_final = new MediaPreprocessor($quote_id, $converted_media_files, $quote_data);
+    $aggregated_context = $preprocessor_final->preprocessAllMedia();
     
     $context_text = $aggregated_context['context_text'];
-    $media_parts = $aggregated_context['media_parts'];
+    $visual_content = $aggregated_context['visual_content'];
+    $transcriptions = $aggregated_context['transcriptions'];
+    
+    // Prepare media parts for Gemini API
+    $media_parts = [];
+    foreach ($visual_content as $content) {
+        $media_parts[] = $content;
+    }
+    
+    // Add transcriptions as text parts
+    foreach ($transcriptions as $transcription) {
+        $media_parts[] = ['text' => "🎤 " . $transcription['source'] . ": " . $transcription['text']];
+    }
 
     // 4. LOAD AI PROMPTS & SCHEMA
     $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
@@ -160,6 +186,9 @@ require_once __DIR__ . '/../config/config.php';
     $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
 
     // 9. SEND SUCCESS RESPONSE
+    // Clean up any converted video files
+    $preprocessor->cleanupConvertedFiles($processed_files);
+    
     echo json_encode([
         'success' => true,
         'model' => 'gemini-2.5-pro',
@@ -169,6 +198,11 @@ require_once __DIR__ . '/../config/config.php';
     ]);
 
 } catch (Throwable $e) {
+    // Clean up any converted video files on error
+    if (isset($preprocessor) && isset($processed_files)) {
+        $preprocessor->cleanupConvertedFiles($processed_files);
+    }
+    
     http_response_code(500);
     echo json_encode([
         'success' => false,

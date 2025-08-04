@@ -407,15 +407,26 @@ try {
             error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
         }
     } else {
-        // Even without files, assess the text-based context
-        // TODO: Fix context assessment - temporarily disabled due to undefined callOpenAI function
-        // try {
-        //     require_once __DIR__ . '/../utils/context-assessor.php';
-        //     $context_assessment = ContextAssessor::assessSubmissionContext($quote_id);
-        //     error_log("Text-only context assessment for quote $quote_id: " . json_encode($context_assessment));
-        // } catch (Exception $e) {
-        //     error_log("Failed context assessment for quote $quote_id: " . $e->getMessage());
-        // }
+        // Even without files, trigger basic AI analysis
+        try {
+            // Trigger simple AI analysis for text-only submissions
+            $analysis_url = $SITE_URL . '/server/api/simple-ai-analysis.php';
+            $post_data = http_build_query(['quote_id' => $quote_id]);
+            
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => 'Content-type: application/x-www-form-urlencoded',
+                    'content' => $post_data,
+                    'timeout' => 5
+                ]
+            ]);
+            
+            $result = file_get_contents($analysis_url, false, $context);
+            error_log("Text-only AI analysis triggered for quote $quote_id: " . ($result ?: 'No response'));
+        } catch (Exception $e) {
+            error_log("Failed to trigger text-only AI analysis for quote $quote_id: " . $e->getMessage());
+        }
     }
     
 } catch (Exception $e) {
