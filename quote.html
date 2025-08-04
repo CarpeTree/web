@@ -696,11 +696,22 @@
         <!-- Debug info for troubleshooting -->
         <div style="margin-top: 15px; padding: 15px; background: #ff9999; border: 3px solid red; border-radius: 5px; font-size: 14px;">
           <strong>🔍 DEBUG INFO (ALWAYS VISIBLE):</strong><br>
-          showProgress: <span x-text="showProgress" style="font-weight: bold; color: blue;"></span> | 
-          progressStep: <span x-text="progressStep" style="font-weight: bold; color: blue;"></span> | 
-          progressPercent: <span x-text="progressPercent" style="font-weight: bold; color: blue;"></span><br>
-          submitting: <span x-text="submitting" style="font-weight: bold; color: blue;"></span> | 
-          currentStep: <span x-text="currentStep" style="font-weight: bold; color: blue;"></span>
+          showProgress: <span x-text="showProgress" style="font-weight: bold; color: blue;">ALPINE_NOT_LOADED</span> | 
+          progressStep: <span x-text="progressStep" style="font-weight: bold; color: blue;">ALPINE_NOT_LOADED</span> | 
+          progressPercent: <span x-text="progressPercent" style="font-weight: bold; color: blue;">ALPINE_NOT_LOADED</span><br>
+          submitting: <span x-text="submitting" style="font-weight: bold; color: blue;">ALPINE_NOT_LOADED</span> | 
+          currentStep: <span x-text="currentStep" style="font-weight: bold; color: blue;">ALPINE_NOT_LOADED</span><br>
+          <strong style="color: red;">If you see "ALPINE_NOT_LOADED" text, Alpine.js is not working!</strong>
+        </div>
+        
+        <!-- Basic HTML debug info that works without Alpine.js -->
+        <div style="margin-top: 10px; padding: 15px; background: #ffff99; border: 3px solid orange; border-radius: 5px; font-size: 14px;">
+          <strong>🟡 BASIC HTML DEBUG (NO ALPINE NEEDED):</strong><br>
+          This text should ALWAYS be visible.<br>
+          Current URL: <span id="current-url">Loading...</span><br>
+          Alpine.js loaded: <span id="alpine-status">Checking...</span><br>
+          Form found: <span id="form-status">Checking...</span><br>
+          Time: <span id="current-time">Loading...</span>
         </div>
       </form>
     </div>
@@ -1597,6 +1608,56 @@
           console.log('✅ Progress bar test completed');
         }
       }
+    }
+  </script>
+  
+  <!-- Basic debugging script that runs without Alpine.js -->
+  <script>
+    console.log('🔍 Basic debug script running...');
+    
+    // Update basic debug info
+    function updateBasicDebug() {
+      const currentUrl = document.getElementById('current-url');
+      const alpineStatus = document.getElementById('alpine-status');
+      const formStatus = document.getElementById('form-status');
+      const currentTime = document.getElementById('current-time');
+      
+      if (currentUrl) currentUrl.textContent = window.location.href;
+      if (currentTime) currentTime.textContent = new Date().toLocaleTimeString();
+      
+      if (alpineStatus) {
+        alpineStatus.textContent = window.Alpine ? '✅ YES' : '❌ NO';
+        alpineStatus.style.color = window.Alpine ? 'green' : 'red';
+      }
+      
+      if (formStatus) {
+        const form = document.querySelector('form');
+        formStatus.textContent = form ? '✅ YES' : '❌ NO';
+        formStatus.style.color = form ? 'green' : 'red';
+      }
+    }
+    
+    // Run immediately
+    updateBasicDebug();
+    
+    // Run after Alpine.js should have loaded
+    setTimeout(updateBasicDebug, 1000);
+    setTimeout(updateBasicDebug, 3000);
+    
+    // Log Alpine.js status
+    if (window.Alpine) {
+      console.log('✅ Alpine.js is loaded:', window.Alpine);
+    } else {
+      console.log('❌ Alpine.js is NOT loaded');
+      console.log('Available scripts:', Array.from(document.scripts).map(s => s.src));
+    }
+    
+    // Check if we're on the right step
+    const stepContent = document.querySelector('[x-show="currentStep === 3"]');
+    if (stepContent) {
+      console.log('📍 Found step 3 content element');
+    } else {
+      console.log('❌ Step 3 content element not found');
     }
   </script>
 </body>
