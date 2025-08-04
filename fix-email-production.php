@@ -16,10 +16,10 @@ DB_PASS=your_database_password_here
 # Professional Email Configuration (Hostinger)
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=587
-SMTP_USER=support@carpetree.com
+SMTP_USER=sapport@carpetree.com
 SMTP_PASS=your_email_password_here
-SMTP_FROM=support@carpetree.com
-ADMIN_EMAIL=support@carpetree.com
+SMTP_FROM=sapport@carpetree.com
+ADMIN_EMAIL=sapport@carpetree.com
 
 # API Keys
 OPENAI_API_KEY=your_openai_key_here

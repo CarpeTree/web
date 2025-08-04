@@ -23,10 +23,10 @@ if (file_exists($env_file)) {
     $env_content = "# Carpe Tree Email Configuration
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=587
-SMTP_USER=support@carpetree.com
+SMTP_USER=sapport@carpetree.com
 SMTP_PASS=your_email_password_here
-SMTP_FROM=support@carpetree.com
-ADMIN_EMAIL=support@carpetree.com
+SMTP_FROM=sapport@carpetree.com
+ADMIN_EMAIL=sapport@carpetree.com
 
 # Database (update with your actual values)
 DB_HOST=localhost

@@ -38,7 +38,7 @@ echo "4. Test email sending with proper credentials\n";
 // Create a simple email test
 if (function_exists('mail')) {
     echo "\n🧪 Testing basic PHP mail function...\n";
-    $to = 'support@carpetree.com';
+    $to = 'sapport@carpetree.com';
     $subject = 'Email Configuration Test';
     $message = 'This is a test email from the fixed configuration.';
     $headers = "From: system@carpetree.com\r\n";
