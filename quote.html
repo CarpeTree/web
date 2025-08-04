@@ -637,6 +637,34 @@
           </div>
         </div>
 
+        <!-- Hidden Resubmit Button - appears on submission errors -->
+        <div x-show="showResubmit" style="margin-top: 20px; padding: 16px; background: #ffebee; border: 1px solid #e57373; border-radius: 8px; animation: slideIn 0.3s ease-out;">
+          <div style="display: flex; align-items: center; justify-content: between; gap: 15px;">
+            <div style="flex: 1;">
+              <h4 style="color: #d32f2f; margin: 0 0 8px 0; font-weight: 600;">🚨 Submission Failed</h4>
+              <p style="color: #666; margin: 0 0 8px 0; font-size: 14px;" x-text="submitError"></p>
+              <p style="color: #999; margin: 0; font-size: 12px;">Don't worry - your form data is saved. Click retry to resubmit.</p>
+            </div>
+            <button 
+              @click="resubmitForm()" 
+              :disabled="isResubmitting"
+              style="padding: 10px 16px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s;"
+              onmouseover="this.style.background='#b71c1c'"
+              onmouseout="this.style.background='#d32f2f'"
+            >
+              <span x-show="!isResubmitting">🔄 Retry Submission</span>
+              <span x-show="isResubmitting">⏳ Retrying...</span>
+            </button>
+          </div>
+          
+          <!-- Retry attempt counter -->
+          <div x-show="retryAttempt > 0" style="margin-top: 10px;">
+            <p style="color: #999; margin: 0; font-size: 11px;">
+              Retry attempt: <span x-text="retryAttempt"></span>/3
+            </p>
+          </div>
+        </div>
+
         <div style="text-align: center; margin-top: 30px;">
           <button type="button" class="btn" @click="prevStep()">Back</button>
           <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
@@ -769,6 +797,11 @@
         progressStep: 0,
         progressPercent: 0,
         progressMessage: 'Preparing submission...',
+        showResubmit: false,
+        isResubmitting: false,
+        submitError: '',
+        retryAttempt: 0,
+        savedFormData: null,
         uploadedFiles: [],
         locationLoading: false,
         locationCaptured: false,
@@ -1269,6 +1302,9 @@
         },
 
         async submitQuote() {
+          // Hide resubmit button if showing
+          this.showResubmit = false;
+          
           this.submitting = true;
           this.showProgress = true;
           this.progressStep = 1;
@@ -1447,10 +1483,45 @@
               response: response
             });
             this.showProgress = false;
-            alert('Error submitting quote: ' + error.message + '. Please try again or contact us directly at sapport@carpetree.com or 778-655-3741');
+            
+            // Show resubmit button instead of alert
+            this.submitError = error.message || 'Unknown error occurred';
+            this.showResubmit = true;
+            
+            // Also show alert for immediate feedback
+            alert('Submission failed: ' + error.message + '\n\nA retry button has appeared below. You can also contact us at:\n📞 778-655-3741\n📧 support@carpetree.com');
           }
           
           this.submitting = false;
+        },
+        
+        async resubmitForm() {
+          if (this.retryAttempt >= 3) {
+            alert('Maximum retry attempts reached. Please contact us directly:\n📞 778-655-3741\n📧 support@carpetree.com');
+            return;
+          }
+          
+          this.retryAttempt++;
+          this.isResubmitting = true;
+          this.showResubmit = false;
+          
+          try {
+            // Use a more aggressive retry strategy
+            this.progressMessage = `Retry attempt ${this.retryAttempt} - Reconnecting to server...`;
+            
+            await this.submitQuote();
+            
+            // Reset retry state on success
+            this.retryAttempt = 0;
+            this.savedFormData = null;
+            
+          } catch (error) {
+            // Failed again, show resubmit button
+            this.showResubmit = true;
+            this.submitError = `Retry ${this.retryAttempt} failed: ${error.message}`;
+          } finally {
+            this.isResubmitting = false;
+          }
         }
       }
     }
