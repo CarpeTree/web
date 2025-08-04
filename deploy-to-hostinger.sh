@@ -4,10 +4,11 @@
 
 echo "🚀 Deploying Carpe Tree website to Hostinger..."
 
-# SSH connection details (you'll need to update these)
-HOST="your-server.hostinger.com"  # Replace with your actual server
-USER="your-username"              # Replace with your username
-REMOTE_PATH="/public_html"        # Or wherever your website files go
+# SSH connection details for Hostinger
+HOST="46.202.182.11"
+PORT="65002"
+USER="u230128646"
+REMOTE_PATH="/public_html"        # Standard Hostinger website directory
 
 # Files to upload
 FILES_TO_UPLOAD=(
@@ -22,7 +23,7 @@ echo "📡 Connecting to Hostinger server..."
 for file in "${FILES_TO_UPLOAD[@]}"; do
     if [ -f "$file" ]; then
         echo "📤 Uploading $file..."
-        scp -i ~/.ssh/carpe-tree-hostinger "$file" "$USER@$HOST:$REMOTE_PATH/"
+        scp -i ~/.ssh/carpe-tree-hostinger -P "$PORT" "$file" "$USER@$HOST:$REMOTE_PATH/"
         if [ $? -eq 0 ]; then
             echo "✅ $file uploaded successfully"
         else
