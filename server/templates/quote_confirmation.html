@@ -20,24 +20,18 @@
         </div>
         
         <div class="content">
-            <p>Hi {{customer_name}},</p>
+            <p>Hi {customer_name},</p>
             
             <p>Thank you for submitting your tree service quote request! We've received your submission and will get back to you soon.</p>
             
             <h3>Quote Details:</h3>
             <ul>
-                <li><strong>Quote ID:</strong> #{{quote_id}}</li>
-                <li><strong>Services Requested:</strong> {{services}}</li>
-                <li><strong>Files Uploaded:</strong> {{files_count}} file(s)</li>
+                <li><strong>Quote ID:</strong> #{quote_id}</li>
+                <li><strong>Services Requested:</strong> {services}</li>
+                <li><strong>Files Uploaded:</strong> {files_count} file(s)</li>
             </ul>
             
-            {{#has_files}}
-            <p>🎯 <strong>Good news!</strong> Your photos/videos will help us provide a more accurate estimate. Our AI analysis will begin shortly, and we'll send you a detailed quote within 24 hours.</p>
-            {{/has_files}}
-            
-            {{^has_files}}
-            <p>📞 <strong>Next Steps:</strong> Since no photos were uploaded, we'll contact you to schedule an in-person assessment. This ensures we can provide the most accurate quote for your specific needs.</p>
-            {{/has_files}}
+            {conditional_content}
             
             <h3>What happens next?</h3>
             <ol>
