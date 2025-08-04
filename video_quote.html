@@ -347,6 +347,16 @@
                 <div class="error-message"></div>
             </div>
 
+            <!-- Processing Time Notice -->
+            <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-left: 4px solid var(--deep-forest-green); border-radius: 5px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--deep-forest-green);">⏰ Analysis Timeline</h4>
+                <p style="margin: 0; color: #2c5530; font-size: 14px;">
+                    <strong>Our AI system typically takes 2-4 hours to thoroughly analyze your videos.</strong> 
+                    This comprehensive process includes frame extraction, tree health assessment, species identification, 
+                    and professional recommendation generation. You'll receive an email notification when your detailed report is ready.
+                </p>
+            </div>
+
             <!-- Progress Bar -->
             <div id="progressContainer" class="progress-container">
                 <div class="progress-steps">
@@ -378,14 +388,27 @@
 
         <div id="successMessage" style="display: none;">
             <h3>🎉 Thank you for your submission!</h3>
-            <p>Your quote request has been received and our AI is analyzing your media files. You'll receive a detailed assessment within 24 hours.</p>
+            <p>Your quote request has been received and our AI is analyzing your media files.</p>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+                <h4 style="margin: 0 0 10px 0; color: #856404;">⏰ Processing Timeline</h4>
+                <p style="margin: 0; color: #856404;"><strong>Please allow 2-4 hours for comprehensive analysis.</strong> Our AI system processes multiple aspects of your trees including:</p>
+                <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
+                    <li>Video frame extraction and analysis</li>
+                    <li>Tree health assessment algorithms</li>
+                    <li>Species identification and risk evaluation</li>
+                    <li>Professional recommendation generation</li>
+                </ul>
+            </div>
+            
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px;">
-                <strong>What happens next:</strong>
+                <strong>What you'll receive:</strong>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>AI analysis of your videos and images</li>
-                    <li>Professional tree assessment report</li>
-                    <li>Detailed service recommendations</li>
-                    <li>Accurate pricing estimates</li>
+                    <li>✅ Detailed AI analysis report within 24 hours</li>
+                    <li>📊 Professional tree assessment with photos</li>
+                    <li>🌲 Specific service recommendations</li>
+                    <li>💰 Accurate pricing estimates</li>
+                    <li>📧 Email notification when analysis is complete</li>
                 </ul>
             </div>
         </div>
@@ -616,9 +639,27 @@
                 this.updateProgress(0, `❌ ${message}`);
                 document.getElementById('submitBtn').disabled = false;
                 document.getElementById('submitBtn').textContent = 'Submit Request';
+                
+                // Show helpful error message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'margin: 20px 0; padding: 15px; background: #ffe8e8; border: 1px solid #ffcdd2; border-radius: 5px; color: #c62828;';
+                errorDiv.innerHTML = `
+                    <h4 style="margin: 0 0 10px 0;">⚠️ Submission Issue</h4>
+                    <p style="margin: 0;">${message}</p>
+                    <p style="margin: 10px 0 0 0; font-size: 14px;">
+                        <strong>If this continues:</strong><br>
+                        📧 Email us directly: <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a><br>
+                        📞 Call us: <a href="tel:7786553741">778-655-3741</a>
+                    </p>
+                `;
+                
+                const form = document.getElementById('videoQuoteForm');
+                form.parentNode.insertBefore(errorDiv, form);
+                
                 setTimeout(() => {
                     document.getElementById('progressContainer').style.display = 'none';
-                }, 3000);
+                    errorDiv.remove();
+                }, 10000);
             }
         };
 
@@ -687,16 +728,39 @@
                 // Step 1: Upload
                 ProgressTracker.updateProgress(25, 'Uploading files...');
                 
-                const response = await fetch('/server/api/submitQuote.php', {
-                    method: 'POST',
-                    body: formData
-                });
+                // Try multiple endpoints for better reliability
+                let response;
+                let result;
+                const endpoints = [
+                    '/server/api/submitQuote.php',
+                    '/server/api/submitQuote-working.php'
+                ];
                 
-                if (!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
+                let lastError;
+                for (const endpoint of endpoints) {
+                    try {
+                        response = await fetch(endpoint, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            result = await response.json();
+                            break;
+                        } else if (response.status === 503) {
+                            lastError = new Error('Server temporarily unavailable. Please try again in a moment.');
+                        } else {
+                            lastError = new Error(`Server error: ${response.status}`);
+                        }
+                    } catch (fetchError) {
+                        lastError = fetchError;
+                        continue;
+                    }
                 }
                 
-                const result = await response.json();
+                if (!result) {
+                    throw lastError || new Error('Unable to submit form. Please try again.');
+                }
                 
                 if (!result.success) {
                     throw new Error(result.error || 'Submission failed');
@@ -706,37 +770,34 @@
                 ProgressTracker.nextStep('Processing media files...');
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // Step 3: AI Analysis
-                ProgressTracker.nextStep('AI is analyzing your trees...');
+                // Step 3: AI Analysis (Initial Setup)
+                ProgressTracker.nextStep('Starting AI analysis...');
+                
+                // Add notice about processing time
+                const timeNotice = document.createElement('div');
+                timeNotice.style.cssText = 'margin: 15px 0; padding: 12px; background: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0;';
+                timeNotice.innerHTML = `
+                    <strong>⏳ Processing Notice:</strong> AI analysis may take 2-4 hours to complete. 
+                    You'll receive an email notification when your detailed report is ready.
+                `;
+                document.getElementById('progressContainer').appendChild(timeNotice);
                 
                 // Check if AI analysis is triggered
                 if (result.quote_id) {
-                    // Monitor AI progress
-                    let analysisComplete = false;
-                    let attempts = 0;
-                    const maxAttempts = 30; // 30 seconds timeout
+                    // Show realistic initial processing
+                    const messages = [
+                        'Queuing your submission for AI analysis...',
+                        'Preparing video processing pipeline...',
+                        'Analysis has been initiated successfully!',
+                        'You will be notified when processing is complete.'
+                    ];
                     
-                    while (!analysisComplete && attempts < maxAttempts) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        attempts++;
-                        
-                        // Update progress text
-                        const messages = [
-                            'Extracting frames from videos...',
-                            'Analyzing tree health indicators...',
-                            'Assessing structural integrity...',
-                            'Generating recommendations...',
-                            'Calculating service requirements...',
-                            'Finalizing assessment...'
-                        ];
-                        const messageIndex = Math.min(Math.floor(attempts / 5), messages.length - 1);
-                        ProgressTracker.updateProgress(50 + (attempts / maxAttempts) * 40, messages[messageIndex]);
-                        
-                        // In a real implementation, you might check analysis status via API
-                        if (attempts >= 8) { // Simulate completion after 8 seconds
-                            analysisComplete = true;
-                        }
+                    for (let i = 0; i < messages.length; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        ProgressTracker.updateProgress(60 + (i * 10), messages[i]);
                     }
+                } else {
+                    ProgressTracker.updateProgress(90, 'Submission processed successfully!');
                 }
                 
                 // Step 4: Complete
