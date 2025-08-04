@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🧪 Progress Bar Test</title>
+    <title>🧪 Updated Progress Bar Test - Human-Centered</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
         .test-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -53,6 +53,16 @@
             text-align: center;
             font-weight: 600;
         }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
         .test-btn {
             background: #007bff;
             color: white;
@@ -68,11 +78,11 @@
 </head>
 <body>
     <div class="test-container">
-        <h1>🧪 Progress Bar Test</h1>
-        <p><strong>Testing the quote submission progress bar</strong></p>
+        <h1>🧪 Updated Progress Bar Test</h1>
+        <p><strong>Testing the NEW human-centered messaging (no AI mentions)</strong></p>
         
         <div class="warning-message">
-            ⏱️ <strong>Please be patient:</strong> Quote processing may take 2-3 minutes due to AI analysis and media processing.
+            ⏱️ <strong>Please be patient:</strong> Your request will be processed as soon as possible. May take a couple of days if we're out of service, which happens regularly. We may email you for more info.
         </div>
         
         <!-- Progress Bar (Always Visible for Testing) -->
@@ -81,7 +91,7 @@
             <div class="progress-steps">
                 <div class="progress-step active">📤 Upload</div>
                 <div class="progress-step active" id="step-processing">🔄 Processing</div>
-                <div class="progress-step" id="step-analysis">🤖 AI Analysis</div>
+                <div class="progress-step" id="step-review">👁️ Review</div>
                 <div class="progress-step" id="step-complete">✅ Complete</div>
             </div>
             
@@ -94,8 +104,13 @@
             </p>
             
             <div style="margin-top: 15px; padding: 12px; background: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0;">
-                <strong>⏳ Processing Time:</strong> Large files or complex requests may take 2-3 minutes. Please keep this page open.
+                <strong>⏳ Processing Notice:</strong> Your request will be processed as soon as possible. May take a couple of days if we're out of service, which happens regularly. We may email you for more info. You'll receive an email notification when we've reviewed your request.
             </div>
+        </div>
+        
+        <div class="success-message" style="display: none;" id="success-msg">
+            🎉 <strong>Request submitted successfully!</strong><br>
+            Thank you! We will review your photos and information, and get back to you as soon as possible. May take a couple of days if we're out of service, which happens regularly. We may email you for more information.
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
@@ -104,20 +119,26 @@
         </div>
         
         <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-            <h4>✅ What This Tests:</h4>
+            <h4>✅ Updated Features:</h4>
             <ul>
-                <li>Progress bar visibility and styling</li>
-                <li>Step-by-step animation</li>
-                <li>Time warning message</li>
-                <li>User-friendly feedback</li>
+                <li><strong>No AI mentions</strong> - More human and personal</li>
+                <li><strong>Realistic timing</strong> - "Couple of days if out of service"</li>
+                <li><strong>Clear communication</strong> - "We may email you for more info"</li>
+                <li><strong>Professional review</strong> - Not automated processing</li>
+                <li><strong>Personal touch</strong> - Acknowledges being away from service</li>
             </ul>
         </div>
     </div>
 
     <script>
         function animateProgress() {
-            const steps = ['step-processing', 'step-analysis', 'step-complete'];
+            const steps = ['step-processing', 'step-review', 'step-complete'];
             const fill = document.querySelector('.progress-fill');
+            const messages = [
+                'Step 2: Processing your files...',
+                'Step 3: Preparing for review...',
+                'Step 4: Request submitted successfully!'
+            ];
             let currentStep = 0;
             
             const animate = () => {
@@ -128,8 +149,19 @@
                     // Update progress bar
                     fill.style.width = `${(currentStep + 2) * 25}%`;
                     
+                    // Update message
+                    document.querySelector('.progress-container p').textContent = messages[currentStep];
+                    
+                    // Show success on completion
+                    if (currentStep === steps.length - 1) {
+                        setTimeout(() => {
+                            document.getElementById('success-msg').style.display = 'block';
+                            document.querySelector('.progress-container').style.opacity = '0.5';
+                        }, 1000);
+                    }
+                    
                     currentStep++;
-                    setTimeout(animate, 1000);
+                    setTimeout(animate, 1500);
                 }
             };
             

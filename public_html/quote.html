@@ -630,8 +630,8 @@
               <div class="step-label">Processing</div>
             </div>
             <div class="progress-step" :class="progressStep >= 3 ? 'active' : ''" id="step-analysis">
-              <div class="step-icon">🤖</div>
-              <div class="step-label">AI Analysis</div>
+              <div class="step-icon">👁️</div>
+                              <div class="step-label">Review</div>
             </div>
             <div class="progress-step" :class="progressStep >= 4 ? 'active' : ''" id="step-complete">
               <div class="step-icon">✅</div>
@@ -645,8 +645,8 @@
           
           <!-- Processing Time Notice -->
           <div x-show="progressStep >= 2" style="margin-top: 15px; padding: 12px; background: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0;">
-            <strong>⏳ Processing Notice:</strong> AI analysis may take 2-4 hours to complete. 
-            You'll receive an email notification when your detailed report is ready.
+                            <strong>⏳ Processing Notice:</strong> Your request will be processed as soon as possible. May take a couple of days if we're out of service, which happens regularly. We may email you for more info. 
+            You'll receive an email notification when we've reviewed your request.
           </div>
         </div>
 
@@ -729,7 +729,7 @@
         <div x-show="!moreInfoUrl">
             <p><strong>What happens next:</strong></p>
             <ul>
-                <li>AI analysis of your photos/videos (immediate)</li>
+                <li>Professional review of your photos/videos</li>
                 <li>Professional review and quote preparation (within 24 hours)</li>
                 <li>Detailed quote emailed to you with specific recommendations</li>
             </ul>
@@ -1493,7 +1493,7 @@
               // Update progress - AI Analysis
               this.progressStep = 3;
               this.progressPercent = 75;
-              this.progressMessage = 'Starting AI analysis...';
+              this.progressMessage = 'Preparing for review...';
               
               await new Promise(resolve => setTimeout(resolve, 1500));
               
@@ -1510,7 +1510,7 @@
                   this.moreInfoUrl = `upload-more.html?quote_id=${result.quote_id}`;
               } else {
                   // Pre-flight check passed or not applicable
-                  this.submissionMessage = 'Thank you! Your quote request has been submitted successfully. Our AI is analyzing your photos and you'll receive a detailed assessment within 24 hours. Please allow 2-4 hours for comprehensive analysis.';
+                  this.submissionMessage = 'Thank you! Your quote request has been submitted successfully. We will review your photos and information, and get back to you as soon as possible. May take a couple of days if we\'re out of service, which happens regularly. We may email you for more information.';
               }
               
               this.showProgress = false;
@@ -1589,7 +1589,7 @@
           
           this.progressStep = 3;
           this.progressPercent = 75;
-          this.progressMessage = 'Test: Step 3 - AI Analysis...';
+          this.progressMessage = 'Test: Step 3 - Review...';
           
           await new Promise(resolve => setTimeout(resolve, 1500));
           
