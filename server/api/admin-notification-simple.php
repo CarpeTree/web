@@ -42,7 +42,7 @@ function sendSimpleAdminAlert($quote_id) {
         
         // Send lightweight email
         return sendSimpleEmail(
-            $ADMIN_EMAIL ?? 'sapport@carpetree.com',
+            $ADMIN_EMAIL ?? 'phil.bajenski@gmail.com',
             $subject,
             $html_body,
             $quote_id
@@ -158,7 +158,7 @@ function sendSimpleEmail($to, $subject, $html_body, $quote_id) {
     // Simple email headers (no attachments)
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "From: Carpe Tree'em System <quotes@carpetree.com>\r\n";
-    $headers .= "Reply-To: sapport@carpetree.com\r\n";
+    $headers .= "Reply-To: phil.bajenski@gmail.com\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "X-Priority: 1\r\n";
     $headers .= "X-MSMail-Priority: High\r\n";
@@ -269,7 +269,7 @@ function sendReminderEmail($quote_id) {
         </div>";
         
         return sendSimpleEmail(
-            $ADMIN_EMAIL ?? 'sapport@carpetree.com',
+            $ADMIN_EMAIL ?? 'phil.bajenski@gmail.com',
             $subject,
             $html_body,
             $quote_id

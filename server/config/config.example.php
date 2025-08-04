@@ -21,7 +21,7 @@ $OPENAI_API_KEY = 'sk-your-openai-api-key-here'; // Get from https://platform.op
 
 // Site Configuration
 $SITE_URL = 'https://carpetree.com';
-$ADMIN_EMAIL = 'sapport@carpetree.com';
+$ADMIN_EMAIL = 'phil.bajenski@gmail.com';
 $ADMIN_URL = 'https://carpetree.com/admin';
 
 // File Upload Configuration
@@ -31,7 +31,7 @@ $ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'vid
 // Business Information
 $BUSINESS_NAME = 'Carpe Tree\'em';
 $BUSINESS_PHONE = '778-655-3741';
-$BUSINESS_EMAIL = 'sapport@carpetree.com';
+$BUSINESS_EMAIL = 'phil.bajenski@gmail.com';
 $BUSINESS_ADDRESS = 'Greater Vancouver Area, BC';
 
 // Quote Settings

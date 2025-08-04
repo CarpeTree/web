@@ -1,8 +1,8 @@
 <?php
-// Test email system with sapport@carpetree.com
+// Test email system with phil.bajenski@gmail.com
 require_once 'server/config/config.php';
 
-echo "🧪 Testing email system with sapport@carpetree.com...\n";
+echo "🧪 Testing email system with phil.bajenski@gmail.com...\n";
 
 // Check current email configuration
 echo "📧 Current email settings:\n";
@@ -13,13 +13,13 @@ echo "SMTP_FROM: " . ($SMTP_FROM ?: 'not set') . "\n\n";
 
 // Test basic email sending
 function testBasicEmail() {
-    $to = 'sapport@carpetree.com';
+    $to = 'phil.bajenski@gmail.com';
     $subject = '🧪 Email System Test - ' . date('Y-m-d H:i:s');
     $message = "
     <html>
     <body>
         <h2>📧 Email Test Successful!</h2>
-        <p>This is a test email to verify the sapport@carpetree.com system is working.</p>
+        <p>This is a test email to verify the phil.bajenski@gmail.com system is working.</p>
         <p><strong>Timestamp:</strong> " . date('Y-m-d H:i:s') . "</p>
         <p><strong>From:</strong> Carpe Tree Website</p>
         <hr>
@@ -30,15 +30,15 @@ function testBasicEmail() {
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "From: Carpe Tree System <noreply@carpetree.com>\r\n";
-    $headers .= "Reply-To: sapport@carpetree.com\r\n";
+    $headers .= "Reply-To: phil.bajenski@gmail.com\r\n";
     
-    echo "📤 Sending test email to sapport@carpetree.com...\n";
+    echo "📤 Sending test email to phil.bajenski@gmail.com...\n";
     
     $result = mail($to, $subject, $message, $headers);
     
     if ($result) {
         echo "✅ Email sent successfully!\n";
-        echo "📬 Check your sapport@carpetree.com inbox\n";
+        echo "📬 Check your phil.bajenski@gmail.com inbox\n";
     } else {
         echo "❌ Email sending failed\n";
         echo "Check server mail configuration\n";

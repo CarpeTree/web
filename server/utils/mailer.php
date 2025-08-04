@@ -92,7 +92,7 @@ function loadEmailTemplate($template, $data) {
     // Add default values
     $html = str_replace('{company_name}', 'Carpe Tree\'em', $html);
     $html = str_replace('{company_phone}', '778-655-3741', $html);
-    $html = str_replace('{company_email}', 'sapport@carpetree.com', $html);
+    $html = str_replace('{company_email}', 'phil.bajenski@gmail.com', $html);
     global $SITE_URL;
     $html = str_replace('{logo_url}', $SITE_URL . '/images/carpeclear.png', $html);
     $html = str_replace('{site_url}', $SITE_URL ?: 'https://yourdomain.com', $html);

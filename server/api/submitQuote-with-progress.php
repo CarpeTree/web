@@ -212,7 +212,7 @@ try {
         ";
         
         $admin_headers = "From: Carpe Tree'em System <system@carpetree.com>\r\n";
-        mail('sapport@carpetree.com', $admin_subject, $admin_message, $admin_headers);
+        mail('phil.bajenski@gmail.com', $admin_subject, $admin_message, $admin_headers);
     } catch (Exception $e) {
         error_log("Admin notification failed: " . $e->getMessage());
     }

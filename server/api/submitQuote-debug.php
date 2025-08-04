@@ -221,7 +221,7 @@ try {
     try {
         debugLog("Sending admin notification...");
         $admin_message = "New quote #$quote_id from " . $_POST['email'];
-        mail('sapport@carpetree.com', 'New Quote Submitted', $admin_message, 'From: system@carpetree.com');
+        mail('phil.bajenski@gmail.com', 'New Quote Submitted', $admin_message, 'From: system@carpetree.com');
         debugLog("Admin notification sent");
     } catch (Exception $e) {
         debugLog("Admin notification error: " . $e->getMessage());
