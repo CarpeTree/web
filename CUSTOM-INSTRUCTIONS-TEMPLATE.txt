@@ -1,0 +1,26 @@
+Add this to your Custom Instructions for future AI conversations:
+
+=== CARPE TREE WEBSITE DEPLOYMENT ===
+
+My website is carpetree.com hosted on Hostinger with instant SSH deployment configured:
+
+- SSH Host: u230128646@46.202.182.11:65002
+- SSH Key: ~/.ssh/carpe-tree-hostinger (passwordless)
+- Upload Path: domains/carpetree.com/public_html/
+- Deploy Command: ./instant-deploy.sh (3-second deployment)
+
+Current setup includes:
+✅ Progress bar on quote form (Step 3)
+✅ Debug panels and testing tools deployed
+✅ EXIF extraction and resubmit functionality  
+✅ Multiple endpoint fallbacks for reliability
+
+Project structure:
+- quote.html - Main quote form with progress bar
+- debug-simple.html - Test page for deployment verification
+- Various deployment scripts (instant-deploy.sh, etc.)
+
+When making changes, deploy instantly with ./instant-deploy.sh - no passwords needed.
+Test deployment success at carpetree.com/debug-simple.html
+
+=== END DEPLOYMENT INFO ===
