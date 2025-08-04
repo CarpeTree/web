@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Bar Test</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        /* Progress Bar Styles */
+        .progress-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .progress-step:last-child::before {
+            display: none;
+        }
+
+        .progress-step.active::before {
+            background: #2c5f2d;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active .step-icon {
+            background: #2c5f2d;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .progress-step.active .step-label {
+            color: #2c5f2d;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #2c5f2d 0%, #4a8f4d 100%);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #2c5f2d;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div x-data="progressTest()" style="padding: 20px;">
+        <h1>Progress Bar Test</h1>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn" @click="showProgress = !showProgress">
+                Toggle Progress Bar (Currently: <span x-text="showProgress ? 'VISIBLE' : 'HIDDEN'"></span>)
+            </button>
+            
+            <button class="btn" @click="startProgress()">Start Test Progress</button>
+            
+            <button class="btn" @click="resetProgress()">Reset Progress</button>
+        </div>
+        
+        <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <strong>Debug Info:</strong><br>
+            showProgress: <span x-text="showProgress"></span><br>
+            progressStep: <span x-text="progressStep"></span><br>
+            progressPercent: <span x-text="progressPercent"></span><br>
+            progressMessage: <span x-text="progressMessage"></span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" x-show="showProgress" style="border: 2px solid red;">
+            <h3>🎯 PROGRESS BAR (Should be visible when showProgress = true)</h3>
+            <div class="progress-steps">
+                <div class="progress-step" :class="progressStep >= 1 ? 'active' : ''" id="step-upload">
+                    <div class="step-icon">📤</div>
+                    <div class="step-label">Uploading</div>
+                </div>
+                <div class="progress-step" :class="progressStep >= 2 ? 'active' : ''" id="step-processing">
+                    <div class="step-icon">⚙️</div>
+                    <div class="step-label">Processing</div>
+                </div>
+                <div class="progress-step" :class="progressStep >= 3 ? 'active' : ''" id="step-analysis">
+                    <div class="step-icon">🤖</div>
+                    <div class="step-label">AI Analysis</div>
+                </div>
+                <div class="progress-step" :class="progressStep >= 4 ? 'active' : ''" id="step-complete">
+                    <div class="step-icon">✅</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" :style="`width: ${progressPercent}%`"></div>
+            </div>
+            <div class="progress-text" x-text="progressMessage"></div>
+        </div>
+        
+        <div x-show="!showProgress" style="background: #ffebee; padding: 20px; border: 2px solid red; margin: 20px 0;">
+            <h3>❌ Progress bar is HIDDEN (showProgress = false)</h3>
+            <p>Click "Toggle Progress Bar" to show it</p>
+        </div>
+    </div>
+
+    <script>
+        function progressTest() {
+            return {
+                showProgress: false,
+                progressStep: 0,
+                progressPercent: 0,
+                progressMessage: 'Ready to start...',
+                
+                async startProgress() {
+                    this.showProgress = true;
+                    this.progressStep = 1;
+                    this.progressPercent = 25;
+                    this.progressMessage = 'Step 1: Uploading files...';
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    this.progressStep = 2;
+                    this.progressPercent = 50;
+                    this.progressMessage = 'Step 2: Processing media...';
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    this.progressStep = 3;
+                    this.progressPercent = 75;
+                    this.progressMessage = 'Step 3: AI Analysis starting...';
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    this.progressStep = 4;
+                    this.progressPercent = 100;
+                    this.progressMessage = 'Step 4: Complete! 🎉';
+                    
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    this.resetProgress();
+                },
+                
+                resetProgress() {
+                    this.showProgress = false;
+                    this.progressStep = 0;
+                    this.progressPercent = 0;
+                    this.progressMessage = 'Ready to start...';
+                }
+            };
+        }
+    </script>
+</body>
+</html>

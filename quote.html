@@ -679,10 +679,27 @@
 
         <div style="text-align: center; margin-top: 30px;">
           <button type="button" class="btn" @click="prevStep()">Back</button>
+          
+          <!-- Debug button to test progress bar -->
+          <button type="button" class="btn" @click="testProgressBar()" 
+                  style="background: orange; margin: 5px;">
+            🧪 Test Progress Bar
+          </button>
+          
           <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
             <span x-show="!submitting">Submit Quote Request</span>
             <span x-show="submitting">Processing...</span>
           </button>
+        </div>
+        
+        <!-- Debug info for troubleshooting -->
+        <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 12px;">
+          <strong>🔍 Debug Info:</strong><br>
+          showProgress: <span x-text="showProgress"></span> | 
+          progressStep: <span x-text="progressStep"></span> | 
+          progressPercent: <span x-text="progressPercent"></span><br>
+          submitting: <span x-text="submitting"></span> | 
+          currentStep: <span x-text="currentStep"></span>
         </div>
       </form>
     </div>
@@ -1314,6 +1331,9 @@
         },
 
         async submitQuote() {
+          console.log('🚀 submitQuote() called!');
+          console.log('Current showProgress:', this.showProgress);
+          
           // Hide resubmit button if showing
           this.showResubmit = false;
           
@@ -1322,6 +1342,8 @@
           this.progressStep = 1;
           this.progressPercent = 25;
           this.progressMessage = 'Uploading files...';
+          
+          console.log('✅ Progress bar should now be visible - showProgress:', this.showProgress);
           
           try {
             const form = document.querySelector('form');
@@ -1534,6 +1556,44 @@
           } finally {
             this.isResubmitting = false;
           }
+        },
+        
+        // Test method to manually trigger progress bar
+        async testProgressBar() {
+          console.log('🧪 Testing progress bar...');
+          
+          this.showProgress = true;
+          this.progressStep = 1;
+          this.progressPercent = 25;
+          this.progressMessage = 'Test: Step 1 - Uploading...';
+          
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          this.progressStep = 2;
+          this.progressPercent = 50;
+          this.progressMessage = 'Test: Step 2 - Processing...';
+          
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          this.progressStep = 3;
+          this.progressPercent = 75;
+          this.progressMessage = 'Test: Step 3 - AI Analysis...';
+          
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          this.progressStep = 4;
+          this.progressPercent = 100;
+          this.progressMessage = 'Test: Complete! 🎉';
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Reset
+          this.showProgress = false;
+          this.progressStep = 0;
+          this.progressPercent = 0;
+          this.progressMessage = 'Ready...';
+          
+          console.log('✅ Progress bar test completed');
         }
       }
     }
