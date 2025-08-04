@@ -158,7 +158,7 @@ function sendSimpleEmail($to, $subject, $html_body, $quote_id) {
     // Simple email headers (no attachments)
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "From: Carpe Tree'em System <quotes@carpetree.com>\r\n";
-    $headers .= "Reply-To: support@carpetree.com\r\n";
+    $headers .= "Reply-To: sapport@carpetree.com\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "X-Priority: 1\r\n";
     $headers .= "X-MSMail-Priority: High\r\n";
