@@ -1,0 +1,20 @@
+FILES TO MANUALLY UPLOAD TO FIX PROGRESS BAR:
+
+1. quote.html - Contains the updated progress bar and debug panels
+2. debug-simple.html - Simple test page to verify uploads work
+
+HOSTING INSTRUCTIONS:
+1. Log into your web hosting control panel (cPanel, Hostinger, etc.)
+2. Go to File Manager or FTP
+3. Navigate to your website's public folder (usually public_html or www)
+4. Upload these files:
+   - quote.html (replaces existing)
+   - debug-simple.html (new file)
+
+AFTER UPLOAD TEST:
+1. Go to carpetree.com/debug-simple.html (should show red page)
+2. Go to carpetree.com/quote.html and navigate to Step 3
+3. Look for bright red and yellow debug boxes at bottom of form
+4. Click orange "Test Progress Bar" button
+
+The progress bar should then work properly!
