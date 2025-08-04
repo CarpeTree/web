@@ -860,9 +860,28 @@
             hideCancelButton: false
           });
 
-          uppy.on('file-added', (file) => {
+          uppy.on('file-added', async (file) => {
             this.uploadedFiles.push(file);
-            this.extractExifLocation(file);
+            
+            // Extract EXIF data for enhanced context
+            try {
+              const exifData = await this.extractEXIFData(file.data);
+              if (exifData) {
+                file.exifData = exifData;
+                console.log('EXIF data extracted for:', file.name, exifData);
+                
+                // Add GPS coordinates to context if available
+                if (exifData.gps) {
+                  this.exifCoords = {
+                    lat: exifData.gps.latitude,
+                    lng: exifData.gps.longitude
+                  };
+                  console.log('GPS coordinates extracted from EXIF:', this.exifCoords);
+                }
+              }
+            } catch (err) {
+              console.warn('EXIF extraction failed for:', file.name, err);
+            }
           });
 
           uppy.on('file-removed', (file) => {
@@ -947,8 +966,15 @@
 
         async extractExifLocation(file) {
           // This is a simplified version - in production you'd use a library like exif-js
-          // For now, we'll just note that EXIF extraction would happen here
-          console.log('EXIF extraction would happen here for:', file.name);
+                      // Extract EXIF data for enhanced context
+            this.extractEXIFData(file).then(exifData => {
+              if (exifData) {
+                file.exifData = exifData;
+                console.log('EXIF data extracted for:', file.name, exifData);
+              }
+            }).catch(err => {
+              console.warn('EXIF extraction failed for:', file.name, err);
+            });
         },
 
         getStepClass(stepNumber) {
@@ -997,6 +1023,249 @@
           if (this.currentStep > 1) {
             this.currentStep--;
           }
+        },
+
+        // EXIF Data Extraction
+        async extractEXIFData(file) {
+          return new Promise((resolve, reject) => {
+            if (!file.type.startsWith('image/')) {
+              resolve(null);
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              try {
+                const arrayBuffer = e.target.result;
+                const dataView = new DataView(arrayBuffer);
+                const exifData = this.parseEXIF(dataView);
+                resolve(exifData);
+              } catch (error) {
+                reject(error);
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+          });
+        },
+
+        parseEXIF(dataView) {
+          // Check for EXIF marker
+          if (dataView.getUint16(0) !== 0xFFD8) {
+            return null; // Not a JPEG
+          }
+
+          let offset = 2;
+          let marker;
+          
+          // Find EXIF marker
+          while (offset < dataView.byteLength) {
+            marker = dataView.getUint16(offset);
+            if (marker === 0xFFE1) {
+              break;
+            }
+            offset += 2 + dataView.getUint16(offset + 2);
+          }
+
+          if (marker !== 0xFFE1) {
+            return null; // No EXIF data
+          }
+
+          // Check for EXIF identifier
+          offset += 4;
+          if (dataView.getUint32(offset) !== 0x45786966) {
+            return null; // Not EXIF
+          }
+
+          const exifData = {};
+          
+          try {
+            offset += 6; // Skip EXIF header
+            const tiffOffset = offset;
+            const byteOrder = dataView.getUint16(offset);
+            const littleEndian = byteOrder === 0x4949;
+            
+            // Extract basic EXIF data
+            const ifdOffset = this.getUint32(dataView, offset + 4, littleEndian) + tiffOffset;
+            const tags = this.getUint16(dataView, ifdOffset, littleEndian);
+            
+            for (let i = 0; i < tags; i++) {
+              const tagOffset = ifdOffset + 2 + (i * 12);
+              const tag = this.getUint16(dataView, tagOffset, littleEndian);
+              const type = this.getUint16(dataView, tagOffset + 2, littleEndian);
+              const count = this.getUint32(dataView, tagOffset + 4, littleEndian);
+              const valueOffset = tagOffset + 8;
+              
+              // Extract specific tags we care about
+              switch (tag) {
+                case 0x010F: // Camera make
+                  exifData.make = this.getStringValue(dataView, valueOffset, count, littleEndian, tiffOffset);
+                  break;
+                case 0x0110: // Camera model
+                  exifData.model = this.getStringValue(dataView, valueOffset, count, littleEndian, tiffOffset);
+                  break;
+                case 0x0132: // DateTime
+                  exifData.dateTime = this.getStringValue(dataView, valueOffset, count, littleEndian, tiffOffset);
+                  break;
+                case 0x8769: // EXIF sub-IFD
+                  const exifSubData = this.parseExifSubIFD(dataView, valueOffset, littleEndian, tiffOffset);
+                  Object.assign(exifData, exifSubData);
+                  break;
+                case 0x8825: // GPS IFD
+                  const gpsData = this.parseGPSIFD(dataView, valueOffset, littleEndian, tiffOffset);
+                  if (gpsData) {
+                    exifData.gps = gpsData;
+                  }
+                  break;
+              }
+            }
+            
+            return Object.keys(exifData).length > 0 ? exifData : null;
+          } catch (error) {
+            console.warn('EXIF parsing error:', error);
+            return null;
+          }
+        },
+
+        parseGPSIFD(dataView, valueOffset, littleEndian, tiffOffset) {
+          try {
+            const gpsOffset = this.getUint32(dataView, valueOffset, littleEndian) + tiffOffset;
+            const gpsTags = this.getUint16(dataView, gpsOffset, littleEndian);
+            const gps = {};
+            
+            for (let i = 0; i < gpsTags; i++) {
+              const tagOffset = gpsOffset + 2 + (i * 12);
+              const tag = this.getUint16(dataView, tagOffset, littleEndian);
+              const type = this.getUint16(dataView, tagOffset + 2, littleEndian);
+              const count = this.getUint32(dataView, tagOffset + 4, littleEndian);
+              const valueOffset = tagOffset + 8;
+              
+              switch (tag) {
+                case 1: // GPS Latitude Ref
+                  gps.latRef = String.fromCharCode(this.getUint8(dataView, valueOffset));
+                  break;
+                case 2: // GPS Latitude
+                  gps.lat = this.getRationalArray(dataView, valueOffset, count, littleEndian, tiffOffset);
+                  break;
+                case 3: // GPS Longitude Ref
+                  gps.lngRef = String.fromCharCode(this.getUint8(dataView, valueOffset));
+                  break;
+                case 4: // GPS Longitude
+                  gps.lng = this.getRationalArray(dataView, valueOffset, count, littleEndian, tiffOffset);
+                  break;
+              }
+            }
+            
+            // Convert to decimal degrees
+            if (gps.lat && gps.lng) {
+              const latitude = this.dmsToDecimal(gps.lat, gps.latRef);
+              const longitude = this.dmsToDecimal(gps.lng, gps.lngRef);
+              
+              return {
+                latitude: latitude,
+                longitude: longitude,
+                latRef: gps.latRef,
+                lngRef: gps.lngRef
+              };
+            }
+            
+            return null;
+          } catch (error) {
+            console.warn('GPS parsing error:', error);
+            return null;
+          }
+        },
+
+        parseExifSubIFD(dataView, valueOffset, littleEndian, tiffOffset) {
+          const exifData = {};
+          try {
+            const exifOffset = this.getUint32(dataView, valueOffset, littleEndian) + tiffOffset;
+            const exifTags = this.getUint16(dataView, exifOffset, littleEndian);
+            
+            for (let i = 0; i < exifTags; i++) {
+              const tagOffset = exifOffset + 2 + (i * 12);
+              const tag = this.getUint16(dataView, tagOffset, littleEndian);
+              const valueOffset = tagOffset + 8;
+              
+              switch (tag) {
+                case 0x9003: // DateTimeOriginal
+                  exifData.dateTimeOriginal = this.getStringValue(dataView, valueOffset, 20, littleEndian, tiffOffset);
+                  break;
+                case 0x829A: // Exposure Time
+                  const exposure = this.getRational(dataView, valueOffset, littleEndian, tiffOffset);
+                  exifData.exposureTime = exposure;
+                  break;
+                case 0x829D: // F Number
+                  const fNumber = this.getRational(dataView, valueOffset, littleEndian, tiffOffset);
+                  exifData.fNumber = fNumber;
+                  break;
+              }
+            }
+          } catch (error) {
+            console.warn('EXIF sub-IFD parsing error:', error);
+          }
+          return exifData;
+        },
+
+        dmsToDecimal(dmsArray, ref) {
+          if (!dmsArray || dmsArray.length < 3) return null;
+          
+          const degrees = dmsArray[0];
+          const minutes = dmsArray[1];
+          const seconds = dmsArray[2];
+          
+          let decimal = degrees + (minutes / 60) + (seconds / 3600);
+          
+          if (ref === 'S' || ref === 'W') {
+            decimal = -decimal;
+          }
+          
+          return Math.round(decimal * 1000000) / 1000000; // 6 decimal places
+        },
+
+        getRationalArray(dataView, offset, count, littleEndian, tiffOffset) {
+          const values = [];
+          const actualOffset = count > 1 ? this.getUint32(dataView, offset, littleEndian) + tiffOffset : offset;
+          
+          for (let i = 0; i < count; i++) {
+            const num = this.getUint32(dataView, actualOffset + (i * 8), littleEndian);
+            const den = this.getUint32(dataView, actualOffset + (i * 8) + 4, littleEndian);
+            values.push(den !== 0 ? num / den : 0);
+          }
+          
+          return values;
+        },
+
+        getRational(dataView, offset, littleEndian, tiffOffset) {
+          const actualOffset = this.getUint32(dataView, offset, littleEndian) + tiffOffset;
+          const num = this.getUint32(dataView, actualOffset, littleEndian);
+          const den = this.getUint32(dataView, actualOffset + 4, littleEndian);
+          return den !== 0 ? num / den : 0;
+        },
+
+        getStringValue(dataView, offset, count, littleEndian, tiffOffset) {
+          const actualOffset = count > 4 ? this.getUint32(dataView, offset, littleEndian) + tiffOffset : offset;
+          let str = '';
+          
+          for (let i = 0; i < count - 1; i++) { // -1 to exclude null terminator
+            const char = dataView.getUint8(actualOffset + i);
+            if (char === 0) break;
+            str += String.fromCharCode(char);
+          }
+          
+          return str;
+        },
+
+        getUint32(dataView, offset, littleEndian) {
+          return dataView.getUint32(offset, littleEndian);
+        },
+
+        getUint16(dataView, offset, littleEndian) {
+          return dataView.getUint16(offset, littleEndian);
+        },
+
+        getUint8(dataView, offset) {
+          return dataView.getUint8(offset);
         },
 
         async submitQuote() {
@@ -1067,9 +1336,21 @@
               formData.append('exifLng', this.exifCoords.lng);
             }
             
-            // Add uploaded files
+            // Add uploaded files with EXIF data
             this.uploadedFiles.forEach((file, index) => {
               formData.append(`files[${index}]`, file.data);
+              
+              // Add EXIF data if available
+              if (file.data.exifData) {
+                formData.append(`exif_${index}`, JSON.stringify(file.data.exifData));
+                
+                // Add GPS coordinates if available
+                if (file.data.exifData.gps) {
+                  formData.append(`gps_lat_${index}`, file.data.exifData.gps.latitude);
+                  formData.append(`gps_lng_${index}`, file.data.exifData.gps.longitude);
+                  console.log('Including GPS from EXIF for file', index, file.data.exifData.gps);
+                }
+              }
             });
             
             // Update progress

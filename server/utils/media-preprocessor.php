@@ -254,6 +254,9 @@ class MediaPreprocessor {
             $context_parts[] = "";
         }
         
+        // Add EXIF metadata context
+        $this->addEXIFContext($context_parts);
+        
         $context_parts[] = "Please analyze ALL the above context and provide a comprehensive tree care assessment.";
         
         $this->aggregated_context['context_text'] = implode("\n", $context_parts);
@@ -660,6 +663,25 @@ class MediaPreprocessor {
             $has_location_data = true;
         }
         
+        // Check for additional EXIF GPS coordinates from individual files
+        $exif_locations = [];
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'gps_lat_') === 0) {
+                $index = substr($key, 8);
+                $lat_key = "gps_lat_$index";
+                $lng_key = "gps_lng_$index";
+                
+                if (isset($_POST[$lat_key]) && isset($_POST[$lng_key])) {
+                    $exif_locations[] = "{$_POST[$lat_key]}, {$_POST[$lng_key]}";
+                }
+            }
+        }
+        
+        if (!empty($exif_locations)) {
+            $context_parts[] = "Additional EXIF GPS Coordinates from Photos: " . implode("; ", $exif_locations);
+            $has_location_data = true;
+        }
+        
         if (!$has_location_data) {
             $context_parts[] = "No GPS coordinates provided";
         }
@@ -709,6 +731,59 @@ class MediaPreprocessor {
             return 'Windows computer';
         } else {
             return 'Desktop/Unknown device';
+        }
+    }
+    
+    private function addEXIFContext(&$context_parts) {
+        $exif_data = [];
+        
+        // Collect EXIF data from submitted files
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'exif_') === 0) {
+                $index = substr($key, 5);
+                $exif_info = json_decode($value, true);
+                
+                if ($exif_info) {
+                    $exif_summary = "File $index: ";
+                    $details = [];
+                    
+                    if (isset($exif_info['make']) && isset($exif_info['model'])) {
+                        $details[] = "Camera: {$exif_info['make']} {$exif_info['model']}";
+                    }
+                    
+                    if (isset($exif_info['dateTime']) || isset($exif_info['dateTimeOriginal'])) {
+                        $date = $exif_info['dateTimeOriginal'] ?? $exif_info['dateTime'];
+                        $details[] = "Taken: $date";
+                    }
+                    
+                    if (isset($exif_info['gps'])) {
+                        $lat = round($exif_info['gps']['latitude'], 6);
+                        $lng = round($exif_info['gps']['longitude'], 6);
+                        $details[] = "GPS: $lat, $lng";
+                    }
+                    
+                    if (isset($exif_info['exposureTime'])) {
+                        $details[] = "Exposure: " . (1/$exif_info['exposureTime']) . "s";
+                    }
+                    
+                    if (isset($exif_info['fNumber'])) {
+                        $details[] = "f/" . round($exif_info['fNumber'], 1);
+                    }
+                    
+                    if (!empty($details)) {
+                        $exif_data[] = $exif_summary . implode(", ", $details);
+                    }
+                }
+            }
+        }
+        
+        if (!empty($exif_data)) {
+            $context_parts[] = "📷 PHOTO METADATA (EXIF)";
+            foreach ($exif_data as $data) {
+                $context_parts[] = "- " . $data;
+            }
+            $context_parts[] = "This metadata helps assess photo quality, timing, and technical context for tree analysis.";
+            $context_parts[] = "";
         }
     }
     
