@@ -618,7 +618,8 @@
         </div>
         
         <!-- Progress Bar -->
-        <div id="progressContainer" class="progress-container" x-show="showProgress">
+        <div id="progressContainer" class="progress-container" x-show="showProgress" 
+             style="border: 3px solid red; background: yellow !important; display: block !important;">
           <div class="progress-steps">
             <div class="progress-step" :class="progressStep >= 1 ? 'active' : ''" id="step-upload">
               <div class="step-icon">📤</div>
@@ -693,13 +694,13 @@
         </div>
         
         <!-- Debug info for troubleshooting -->
-        <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 12px;">
-          <strong>🔍 Debug Info:</strong><br>
-          showProgress: <span x-text="showProgress"></span> | 
-          progressStep: <span x-text="progressStep"></span> | 
-          progressPercent: <span x-text="progressPercent"></span><br>
-          submitting: <span x-text="submitting"></span> | 
-          currentStep: <span x-text="currentStep"></span>
+        <div style="margin-top: 15px; padding: 15px; background: #ff9999; border: 3px solid red; border-radius: 5px; font-size: 14px;">
+          <strong>🔍 DEBUG INFO (ALWAYS VISIBLE):</strong><br>
+          showProgress: <span x-text="showProgress" style="font-weight: bold; color: blue;"></span> | 
+          progressStep: <span x-text="progressStep" style="font-weight: bold; color: blue;"></span> | 
+          progressPercent: <span x-text="progressPercent" style="font-weight: bold; color: blue;"></span><br>
+          submitting: <span x-text="submitting" style="font-weight: bold; color: blue;"></span> | 
+          currentStep: <span x-text="currentStep" style="font-weight: bold; color: blue;"></span>
         </div>
       </form>
     </div>
