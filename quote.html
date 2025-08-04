@@ -1360,10 +1360,36 @@
             
             await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay for UX
             
-            const response = await fetch('/server/api/submitQuote-working.php', {
-              method: 'POST',
-              body: formData
-            });
+            // Try multiple endpoints for maximum reliability
+            let response;
+            const endpoints = [
+              '/server/api/submitQuote-reliable.php',
+              '/server/api/submitQuote-working.php',
+              '/server/api/submitQuote-no-files.php'
+            ];
+            
+            let lastError;
+            for (const endpoint of endpoints) {
+              try {
+                response = await fetch(endpoint, {
+                  method: 'POST',
+                  body: formData
+                });
+                
+                if (response.ok) {
+                  break; // Success, use this response
+                } else {
+                  lastError = new Error(`Server error ${response.status} from ${endpoint}`);
+                }
+              } catch (fetchError) {
+                lastError = fetchError;
+                continue; // Try next endpoint
+              }
+            }
+            
+            if (!response || !response.ok) {
+              throw lastError || new Error('All submission endpoints failed');
+            }
             
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
