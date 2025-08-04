@@ -1,91 +1,45 @@
 <?php
-// Simple email test
-header('Content-Type: text/plain');
-echo "=== SIMPLE EMAIL TEST ===\n\n";
+// Simple email test without database dependencies
+echo "📧 Testing sapport@carpetree.com email delivery...\n";
 
-try {
-    // Test 1: Check files exist
-    echo "1. Checking required files...\n";
-    $mailer_exists = file_exists(__DIR__ . '/server/utils/mailer.php');
-    $config_exists = file_exists(__DIR__ . '/server/config/config.php');
-    $template_exists = file_exists(__DIR__ . '/server/templates/quote_confirmation.html');
-    
-    echo "Mailer: " . ($mailer_exists ? 'YES' : 'NO') . "\n";
-    echo "Config: " . ($config_exists ? 'YES' : 'NO') . "\n"; 
-    echo "Template: " . ($template_exists ? 'YES' : 'NO') . "\n";
-    
-    // Test 2: Try basic PHP mail
-    echo "\n2. Testing basic PHP mail...\n";
-    $basic_mail = mail(
-        'phil.bajenski@gmail.com',
-        'Simple Test - Carpe Tree\'em',
-        'This is a basic test email.',
-        'From: test@carpetree.com'
-    );
-    echo "Basic mail result: " . ($basic_mail ? 'SUCCESS' : 'FAILED') . "\n";
-    
-    // Test 3: Check database connection
-    echo "\n3. Testing database...\n";
-    require_once 'server/config/database-simple.php';
-    echo "Database: CONNECTED\n";
-    
-    // Test 4: Check email log table
-    $stmt = $pdo->query("DESCRIBE email_log");
-    $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    echo "Email log columns: " . implode(', ', $columns) . "\n";
-    
-    echo "\n4. Testing mailer include...\n";
-    // Try to include mailer carefully
-    $old_error_reporting = error_reporting(E_ALL);
-    $old_display_errors = ini_get('display_errors');
-    ini_set('display_errors', 1);
-    
-    ob_start();
-    $mailer_included = false;
-    try {
-        require_once __DIR__ . '/server/utils/mailer.php';
-        $mailer_included = true;
-        echo "Mailer included successfully\n";
-    } catch (Exception $e) {
-        echo "Mailer include error: " . $e->getMessage() . "\n";
-    } catch (ParseError $e) {
-        echo "Mailer parse error: " . $e->getMessage() . "\n";
-    } catch (Error $e) {
-        echo "Mailer fatal error: " . $e->getMessage() . "\n";
-    }
-    $output = ob_get_clean();
-    echo $output;
-    
-    error_reporting($old_error_reporting);
-    ini_set('display_errors', $old_display_errors);
-    
-    if ($mailer_included && function_exists('sendEmail')) {
-        echo "sendEmail function: AVAILABLE\n";
-        
-        echo "\n5. Testing email configuration...\n";
-        if ($config_exists) {
-            require_once __DIR__ . '/server/config/config.php';
-            
-            $smtp_settings = [
-                'SMTP_HOST' => $SMTP_HOST ?? 'NOT SET',
-                'SMTP_USER' => $SMTP_USER ?? 'NOT SET', 
-                'SMTP_PASS' => isset($SMTP_PASS) ? '[HIDDEN]' : 'NOT SET',
-                'SMTP_PORT' => $SMTP_PORT ?? 'NOT SET',
-                'SMTP_FROM' => $SMTP_FROM ?? 'NOT SET'
-            ];
-            
-            foreach ($smtp_settings as $key => $value) {
-                echo "$key: $value\n";
-            }
-        }
-        
-    } else {
-        echo "sendEmail function: NOT AVAILABLE\n";
-    }
-    
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+$to = 'sapport@carpetree.com';
+$subject = '🎯 Quote System Test - ' . date('H:i:s');
+$message = "
+<html>
+<body style='font-family: Arial, sans-serif;'>
+    <h2 style='color: #2c5f2d;'>🌲 Carpe Tree Email Test</h2>
+    <p><strong>Timestamp:</strong> " . date('Y-m-d H:i:s') . "</p>
+    <p><strong>Test Type:</strong> Email delivery verification</p>
+    <div style='background: #f0f8f0; padding: 15px; border-left: 4px solid #2c5f2d; margin: 20px 0;'>
+        <p><strong>✅ If you receive this email:</strong></p>
+        <ul>
+            <li>Email system is working correctly</li>
+            <li>sapport@carpetree.com is receiving emails</li>
+            <li>Quote notifications should work</li>
+        </ul>
+    </div>
+    <p>📱 <strong>Phone:</strong> 778-655-3741</p>
+    <p>🌐 <strong>Website:</strong> carpetree.com</p>
+</body>
+</html>";
+
+$headers = "MIME-Version: 1.0\r\n";
+$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+$headers .= "From: Carpe Tree System <noreply@carpetree.com>\r\n";
+$headers .= "Reply-To: sapport@carpetree.com\r\n";
+
+echo "📤 Sending email to sapport@carpetree.com...\n";
+
+if (mail($to, $subject, $message, $headers)) {
+    echo "✅ SUCCESS! Email sent to sapport@carpetree.com\n";
+    echo "📬 Check your email inbox (including spam folder)\n";
+    echo "⏰ Email should arrive within 1-2 minutes\n";
+} else {
+    echo "❌ Email sending failed\n";
 }
 
-echo "\n=== TEST COMPLETE ===\n";
-?> 
+echo "\n🧪 To test the full system:\n";
+echo "1. Check your sapport@carpetree.com email\n";
+echo "2. Submit a test quote on carpetree.com/quote.html\n";
+echo "3. Watch for quote notification emails\n";
+?>
