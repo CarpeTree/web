@@ -200,6 +200,113 @@
       border-color: var(--muted-golden-amber);
       color: var(--deep-forest-green);
     }
+
+    .btn:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    /* Progress Bar Styles */
+    .progress-container {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding: 10px;
+    }
+
+    .progress-step::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 50%;
+      right: -50%;
+      height: 2px;
+      background: #e9ecef;
+      z-index: 1;
+    }
+
+    .progress-step:last-child::before {
+      display: none;
+    }
+
+    .progress-step.active::before {
+      background: var(--deep-forest-green);
+    }
+
+    .step-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      background: #e9ecef;
+      color: #6c757d;
+      font-size: 20px;
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+
+    .progress-step.active .step-icon {
+      background: var(--deep-forest-green);
+      color: white;
+    }
+
+    .progress-step.completed .step-icon {
+      background: #28a745;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #6c757d;
+    }
+
+    .progress-step.active .step-label {
+      color: var(--deep-forest-green);
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--deep-forest-green), #4a7c59);
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: var(--deep-forest-green);
+      font-weight: 500;
+      margin-top: 10px;
+    }
     
     .upload-area {
       border: 3px dashed var(--deep-forest-green);
@@ -498,11 +605,43 @@
           <textarea id="notes" x-model="formData.notes" rows="4" placeholder="Any specific concerns, questions, or additional context about your trees?"></textarea>
         </div>
         
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="progress-container" x-show="showProgress">
+          <div class="progress-steps">
+            <div class="progress-step" :class="progressStep >= 1 ? 'active' : ''" id="step-upload">
+              <div class="step-icon">📤</div>
+              <div class="step-label">Uploading</div>
+            </div>
+            <div class="progress-step" :class="progressStep >= 2 ? 'active' : ''" id="step-processing">
+              <div class="step-icon">⚙️</div>
+              <div class="step-label">Processing</div>
+            </div>
+            <div class="progress-step" :class="progressStep >= 3 ? 'active' : ''" id="step-analysis">
+              <div class="step-icon">🤖</div>
+              <div class="step-label">AI Analysis</div>
+            </div>
+            <div class="progress-step" :class="progressStep >= 4 ? 'active' : ''" id="step-complete">
+              <div class="step-icon">✅</div>
+              <div class="step-label">Complete</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="`width: ${progressPercent}%`"></div>
+          </div>
+          <div class="progress-text" x-text="progressMessage"></div>
+          
+          <!-- Processing Time Notice -->
+          <div x-show="progressStep >= 2" style="margin-top: 15px; padding: 12px; background: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0;">
+            <strong>⏳ Processing Notice:</strong> AI analysis may take 2-4 hours to complete. 
+            You'll receive an email notification when your detailed report is ready.
+          </div>
+        </div>
+
         <div style="text-align: center; margin-top: 30px;">
           <button type="button" class="btn" @click="prevStep()">Back</button>
           <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
-                            <span x-show="!submitting">Submit Quote Request</span>
-            <span x-show="submitting">Submitting...</span>
+            <span x-show="!submitting">Submit Quote Request</span>
+            <span x-show="submitting">Processing...</span>
           </button>
         </div>
       </form>
@@ -626,6 +765,10 @@
         submitted: false,
         submissionMessage: '',
         moreInfoUrl: '',
+        showProgress: false,
+        progressStep: 0,
+        progressPercent: 0,
+        progressMessage: 'Preparing submission...',
         uploadedFiles: [],
         locationLoading: false,
         locationCaptured: false,
@@ -858,6 +1001,10 @@
 
         async submitQuote() {
           this.submitting = true;
+          this.showProgress = true;
+          this.progressStep = 1;
+          this.progressPercent = 25;
+          this.progressMessage = 'Uploading files...';
           
           try {
             const form = document.querySelector('form');
@@ -925,16 +1072,23 @@
               formData.append(`files[${index}]`, file.data);
             });
             
-                      const response = await fetch('/server/api/submitQuote-working.php', {
-            method: 'POST',
-            body: formData
-          });
-          
-          console.log('Response status:', response.status);
-          console.log('Response headers:', response.headers);
-          
-          const responseText = await response.text();
-          console.log('Raw response:', responseText);
+            // Update progress
+            this.progressStep = 2;
+            this.progressPercent = 50;
+            this.progressMessage = 'Processing media files...';
+            
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay for UX
+            
+            const response = await fetch('/server/api/submitQuote-working.php', {
+              method: 'POST',
+              body: formData
+            });
+            
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
           
           let result;
           try {
@@ -947,15 +1101,30 @@
           if (response.ok && result.success) {
               console.log('Quote submitted successfully:', result);
 
+              // Update progress - AI Analysis
+              this.progressStep = 3;
+              this.progressPercent = 75;
+              this.progressMessage = 'Starting AI analysis...';
+              
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              
+              // Complete progress
+              this.progressStep = 4;
+              this.progressPercent = 100;
+              this.progressMessage = 'Analysis queued successfully! 🎉';
+              
+              await new Promise(resolve => setTimeout(resolve, 1000));
+
               if (result.preflight_check && !result.preflight_check.sufficient) {
                   // Pre-flight check failed, ask for more info
                   this.submissionMessage = `We need a bit more information to provide an accurate quote: ${result.preflight_check.missing_items.join(', ')}.`;
                   this.moreInfoUrl = `upload-more.html?quote_id=${result.quote_id}`;
               } else {
                   // Pre-flight check passed or not applicable
-                  this.submissionMessage = 'Thank you! We\'ve received your tree photos and information. Our AI is analyzing your media now.';
+                  this.submissionMessage = 'Thank you! Your quote request has been submitted successfully. Our AI is analyzing your photos and you'll receive a detailed assessment within 24 hours. Please allow 2-4 hours for comprehensive analysis.';
               }
               
+              this.showProgress = false;
               this.submitted = true;
               this.currentStep = 4; // Show success/feedback screen
             } else {
@@ -970,7 +1139,8 @@
               stack: error.stack,
               response: response
             });
-            alert('Error submitting quote: ' + error.message + '. Please try again or call us at 778-655-3741');
+            this.showProgress = false;
+            alert('Error submitting quote: ' + error.message + '. Please try again or contact us directly at sapport@carpetree.com or 778-655-3741');
           }
           
           this.submitting = false;
