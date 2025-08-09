@@ -1,0 +1,69 @@
+{
+    "transfer_stations": [
+        {
+            "id": 1,
+            "name": "Greater Vancouver Transfer Station",
+            "address": "5000 Miller Rd, Richmond, BC V6X 1M4",
+            "latitude": 49.166592,
+            "longitude": -123.133569,
+            "cost_per_tonne": 120,
+            "accepts_brush": true,
+            "accepts_wood": true,
+            "operating_hours": "Mon-Sat 7:00 AM - 5:00 PM",
+            "phone": "604-276-4010",
+            "region": "Lower Mainland"
+        },
+        {
+            "id": 2,
+            "name": "Burnaby Transfer Station",
+            "address": "7975 6th St, Burnaby, BC V3N 3N4",
+            "latitude": 49.217621,
+            "longitude": -122.959786,
+            "cost_per_tonne": 110,
+            "accepts_brush": true,
+            "accepts_wood": true,
+            "operating_hours": "Daily 8:00 AM - 4:00 PM",
+            "phone": "604-294-7550",
+            "region": "Lower Mainland"
+        },
+        {
+            "id": 3,
+            "name": "Castlegar Regional Landfill",
+            "address": "1018 Ootischenia Rd, Castlegar, BC V1N 4L4",
+            "latitude": 49.323308,
+            "longitude": -117.686097,
+            "cost_per_tonne": 85,
+            "accepts_brush": true,
+            "accepts_wood": true,
+            "operating_hours": "Mon-Fri 8:00 AM - 4:00 PM, Sat 9:00 AM - 3:00 PM",
+            "phone": "250-365-7044",
+            "region": "Kootenays"
+        },
+        {
+            "id": 4,
+            "name": "Nelson Transfer Station",
+            "address": "1500 Railway St, Nelson, BC V1L 1L6",
+            "latitude": 49.4944,
+            "longitude": -117.2948,
+            "cost_per_tonne": 90,
+            "accepts_brush": true,
+            "accepts_wood": true,
+            "operating_hours": "Wed-Sat 9:00 AM - 4:00 PM",
+            "phone": "250-352-8201",
+            "region": "Kootenays"
+        },
+        {
+            "id": 5,
+            "name": "Kamloops Transfer Station",
+            "address": "1270 River St, Kamloops, BC V2C 1X1",
+            "latitude": 50.6745,
+            "longitude": -120.3273,
+            "cost_per_tonne": 95,
+            "accepts_brush": true,
+            "accepts_wood": true,
+            "operating_hours": "Mon-Sat 7:30 AM - 4:30 PM",
+            "phone": "250-828-3461",
+            "region": "Interior"
+        }
+    ]
+}

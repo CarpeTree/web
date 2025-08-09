@@ -21,7 +21,7 @@ try {
     // Launch each AI analysis script with PHP-CLI in the background
     $scripts = [
         'o3' => __DIR__ . '/openai-o3-analysis.php',
-        'o4-mini' => __DIR__ . '/openai-o4-mini-analysis.php',
+        'gpt-5' => __DIR__ . '/openai-o4-mini-analysis.php', // script now runs GPT-5
         'gemini' => __DIR__ . '/google-gemini-analysis.php'
     ];
 
@@ -42,7 +42,7 @@ try {
         $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
         $endpoints = [
             $base_url . '/server/api/openai-o3-analysis.php?quote_id=' . $quote_id,
-            $base_url . '/server/api/openai-o4-mini-analysis.php?quote_id=' . $quote_id,
+            $base_url . '/server/api/openai-o4-mini-analysis.php?quote_id=' . $quote_id, // GPT-5
             $base_url . '/server/api/google-gemini-analysis.php?quote_id=' . $quote_id
         ];
         foreach ($endpoints as $url) {

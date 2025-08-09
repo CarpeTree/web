@@ -1,5 +1,5 @@
 <?php
-// OpenAI o4-mini Analysis Script
+// OpenAI GPT-5 Analysis Script (replaces prior o4-mini usage)
 
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
@@ -9,7 +9,7 @@ register_shutdown_function(function () {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'model' => 'o4-mini',
+            'model' => 'gpt-5',
             'error' => 'A fatal error occurred: ' . $error['message'],
             'file' => $error['file'],
             'line' => $error['line'],
@@ -38,7 +38,7 @@ try {
     // If running via HTTP, send immediate 200 and continue in background
 if (php_sapi_name() !== 'cli') {
     header('X-Accel-Buffering: no');
-    echo json_encode(['success' => true, 'queued' => true, 'model' => 'o4-mini', 'quote_id' => $quote_id]);
+    echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5', 'quote_id' => $quote_id]);
     if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
     }
@@ -88,16 +88,50 @@ require_once __DIR__ . '/../config/config.php';
     }
 
     // 5. PREPARE OPENAI API REQUEST
+    // Convert visual_content (Gemini-style inlineData) to OpenAI image_url parts
+    $userParts = [['type' => 'text', 'text' => $context_text]];
+    if (is_array($visual_content)) {
+        foreach ($visual_content as $vc) {
+            if (isset($vc['inlineData'])) {
+                $mime = $vc['inlineData']['mimeType'] ?? 'image/jpeg';
+                $data = $vc['inlineData']['data'] ?? '';
+                if (is_string($data) && $data !== '') {
+                    $dataUrl = 'data:' . $mime . ';base64,' . $data;
+                    $userParts[] = [
+                        'type' => 'image_url',
+                        'image_url' => ['url' => $dataUrl]
+                    ];
+                }
+            } elseif (isset($vc['image_url'])) {
+                // Already in OpenAI format
+                $img = $vc['image_url'];
+                if (is_array($img) && isset($img['url'])) {
+                    $userParts[] = [
+                        'type' => 'image_url',
+                        'image_url' => ['url' => $img['url']]
+                    ];
+                }
+            }
+        }
+    }
     $messages = [
         ['role' => 'system', 'content' => $system_prompt],
-        ['role' => 'user', 'content' => array_merge([['type' => 'text', 'text' => $context_text]], $visual_content)]
+        ['role' => 'user', 'content' => $userParts]
     ];
 
+    // Determine function name from schema (fallbacks included)
+    $function_name = 'draft_tree_quote';
+    if (is_array($json_schema) && isset($json_schema['function']['name'])) {
+        $function_name = $json_schema['function']['name'];
+    } elseif (isset($json_schema['name'])) {
+        $function_name = $json_schema['name'];
+    }
+
     $openai_request = [
-        'model' => 'o4-mini',
+        'model' => 'gpt-5',
         'messages' => $messages,
         'tools' => [$json_schema],
-        'tool_choice' => ['type' => 'function', 'function' => ['name' => 'draft_tree_quote']],
+        'tool_choice' => ['type' => 'function', 'function' => ['name' => $function_name]],
         'max_completion_tokens' => 100000,
         
     ];
@@ -115,6 +149,18 @@ require_once __DIR__ . '/../config/config.php';
     ]));
 
     // 6. EXECUTE API CALL
+    // Resolve API key robustly (prefer process env over config var)
+    $API_KEY = getenv('OPENAI_API_KEY') ?: '';
+    if (!$API_KEY && isset($_ENV['OPENAI_API_KEY'])) {
+        $envKey = $_ENV['OPENAI_API_KEY'];
+        $API_KEY = is_array($envKey) ? (reset($envKey) ?: '') : $envKey;
+    }
+    if (!$API_KEY) {
+        $API_KEY = is_array($OPENAI_API_KEY) ? (reset($OPENAI_API_KEY) ?: '') : ($OPENAI_API_KEY ?? '');
+    }
+    if (!$API_KEY) {
+        throw new Exception("OpenAI API key not configured or empty");
+    }
     $curl = curl_init();
     curl_setopt_array($curl, [
         CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
@@ -123,7 +169,7 @@ require_once __DIR__ . '/../config/config.php';
         CURLOPT_POSTFIELDS => json_encode($openai_request),
         CURLOPT_HTTPHEADER => [
             'Content-Type: application/json',
-            'Authorization: Bearer ' . $OPENAI_API_KEY
+            'Authorization: Bearer ' . $API_KEY
         ],
         CURLOPT_TIMEOUT => 120
     ]);
@@ -136,7 +182,7 @@ require_once __DIR__ . '/../config/config.php';
     $processing_time = (microtime(true) - $start_time) * 1000;
 
     if ($http_code !== 200) {
-        throw new Exception("OpenAI o4-mini API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
+        throw new Exception("OpenAI gpt-5 API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
     }
 
     // 7. PARSE RESPONSE & CALCULATE COST
@@ -144,7 +190,7 @@ require_once __DIR__ . '/../config/config.php';
     $ai_analysis_json = $ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'] ?? null;
 
     if (!$ai_analysis_json) {
-        throw new Exception("Invalid o4-mini response format or missing tool call. Full response: " . $response);
+        throw new Exception("Invalid gpt-5 response format or missing tool call. Full response: " . $response);
     }
     
     $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
@@ -154,7 +200,7 @@ require_once __DIR__ . '/../config/config.php';
     $cost_tracker = new CostTracker($pdo);
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'o4-mini',
+        'model_name' => 'gpt-5',
         'provider' => 'openai',
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
@@ -189,7 +235,7 @@ require_once __DIR__ . '/../config/config.php';
         $ai_response = json_encode($parsed_analysis);
 
 $analysis_data_to_store = [
-        'model' => 'o4-mini',
+        'model' => 'gpt-5',
         'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
@@ -222,7 +268,7 @@ $analysis_data_to_store = [
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([
         'success' => true,
-        'model' => 'o4-mini',
+        'model' => 'gpt-5',
         'quote_id' => $quote_id,
         'analysis' => $analysis_data_to_store,
         'cost_tracking' => $cost_data
@@ -232,12 +278,23 @@ $analysis_data_to_store = [
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'model' => 'o4-mini',
+        'model' => 'gpt-5',
         'error' => $e->getMessage(),
         'file' => $e->getFile(),
         'line' => $e->getLine(),
         'quote_id' => $quote_id ?? null,
         'trace' => $e->getTraceAsString()
     ]);
+}
+
+// After success or failure, attempt to notify admin asynchronously when analysis succeeds
+if (isset($analysis_data_to_store)) {
+    try {
+        require_once __DIR__ . '/admin-notification.php';
+        // Fire-and-forget style; do not block response if it fails
+        sendAdminNotification($quote_id);
+    } catch (Throwable $notifyError) {
+        error_log('Admin notification after GPT-5 analysis failed: ' . $notifyError->getMessage());
+    }
 }
 ?>

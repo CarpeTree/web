@@ -1,337 +1,74 @@
 {
   "type": "function",
   "function": {
-    "name": "draft_tree_quote",
-    "description": "Generate a comprehensive tree care quote based on photo/video analysis",
+    "name": "draft_tree_quote_simple",
+    "description": "Generate a structured tree care quote from an analysis of images, videos, and audio. Focus on identifying specific services required.",
     "parameters": {
       "type": "object",
       "properties": {
-        "overall_assessment": {
+        "analysis": {
           "type": "string",
-          "description": "High-level summary of the property and tree situation"
+          "description": "A detailed, multi-paragraph analysis of the tree(s), site conditions, access, and any potential hazards or special considerations. This should be a comprehensive text block."
         },
-        "site_conditions": {
-          "type": "object",
-          "properties": {
-            "access_difficulty": {
-              "type": "string",
-              "enum": ["easy", "moderate", "difficult", "very_difficult"],
-              "description": "Overall site access for equipment and crew"
-            },
-            "proximity_concerns": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["structures", "power_lines", "neighboring_trees", "vehicles", "landscaping", "none"]
-              }
-            },
-            "soil_conditions": {
-              "type": "string",
-              "description": "Observed soil and growing conditions"
-            },
-            "weather_considerations": {
-              "type": "string",
-              "description": "Any weather-related factors affecting the work"
-            }
-          }
-        },
-        "trees": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "tree_id": {
-                "type": "string",
-                "description": "Unique identifier for this tree (e.g., Tree A, Tree 1, Main Oak)"
-              },
-              "species": {
-                "type": "object",
-                "properties": {
-                  "common_name": {
-                    "type": "string",
-                    "description": "Common name of the tree species"
-                  },
-                  "scientific_name": {
-                    "type": "string",
-                    "description": "Scientific name if identifiable"
-                  },
-                  "confidence_score": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "description": "Confidence in species identification (0-1)"
-                  },
-                  "is_conifer": {
-                    "type": "boolean",
-                    "description": "Whether this is a coniferous tree"
-                  }
-                }
-              },
-              "measurements": {
-                "type": "object",
-                "properties": {
-                  "height_meters": {
-                    "type": "number",
-                    "description": "Estimated height in meters"
-                  },
-                  "height_feet": {
-                    "type": "number",
-                    "description": "Estimated height in feet"
-                  },
-                  "dbh_cm": {
-                    "type": "number",
-                    "description": "Diameter at breast height in centimeters"
-                  },
-                  "dbh_inches": {
-                    "type": "number",
-                    "description": "Diameter at breast height in inches"
-                  },
-                  "measurement_method": {
-                    "type": "string",
-                    "description": "How measurements were estimated (e.g., using person for scale, architectural reference)"
-                  }
-                }
-              },
-              "condition": {
-                "type": "object",
-                "properties": {
-                  "overall_health": {
-                    "type": "string",
-                    "enum": ["excellent", "good", "fair", "poor", "dead"],
-                    "description": "Overall tree health assessment"
-                  },
-                  "structural_issues": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "List of structural problems observed"
-                  },
-                  "lean_description": {
-                    "type": "string",
-                    "description": "Description of any significant lean and direction"
-                  },
-                  "risk_factors": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Identified risk factors or safety concerns"
-                  }
-                }
-              },
-              "location_context": {
-                "type": "object",
-                "properties": {
-                  "distance_to_structures_meters": {
-                    "type": "number",
-                    "description": "Distance to nearest structure in meters"
-                  },
-                  "within_20m_building": {
-                    "type": "boolean",
-                    "description": "Whether tree is within 20 meters of a building (for sprinkler upsell)"
-                  },
-                  "power_line_proximity": {
-                    "type": "boolean",
-                    "description": "Whether tree is near power lines"
-                  },
-                  "target_analysis": {
-                    "type": "string",
-                    "description": "Analysis of what could be damaged if tree fails"
-                  }
-                }
-              },
-              "services": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "service_type": {
-                      "type": "string",
-                      "enum": [
-                        "pruning",
-                        "removal", 
-                        "assessment",
-                        "cabling",
-                        "stump_grinding",
-                        "emergency",
-                        "planting",
-                        "wildfire_risk",
-                        "sprinkler_system"
-                      ]
-                    },
-                    "service_description": {
-                      "type": "string",
-                      "description": "Detailed description of the recommended service"
-                    },
-                    "justification": {
-                      "type": "string",
-                      "description": "Why this service is recommended"
-                    },
-                    "priority": {
-                      "type": "string",
-                      "enum": ["urgent", "high", "medium", "low", "optional"],
-                      "description": "Priority level for this service"
-                    },
-                    "timing": {
-                      "type": "string",
-                      "description": "Recommended timing for the work (e.g., dormant season, immediate)"
-                    },
-                    "cost_breakdown": {
-                      "type": "object",
-                      "properties": {
-                        "estimated_hours": {
-                          "type": "number",
-                          "description": "Estimated hours for this service"
-                        },
-                        "hourly_rate": {
-                          "type": "number",
-                          "description": "Hourly rate in CAD"
-                        },
-                        "labor_cost": {
-                          "type": "number",
-                          "description": "Total labor cost"
-                        },
-                        "material_cost": {
-                          "type": "number",
-                          "description": "Cost of materials if applicable"
-                        },
-                        "equipment_cost": {
-                          "type": "number", 
-                          "description": "Equipment rental or special tool costs"
-                        },
-                        "cleanup_cost": {
-                          "type": "number",
-                          "description": "Debris cleanup and disposal costs"
-                        },
-                        "total_cost": {
-                          "type": "number",
-                          "description": "Total cost for this service"
-                        }
-                      }
-                    },
-                    "technical_details": {
-                      "type": "object",
-                      "properties": {
-                        "cut_count": {
-                          "type": "integer",
-                          "description": "Number of cuts required for pruning"
-                        },
-                        "removal_method": {
-                          "type": "string",
-                          "enum": ["crane", "climber", "bucket_truck", "felling"],
-                          "description": "Recommended removal method if applicable"
-                        },
-                        "disposal_method": {
-                          "type": "string",
-                          "enum": ["chip", "firewood", "haul_away", "leave_logs"],
-                          "description": "Recommended disposal method"
-                        },
-                        "ansi_standards": {
-                          "type": "boolean",
-                          "description": "Whether work follows ANSI standards"
-                        },
-                        "topping_refused": {
-                          "type": "boolean",
-                          "description": "Whether topping was requested and refused"
-                        }
-                      }
-                    }
-                  },
-                  "required": ["service_type", "service_description", "cost_breakdown"]
-                }
-              }
-            },
-            "required": ["tree_id", "species", "measurements", "condition", "services"]
-          }
-        },
-        "quote_summary": {
-          "type": "object",
-          "properties": {
-            "total_trees": {
-              "type": "integer",
-              "description": "Total number of trees analyzed"
-            },
-            "total_services": {
-              "type": "integer", 
-              "description": "Total number of services recommended"
-            },
-            "estimated_total_cost": {
-              "type": "number",
-              "description": "Total estimated cost for all services"
-            },
-            "estimated_total_hours": {
-              "type": "number",
-              "description": "Total estimated hours for all work"
-            },
-            "priority_breakdown": {
-              "type": "object",
-              "properties": {
-                "urgent": {
-                  "type": "integer",
-                  "description": "Number of urgent priority items"
-                },
-                "high": {
-                  "type": "integer",
-                  "description": "Number of high priority items"
-                },
-                "medium": {
-                  "type": "integer",
-                  "description": "Number of medium priority items"
-                },
-                "low": {
-                  "type": "integer",
-                  "description": "Number of low priority items"
-                }
-              }
-            }
-          }
-        },
-        "recommendations": {
-          "type": "object",
-          "properties": {
-            "immediate_safety_concerns": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Any immediate safety issues that need attention"
-            },
-            "long_term_care_plan": {
-              "type": "string",
-              "description": "Recommendations for ongoing tree care"
-            },
-            "seasonal_timing": {
-              "type": "string",
-              "description": "Best timing for the recommended work"
-            },
-            "additional_assessments_needed": {
-              "type": "boolean",
-              "description": "Whether an on-site assessment is recommended"
-            },
-            "assessment_reason": {
-              "type": "string",
-              "description": "Why additional assessment is needed if applicable"
-            }
-          }
-        },
-        "limitations": {
+        "species_identification": {
           "type": "string",
-          "description": "Limitations of this photo-based assessment"
+          "description": "The common name of the primary tree species identified. e.g., 'Douglas Fir', 'Western Red Cedar', 'Unknown'."
         },
-        "next_steps": {
+        "height_estimate": {
           "type": "string",
-          "description": "Recommended next steps for the customer"
+          "description": "The estimated height of the tree in feet or meters. e.g., 'approx. 80-90 feet'."
+        },
+        "crown_spread": {
+            "type": "string",
+            "description": "The estimated crown spread of the tree in feet or meters. e.g., '40-foot spread'."
+        },
+        "dbh_estimate": {
+          "type": "string",
+          "description": "The estimated Diameter at Breast Height (DBH) in inches or cm. e.g., 'around 24 inches'."
+        },
+        "climbing_required": {
+          "type": "boolean",
+          "description": "Is it necessary for an arborist to climb the tree to perform the work? True or false."
+        },
+        "rigging_required": {
+          "type": "boolean",
+          "description": "Will specialized rigging equipment be needed to safely lower limbs or sections of the tree? True or false."
+        },
+        "brush_chipping_required": {
+          "type": "boolean",
+          "description": "Will a wood chipper be needed on-site to process brush? True or false."
+        },
+        "wood_removal_required": {
+            "type": "boolean",
+            "description": "Does the large-diameter wood need to be hauled away from the site? True or false."
+        },
+        "firewood_processing": {
+            "type": "boolean",
+            "description": "Does the client want the wood processed into firewood and left on site? True or false."
+        },
+        "brush_hauling_required": {
+            "type": "boolean",
+            "description": "Do the wood chips or brush need to be hauled away? True or false."
+        },
+        "waste_disposal": {
+            "type": "string",
+            "description": "Describe the plan for waste disposal, including estimated volume and type of debris."
         }
       },
       "required": [
-        "overall_assessment",
-        "trees",
-        "quote_summary",
-        "recommendations",
-        "limitations",
-        "next_steps"
+        "analysis",
+        "species_identification",
+        "height_estimate",
+        "crown_spread",
+        "dbh_estimate",
+        "climbing_required",
+        "rigging_required",
+        "brush_chipping_required",
+        "wood_removal_required",
+        "firewood_processing",
+        "brush_hauling_required",
+        "waste_disposal"
       ]
     }
   }
-} 
+}

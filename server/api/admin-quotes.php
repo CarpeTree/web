@@ -254,7 +254,11 @@ try {
             'exif_locations' => $formatted_exif,
             'context_assessment' => $formatted_assessment,
             'total_cost' => $cost_data['total_cost'] ?? 0,
-            'total_tokens' => $cost_data['total_tokens'] ?? 0
+            'total_tokens' => $cost_data['total_tokens'] ?? 0,
+            // ADD MISSING AI ANALYSIS COLUMNS
+            'ai_o4_mini_analysis' => $quote['ai_o4_mini_analysis'] ? json_decode($quote['ai_o4_mini_analysis'], true) : null,
+            'ai_o3_analysis' => $quote['ai_o3_analysis'] ? json_decode($quote['ai_o3_analysis'], true) : null,
+            'ai_gemini_analysis' => $quote['ai_gemini_analysis'] ? json_decode($quote['ai_gemini_analysis'], true) : null
         ];
     }
 

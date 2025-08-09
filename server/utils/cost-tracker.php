@@ -10,6 +10,8 @@ class CostTracker {
         // All costs are in USD per 1,000,000 tokens
         $this->cost_rates = [
             'openai' => [
+                'gpt-5' => ['input' => 10.00, 'output' => 30.00],
+                // Keep legacy mapping for historical rows still labeled as o4-mini
                 'o4-mini' => ['input' => 0.15, 'output' => 0.60],
                 'o3' => ['input' => 5.00, 'output' => 15.00],
                 'whisper-1' => ['input' => 0.006, 'output' => 0] // Priced per minute, approx this per 1M tokens
@@ -32,6 +34,11 @@ class CostTracker {
 
         // Handle database connection recovery
         try {
+            // Ensure connection is alive
+            if (!$this->pdo || !$this->pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)) {
+                $this->pdo = $this->reconnectDatabase();
+            }
+            
             $stmt = $this->pdo->prepare("
                 INSERT INTO ai_cost_log (quote_id, model_name, provider, input_tokens, output_tokens, total_cost, processing_time_ms)
                 VALUES (?, ?, ?, ?, ?, ?, ?)

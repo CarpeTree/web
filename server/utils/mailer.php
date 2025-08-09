@@ -24,7 +24,10 @@ function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
         $mail->Port       = $SMTP_PORT ?? 587;
 
         // Recipients
-        $mail->setFrom($SMTP_FROM ?? 'noreply@carpetree.com', 'Carpe Tree\'em');
+        $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
+        $mail->setFrom($fromAddress, 'Carpe Tree\'em');
+        $mail->addReplyTo($fromAddress);
+        $mail->Sender = $fromAddress; // envelope-from for better alignment
         $mail->addAddress($to);
 
         // Content - ensure proper HTML rendering
@@ -194,7 +197,10 @@ function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
         $mail->Port       = $SMTP_PORT ?? 587;
 
         // Recipients
-        $mail->setFrom($SMTP_FROM ?? 'noreply@carpetree.com', 'Carpe Tree\'em');
+        $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
+        $mail->setFrom($fromAddress, 'Carpe Tree\'em');
+        $mail->addReplyTo($fromAddress);
+        $mail->Sender = $fromAddress; // envelope-from for better alignment
         $mail->addAddress($to);
 
         // Content
@@ -226,10 +232,12 @@ function logEmailSimple($recipient, $subject, $template, $status, $error = '', $
     global $pdo;
     
     try {
+        // Use the primary email_log table schema for consistency
         $stmt = $pdo->prepare("
-            INSERT INTO email_logs (
-                recipient, subject, template_used, status, error_message, quote_id
-            ) VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO email_log (
+                recipient_email, subject, template_used, status, error_message,
+                quote_id, invoice_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
@@ -238,11 +246,13 @@ function logEmailSimple($recipient, $subject, $template, $status, $error = '', $
             $template,
             $status,
             $error ?: null,
-            $quote_id
+            is_numeric($quote_id) ? (int)$quote_id : null,
+            null
         ]);
         
     } catch (Exception $e) {
-        error_log("Failed to log email: " . $e->getMessage());
+        // Do not block email sending on logging errors
+        error_log("Failed to log email (simple): " . $e->getMessage());
     }
 }
 // END NEW 
