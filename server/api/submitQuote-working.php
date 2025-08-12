@@ -195,18 +195,14 @@ try {
         }
     }
     
-    // Update quote status based on file uploads and trigger AI processing
+    // Update quote status based on file uploads (AI analysis triggered later by admin/cron)
     if ($file_count > 0) {
-        // Files uploaded - set for AI processing
-        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
-        $stmt->execute([$quote_id]);
-        
-        error_log("Quote $quote_id: $file_count files uploaded, triggering AI analysis");
-    } else {
-        // No files - just submitted
         $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
         $stmt->execute([$quote_id]);
-        
+        error_log("Quote $quote_id: $file_count files uploaded, status set to submitted (processing deferred)");
+    } else {
+        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
+        $stmt->execute([$quote_id]);
         error_log("Quote $quote_id: No files uploaded, status set to submitted");
     }
     
@@ -282,30 +278,7 @@ try {
         error_log("Fatal error in admin notification for quote $quote_id: " . $e->getMessage());
     }
     
-    // Trigger AI processing for quotes with media (asynchronous)
-    if ($file_count > 0) {
-        try {
-            // Trigger AI analysis in background  
-            $ai_url = 'https://carpetree.com/server/api/simple-ai-analysis.php?quote_id=' . $quote_id;
-            
-            // Use cURL to trigger AI processing asynchronously
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $ai_url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 1, // Very short timeout - fire and forget
-                CURLOPT_CONNECTTIMEOUT => 1,
-                CURLOPT_NOSIGNAL => 1
-            ]);
-            
-            $result = curl_exec($curl);
-            curl_close($curl);
-            
-            error_log("Triggered AI processing for quote $quote_id with $file_count files");
-        } catch (Exception $e) {
-            error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
-        }
-    }
+    // Remove immediate AI trigger; processing will be handled by admin action or cron.
     
 } catch (Exception $e) {
     // Rollback transaction if it exists
