@@ -959,6 +959,10 @@
                 statusEl.textContent = 'Uploading media… ' + pct + '%';
               }
             };
+            xhr.upload.onload = () => {
+              if (progressBar) progressBar.style.width = '95%';
+              if (statusEl) statusEl.textContent = 'Submitting request…';
+            };
             this.uploadedFiles.forEach((file, index) => {
               formData.append(`files[${index}]`, file.data);
             });
