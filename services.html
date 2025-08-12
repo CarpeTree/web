@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* Visibility helpers */
+        .desktop-only { display: block; }
+        .mobile-only { display: none; }
+
+        @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            .mobile-only { display: block !important; }
+        }
+
         /* MODERN TREE-THEMED RADIAL LAYOUT */
         .radial-container {
             position: relative;
@@ -656,6 +665,86 @@
     </nav>
 
     <section class="content">
+        <!-- MOBILE-OPTIMIZED SERVICES HUB -->
+        <div class="mobile-only">
+            <div class="services-hero" style="margin-top: 0;">
+                <h1>Services</h1>
+                <p>Tap a service to learn more or book a consultation.</p>
+                <div style="margin-top: 15px;">
+                    <a href="lets-talk.html" class="cta-button">Book a Consultation</a>
+                </div>
+            </div>
+
+            <div class="service-grid" style="grid-template-columns: 1fr; gap: 14px; padding: 0; max-width: 800px;">
+                <a class="service-card" href="services/assessments.html">
+                    <h3>Risk Assessments</h3>
+                    <p>Professional evaluation of tree condition and risks.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/pruning.html">
+                    <h3>Pruning</h3>
+                    <p>Structure-first pruning to improve safety, health, and longevity.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/soil-health.html">
+                    <h3>Soil & Root Health</h3>
+                    <p>Diagnosis and remediation to support resilient trees from the ground up.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/planting.html">
+                    <h3>Tree Planting</h3>
+                    <p>Species selection and planting done right for the Kootenays.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/wildfire-risk-management.html">
+                    <h3>Wildfire Risk Management</h3>
+                    <p>Fuel reduction and defensible space without harming your ecosystem.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/emergency.html">
+                    <h3>Storm & Fire Damage</h3>
+                    <p>Rapid response to make hazardous trees safe.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/removal.html">
+                    <h3>Tree Removal</h3>
+                    <p>Safe, precise removals with minimal impact when it’s the right choice.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/milling.html">
+                    <h3>Milling</h3>
+                    <p>Turn removals into useful timber with on-site milling.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/wildlife-snags.html">
+                    <h3>Wildlife Snags</h3>
+                    <p>Create safe, beneficial habitat while managing risk.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/animal-rescue.html">
+                    <h3>Cat & Drone Rescue</h3>
+                    <p>Humane, technical retrieval from difficult locations.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/canopy-science.html">
+                    <h3>Canopy Science</h3>
+                    <p>Research and monitoring services in tree canopies.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+                <a class="service-card" href="services/treehouse-installation.html">
+                    <h3>Treehouse & Walkways</h3>
+                    <p>Tree-supported structures designed to protect tree health.</p>
+                    <div style="margin-top: 10px;"><span class="service-link">Learn more</span></div>
+                </a>
+            </div>
+
+            <div class="cta-section" style="margin-top: 10px;">
+                <a href="lets-talk.html" class="cta-button">Book a Consultation</a>
+            </div>
+        </div>
+
+        <!-- DESKTOP RADIAL LAYOUT -->
+        <div class="desktop-only">
         <!-- MODERN TREE-THEMED RADIAL LAYOUT -->
         <div class="radial-container">
             <!-- Tree-themed background elements -->
@@ -859,6 +948,7 @@
                 </div>
                 <h3 class="section-title">Climbing Technician</h3>
             </div>
+        </div>
         </div>
         
         <!-- Local considerations moved below the radial layout -->

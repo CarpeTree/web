@@ -37,7 +37,7 @@
       position: fixed;
       width: 100%;
       top: 30px; /* Account for contact header */
-      z-index: 1000; /* Ensure nav stays above other content */
+      z-index: 1002; /* Ensure nav stays above other content and contact header */
       padding: 15px 0;
     }
 
@@ -316,6 +316,8 @@
     @media(max-width: 768px) {
       .menu-toggle {
         display: flex;
+        position: relative;
+        z-index: 1002; /* Ensure above contact header */
       }
       
       .nav-container {
@@ -326,16 +328,18 @@
       .nav-links {
         display: none;
         flex-direction: column;
-        width: 100%;
+        width: 100vw;
         background: var(--background-color);
         border: 2px solid var(--deep-forest-green);
-        border-radius: 4px;
+        border-radius: 8px;
         padding: 20px 0;
-        margin-top: 10px;
-        position: absolute;
-        top: 60px;
+        margin: 0;
+        position: fixed;
+        top: 80px;
         left: 0;
-        z-index: 1000;
+        right: 0;
+        z-index: 1001;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
       
       .nav-links.active {
@@ -348,6 +352,8 @@
         text-align: center;
         width: 100%;
         border-bottom: 1px solid var(--deep-forest-green);
+        color: var(--deep-forest-green);
+        background: var(--background-color);
       }
       
       .nav-links a:last-child {
@@ -373,6 +379,13 @@
       }
       .content, .services {
         margin-top: 250px;  /* Increased for mobile */
+      }
+
+      /* Prevent scroll when menu open */
+      body.menu-open {
+        overflow: hidden !important;
+        position: fixed;
+        width: 100%;
       }
     }
 
@@ -780,7 +793,7 @@
         </div>
         <p>Modern arboriculture focused on preservation, longevity, and environmental stewardship.</p>
         <a href="quote.html" class="cta-button">Get Video Quote</a>
-        <button class="cta-button" onclick="openQuotePopup()">Schedule a Consultation</button>
+        <a href="lets-talk.html" class="cta-button">Schedule a Consultation</a>
     </div>
   </section>
 
@@ -844,7 +857,7 @@
                     <li>You've noticed changes in your tree and want expert insight before proceeding with an on-site visit</li>
                 </ul>
                 <p class="eco-note">🌱 This option reduces our carbon footprint while still providing expert guidance.</p>
-                <a href="video_quote.html" class="cta-button">Request Video Assessment</a>
+                <a href="quote.html" class="cta-button">Request Video Assessment</a>
             </div>
 
             <div class="quote-option">
@@ -893,34 +906,47 @@
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
       
-      if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-          this.classList.toggle('active');
-          navLinks.classList.toggle('active');
-          document.body.classList.toggle('menu-open');
+      if (menuToggle && navLinks) {
+        const openMenu = () => {
+          menuToggle.classList.add('active');
+          navLinks.classList.add('active');
+          document.body.classList.add('menu-open');
+        };
+        const closeMenu = () => {
+          menuToggle.classList.remove('active');
+          navLinks.classList.remove('active');
+          document.body.classList.remove('menu-open');
+        };
+        const toggleMenu = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (navLinks.classList.contains('active')) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        menuToggle.addEventListener('touchstart', toggleMenu, { passive: false });
+
+        // Close menu when a link is clicked
+        const navItems = document.querySelectorAll('.nav-links a');
+        navItems.forEach(item => {
+          item.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+              closeMenu();
+            }
+          });
         });
-      }
-      
-      // Close menu when a link is clicked
-      const navItems = document.querySelectorAll('.nav-links a');
-      navItems.forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            navLinks.classList.remove('active');
-            menuToggle.classList.remove('active');
-            document.body.classList.remove('menu-open');
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+            closeMenu();
           }
         });
-      });
-      
-      // Close menu when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-          navLinks.classList.remove('active');
-          menuToggle.classList.remove('active');
-          document.body.classList.remove('menu-open');
-        }
-      });
+      }
     });
   </script>
 

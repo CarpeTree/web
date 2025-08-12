@@ -20,13 +20,25 @@ function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
         $mail->SMTPAuth   = true;
         $mail->Username   = $SMTP_USER ?? '';
         $mail->Password   = $SMTP_PASS ?? '';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $SMTP_PORT ?? 587;
+        // Optional debug
+        $smtpDebug = $_ENV['SMTP_DEBUG'] ?? null;
+        if (is_numeric($smtpDebug) && (int)$smtpDebug > 0) {
+            $mail->SMTPDebug = (int)$smtpDebug; // 1 = client, 2 = server
+        }
+        // Choose encryption based on port or env override
+        $securePref = $_ENV['SMTP_SECURE'] ?? null; // 'ssl' or 'tls'
+        if ((int)$mail->Port === 465 || (is_string($securePref) && strtolower($securePref) === 'ssl')) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
 
         // Recipients
         $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
+        $replyToAddress = $_ENV['SMTP_REPLY_TO'] ?? $_ENV['SUPPORT_EMAIL'] ?? $fromAddress;
         $mail->setFrom($fromAddress, 'Carpe Tree\'em');
-        $mail->addReplyTo($fromAddress);
+        $mail->addReplyTo($replyToAddress);
         $mail->Sender = $fromAddress; // envelope-from for better alignment
         $mail->addAddress($to);
 
@@ -95,7 +107,8 @@ function loadEmailTemplate($template, $data) {
     // Add default values
     $html = str_replace('{company_name}', 'Carpe Tree\'em', $html);
     $html = str_replace('{company_phone}', '778-655-3741', $html);
-    $html = str_replace('{company_email}', 'phil.bajenski@gmail.com', $html);
+    $companyEmail = $_ENV['SUPPORT_EMAIL'] ?? $_ENV['SMTP_REPLY_TO'] ?? ($GLOBALS['SMTP_FROM'] ?? 'sapport@carpetree.com');
+    $html = str_replace('{company_email}', $companyEmail, $html);
     global $SITE_URL;
     $html = str_replace('{logo_url}', $SITE_URL . '/images/carpeclear.png', $html);
     $html = str_replace('{site_url}', $SITE_URL ?: 'https://yourdomain.com', $html);
@@ -108,6 +121,10 @@ function logEmail($recipient, $subject, $template, $status, $error = '', $data =
     global $pdo;
     
     try {
+        if (!($pdo instanceof PDO)) {
+            // DB not available; skip logging silently
+            return;
+        }
         $stmt = $pdo->prepare("
             INSERT INTO email_log (
                 recipient_email, subject, template_used, status, error_message,
@@ -193,13 +210,23 @@ function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
         $mail->SMTPAuth   = true;
         $mail->Username   = $SMTP_USER ?? '';
         $mail->Password   = $SMTP_PASS ?? '';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $SMTP_PORT ?? 587;
+        $smtpDebug = $_ENV['SMTP_DEBUG'] ?? null;
+        if (is_numeric($smtpDebug) && (int)$smtpDebug > 0) {
+            $mail->SMTPDebug = (int)$smtpDebug;
+        }
+        $securePref = $_ENV['SMTP_SECURE'] ?? null; // 'ssl' or 'tls'
+        if ((int)$mail->Port === 465 || (is_string($securePref) && strtolower($securePref) === 'ssl')) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
 
         // Recipients
         $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
+        $replyToAddress = $_ENV['SMTP_REPLY_TO'] ?? $_ENV['SUPPORT_EMAIL'] ?? $fromAddress;
         $mail->setFrom($fromAddress, 'Carpe Tree\'em');
-        $mail->addReplyTo($fromAddress);
+        $mail->addReplyTo($replyToAddress);
         $mail->Sender = $fromAddress; // envelope-from for better alignment
         $mail->addAddress($to);
 
@@ -232,6 +259,10 @@ function logEmailSimple($recipient, $subject, $template, $status, $error = '', $
     global $pdo;
     
     try {
+        if (!($pdo instanceof PDO)) {
+            // DB not available; skip logging silently
+            return;
+        }
         // Use the primary email_log table schema for consistency
         $stmt = $pdo->prepare("
             INSERT INTO email_log (

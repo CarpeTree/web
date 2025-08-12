@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
+    /* Ensure nav overlays contact header on mobile */
+    nav { z-index: 1002; }
     .quote-wizard {
       max-width: 800px;
       margin: 120px auto 40px;
@@ -258,7 +260,7 @@
         .menu-toggle {
           display: flex;
           position: relative;
-          z-index: 1001;
+          z-index: 1003;
         }
         
         .nav-container {
@@ -281,12 +283,16 @@
           top: 80px;
           left: 0;
           right: 0;
-          z-index: 1000;
+          z-index: 1002;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          /* Override global collapsing nav */
+          max-height: calc(100vh - 90px) !important;
+          overflow-y: auto !important;
         }
         
         .nav-links.active {
-          display: flex;
+          display: flex !important;
+          max-height: calc(100vh - 90px) !important;
         }
         
         .nav-links a {
@@ -310,7 +316,9 @@
         
         /* Prevent body scroll when menu is open */
         body.menu-open {
-          overflow: hidden;
+          overflow: hidden !important;
+          position: fixed;
+          width: 100%;
         }
         
         .quote-wizard {
