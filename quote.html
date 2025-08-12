@@ -950,6 +950,8 @@
             // Upload with progress using XHR
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/server/api/submitQuote-working.php', true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.timeout = 900000; // 15 minutes
             xhr.upload.onprogress = (e) => {
               if (e.lengthComputable && progressBar && statusEl) {
                 const pct = Math.min(90, Math.round((e.loaded / e.total) * 90));
@@ -972,6 +974,13 @@
               xhr.send(formData);
               if (statusEl) statusEl.textContent = 'Submitting request…';
               if (progressBar) progressBar.style.width = '95%';
+              // While waiting for server, slowly advance to 99%
+              let visual = 95;
+              const tick = setInterval(() => {
+                if (xhr.readyState === 4 || visual >= 99) { clearInterval(tick); return; }
+                visual += 0.5; if (progressBar) progressBar.style.width = visual + '%';
+                if (statusEl) statusEl.textContent = 'Finalizing… ' + Math.floor(visual) + '%';
+              }, 800);
             });
             let result;
             try {
@@ -979,6 +988,9 @@
             } catch (parseError) {
               console.error('JSON parse error:', parseError);
               throw new Error('Invalid response from server: ' + String(responseText).substring(0, 120));
+            }
+            if (result && result.success !== true) {
+              throw new Error(result.error || 'Submission failed');
             }
           
           if (response.ok && result.success) {
