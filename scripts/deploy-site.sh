@@ -31,6 +31,7 @@ rsync -r -e "ssh $SSH_OPTS" "$ROOT/services.html"   "$HOST:$REMOTE_TMP/site/" ||
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/quote.html"      "$HOST:$REMOTE_TMP/site/" || true
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/lets-talk.html"  "$HOST:$REMOTE_TMP/site/" || true
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/images/"         "$HOST:$REMOTE_TMP/site/images/" || true
 
 # Move into place with sudo and fix ownership
 ssh $SSH_OPTS "$HOST" "mkdir -p /var/www/carpetree.com/server/api /var/www/carpetree.com/server/utils /var/www/carpetree.com/server/templates /var/www/carpetree.com/ai && \
