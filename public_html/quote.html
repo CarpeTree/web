@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Get Your Tree Service Quote - Carpe Tree'em</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20250812">
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
@@ -1535,7 +1535,7 @@
             this.showResubmit = true;
             
             // Also show alert for immediate feedback
-            alert('Submission failed: ' + error.message + '\n\nA retry button has appeared below. You can also contact us at:\n📞 778-655-3741\n📧 support@carpetree.com');
+            alert('Submission failed: ' + error.message + '\n\nA retry button has appeared below. You can also contact us at:\n📞 778-655-3741\n📧 sapport@carpetree.com');
           }
           
           this.submitting = false;
@@ -1543,7 +1543,7 @@
         
         async resubmitForm() {
           if (this.retryAttempt >= 3) {
-            alert('Maximum retry attempts reached. Please contact us directly:\n📞 778-655-3741\n📧 support@carpetree.com');
+            alert('Maximum retry attempts reached. Please contact us directly:\n📞 778-655-3741\n📧 sapport@carpetree.com');
             return;
           }
           
