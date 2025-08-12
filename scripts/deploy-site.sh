@@ -19,25 +19,25 @@ echo "Deploying to $HOST ($WEB_ROOT)"
 # Prepare remote temp workspace
 ssh $SSH_OPTS "$HOST" "rm -rf $REMOTE_TMP && mkdir -p $REMOTE_TMP/site $REMOTE_TMP/server/api $REMOTE_TMP/server/utils $REMOTE_TMP/server/templates $REMOTE_TMP/ai"
 
-# Sync server-side code
-rsync -az --delete -e "ssh $SSH_OPTS" "$ROOT/server/api/"       "$HOST:$REMOTE_TMP/server/api/"
-rsync -az --delete -e "ssh $SSH_OPTS" "$ROOT/server/utils/"     "$HOST:$REMOTE_TMP/server/utils/"
-rsync -az --delete -e "ssh $SSH_OPTS" "$ROOT/server/templates/" "$HOST:$REMOTE_TMP/server/templates/"
-rsync -az --delete -e "ssh $SSH_OPTS" "$ROOT/ai/"               "$HOST:$REMOTE_TMP/ai/"
+# Sync server-side code (no perms/owner/group/times to avoid chown/chgrp issues)
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/api/"       "$HOST:$REMOTE_TMP/server/api/"
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/utils/"     "$HOST:$REMOTE_TMP/server/utils/"
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/templates/" "$HOST:$REMOTE_TMP/server/templates/"
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/ai/"               "$HOST:$REMOTE_TMP/ai/"
 
 # Sync key frontend assets (add more as needed)
-rsync -az -e "ssh $SSH_OPTS" "$ROOT/index.html"      "$HOST:$REMOTE_TMP/site/" || true
-rsync -az -e "ssh $SSH_OPTS" "$ROOT/services.html"   "$HOST:$REMOTE_TMP/site/" || true
-rsync -az -e "ssh $SSH_OPTS" "$ROOT/quote.html"      "$HOST:$REMOTE_TMP/site/" || true
-rsync -az -e "ssh $SSH_OPTS" "$ROOT/lets-talk.html"  "$HOST:$REMOTE_TMP/site/" || true
-rsync -az -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/index.html"      "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/services.html"   "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/quote.html"      "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/lets-talk.html"  "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" || true
 
 # Move into place with sudo and fix ownership
-ssh $SSH_OPTS "$HOST" "rsync -rlptD $REMOTE_TMP/server/api/ /var/www/carpetree.com/server/api/ && \
-  rsync -rlptD $REMOTE_TMP/server/utils/ /var/www/carpetree.com/server/utils/ && \
-  rsync -rlptD $REMOTE_TMP/server/templates/ /var/www/carpetree.com/server/templates/ && \
-  rsync -rlptD $REMOTE_TMP/ai/ /var/www/carpetree.com/ai/ && \
-  rsync -rlptD $REMOTE_TMP/site/ $WEB_ROOT/ && \
+ssh $SSH_OPTS "$HOST" "rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/api/ /var/www/carpetree.com/server/api/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/utils/ /var/www/carpetree.com/server/utils/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/templates/ /var/www/carpetree.com/server/templates/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ /var/www/carpetree.com/ai/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
 echo deploy_ok
