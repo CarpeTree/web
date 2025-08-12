@@ -289,9 +289,7 @@
         }
         
         /* Service icons */
-        .service-icon {
-            display: none;
-        }
+            .service-icon { display: inline-block; width: 22px; height: 22px; opacity: 0.9; }
         
         .section-nw .service-icon,
         .section-sw .service-icon {
@@ -307,9 +305,8 @@
             opacity: 1;
         }
         
-        .service-link:hover {
-            color: var(--warm-earth-brown);
-        }
+            .service-link:hover { color: var(--warm-earth-brown); }
+            .service-items a.service-link { display: inline-flex; align-items: center; gap: 10px; }
         
         /* Hover effects */
         .section-nw .service-link:hover,
@@ -521,9 +518,7 @@
 
         /* Mobile responsive design */
         @media (max-width: 768px) {
-            .menu-toggle {
-                display: flex;
-            }
+            .menu-toggle { display: flex; position: relative; z-index: 1003; }
             
             .nav-container {
                 flex-direction: column;
@@ -533,20 +528,24 @@
             .nav-links {
                 display: none;
                 flex-direction: column;
-                width: 100%;
+                width: 100vw;
                 background: var(--background-color);
                 border: 2px solid var(--deep-forest-green);
-                border-radius: 4px;
+                border-radius: 8px;
                 padding: 20px 0;
-                margin-top: 10px;
-                position: absolute;
-                top: 60px;
+                margin: 0;
+                position: fixed;
+                top: 80px;
                 left: 0;
-                z-index: 1000;
+                right: 0;
+                z-index: 1002;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
             }
             
             .nav-links.active {
-                display: flex;
+                display: flex !important;
             }
             
             .nav-links a {
@@ -560,6 +559,8 @@
             .nav-links a:last-child {
                 border-bottom: none;
             }
+            /* Prevent body scroll when menu is open */
+            body.menu-open { overflow: hidden !important; position: fixed; width: 100%; }
         }
     </style>
     <style>
