@@ -633,13 +633,16 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         z-index: 1001;
         padding: 0;
-        max-height: calc(100vh - 90px);
-        overflow-y: auto;
+        height: 0;
+        overflow: hidden;
+        transition: height 0.25s ease;
     }
 
     body:not(.force-desktop-layout) .nav-links.active {
         display: flex !important;
-        max-height: calc(100vh - 90px) !important;
+        height: calc(100vh - 90px) !important;
+        padding: 20px 0 !important;
+        overflow-y: auto !important;
     }
 
     body:not(.force-desktop-layout) .nav-links a {
