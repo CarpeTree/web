@@ -775,9 +775,23 @@
       </button>
       <div class="nav-links">
         <a href="index.html">Home</a>
-                    <a href="quote.html">Get Video Quote</a>
+        <a href="quote.html">Get Video Quote</a>
         <a href="philosophy.html">Philosophy</a>
-        <a href="services.html">Services</a>
+        <a href="#" id="servicesParent" aria-expanded="false">Services ▸</a>
+        <div class="submenu" id="servicesSubmenu" aria-hidden="true">
+          <a href="services/assessments.html">Risk Assessments</a>
+          <a href="services/pruning.html">Pruning</a>
+          <a href="services/soil-health.html">Soil & Root Health</a>
+          <a href="services/planting.html">Tree Planting</a>
+          <a href="services/wildfire-risk-management.html">Wildfire Risk</a>
+          <a href="services/emergency.html">Storm & Fire Damage</a>
+          <a href="services/removal.html">Tree Removal</a>
+          <a href="services/milling.html">Milling</a>
+          <a href="services/wildlife-snags.html">Wildlife Snags</a>
+          <a href="services/animal-rescue.html">Cat & Drone Rescue</a>
+          <a href="services/canopy-science.html">Canopy Science</a>
+          <a href="services/treehouse-installation.html">Treehouse & Walkways</a>
+        </div>
         <a href="root-knowledge.html">Root Knowledge</a>
         <a href="lets-talk.html">Let's Talk Trees</a>
       </div>
@@ -905,6 +919,8 @@
     document.addEventListener('DOMContentLoaded', function() {
       const menuToggle = document.querySelector('.menu-toggle');
       const navLinks = document.querySelector('.nav-links');
+      const servicesParent = document.getElementById('servicesParent');
+      const servicesSubmenu = document.getElementById('servicesSubmenu');
       
       if (menuToggle && navLinks) {
         const openMenu = () => {
@@ -945,6 +961,16 @@
           if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
             closeMenu();
           }
+        });
+      }
+      // Submenu toggle (Services)
+      if (servicesParent && servicesSubmenu) {
+        servicesParent.addEventListener('click', function(e) {
+          e.preventDefault();
+          const open = servicesSubmenu.classList.toggle('active');
+          servicesParent.setAttribute('aria-expanded', String(open));
+          servicesSubmenu.setAttribute('aria-hidden', String(!open));
+          servicesParent.textContent = open ? 'Services ▾' : 'Services ▸';
         });
       }
     });

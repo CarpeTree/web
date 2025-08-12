@@ -660,6 +660,19 @@
         font-weight: 600;
     }
 
+    /* Mobile submenu styles */
+    body:not(.force-desktop-layout) .nav-links .submenu {
+        display: none;
+        border-top: 1px solid rgba(44,95,45,0.15);
+        background: #f9faf9;
+    }
+    body:not(.force-desktop-layout) .nav-links .submenu.active { display: block; }
+    body:not(.force-desktop-layout) .nav-links .submenu a {
+        padding-left: 35px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
     body:not(.force-desktop-layout) .nav-links a:last-child {
         border-bottom: none;
         border-right: none;
