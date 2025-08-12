@@ -508,10 +508,19 @@
         
         <div style="text-align: center; margin-top: 30px;">
           <button type="button" class="btn" @click="prevStep()">Back</button>
-          <button type="submit" class="btn btn-primary" x-bind:disabled="submitting">
-                            <span x-show="!submitting">Submit Quote Request</span>
+          <button type="submit" id="submitBtn" class="btn btn-primary" x-bind:disabled="submitting">
+            <span x-show="!submitting">Submit Quote Request</span>
             <span x-show="submitting">Submitting...</span>
           </button>
+        </div>
+        <div id="submitProgress" style="display:none; margin-top:12px;">
+          <div style="height:8px;background:#e9ecef;border-radius:4px;overflow:hidden;">
+            <div id="submitProgressBar" style="height:8px;width:0%;background:var(--deep-forest-green);transition:width .2s;"></div>
+          </div>
+          <div id="submitStatus" style="font-size:12px;margin-top:6px;color:#2D5A27;">Preparing upload…</div>
+          <div style="font-size:12px;margin-top:4px;color:#555;">
+            Large video uploads can take time. After upload finishes, AI analysis may take 2–4 hours. You'll receive an email when it's ready.
+          </div>
         </div>
       </form>
     </div>
@@ -868,6 +877,15 @@
           this.submitting = true;
           
           try {
+            // Show grounded progress UI
+            const progressEl = document.getElementById('submitProgress');
+            const progressBar = document.getElementById('submitProgressBar');
+            const statusEl = document.getElementById('submitStatus');
+            if (progressEl && progressBar && statusEl) {
+              progressEl.style.display = 'block';
+              progressBar.style.width = '5%';
+              statusEl.textContent = 'Preparing upload…';
+            }
             const form = document.querySelector('form');
             const formData = new FormData(form);
             
@@ -929,31 +947,44 @@
             }
             
             // Add uploaded files
+            // Upload with progress using XHR
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/server/api/submitQuote-working.php', true);
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable && progressBar && statusEl) {
+                const pct = Math.min(90, Math.round((e.loaded / e.total) * 90));
+                progressBar.style.width = pct + '%';
+                statusEl.textContent = 'Uploading media… ' + pct + '%';
+              }
+            };
             this.uploadedFiles.forEach((file, index) => {
               formData.append(`files[${index}]`, file.data);
             });
             
-                      const response = await fetch('/server/api/submitQuote-working.php', {
-            method: 'POST',
-            body: formData
-          });
-          
-          console.log('Response status:', response.status);
-          console.log('Response headers:', response.headers);
-          
-          const responseText = await response.text();
-          console.log('Raw response:', responseText);
-          
-          let result;
-          try {
-            result = JSON.parse(responseText);
-          } catch (parseError) {
-            console.error('JSON parse error:', parseError);
-            throw new Error('Invalid response from server: ' + responseText.substring(0, 100));
-          }
+            // Wrap XHR in a promise to reuse existing logic
+            const responseText = await new Promise((resolve, reject) => {
+              xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                  resolve(xhr.responseText);
+                }
+              };
+              xhr.onerror = () => reject(new Error('Network error'));
+              xhr.send(formData);
+              if (statusEl) statusEl.textContent = 'Submitting request…';
+              if (progressBar) progressBar.style.width = '95%';
+            });
+            let result;
+            try {
+              result = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error('JSON parse error:', parseError);
+              throw new Error('Invalid response from server: ' + String(responseText).substring(0, 120));
+            }
           
           if (response.ok && result.success) {
               console.log('Quote submitted successfully:', result);
+              if (progressBar) progressBar.style.width = '100%';
+              if (statusEl) statusEl.textContent = 'Upload complete. Starting AI analysis…';
 
               if (result.preflight_check && !result.preflight_check.sufficient) {
                   // Pre-flight check failed, ask for more info
