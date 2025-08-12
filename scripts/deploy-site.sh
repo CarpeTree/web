@@ -33,12 +33,11 @@ rsync -az -e "ssh $SSH_OPTS" "$ROOT/lets-talk.html"  "$HOST:$REMOTE_TMP/site/" |
 rsync -az -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" || true
 
 # Move into place with sudo and fix ownership
-ssh $SSH_OPTS "$HOST" "sudo -n rsync -a $REMOTE_TMP/server/api/ /var/www/carpetree.com/server/api/ && \
-  sudo -n rsync -a $REMOTE_TMP/server/utils/ /var/www/carpetree.com/server/utils/ && \
-  sudo -n rsync -a $REMOTE_TMP/server/templates/ /var/www/carpetree.com/server/templates/ && \
-  sudo -n rsync -a $REMOTE_TMP/ai/ /var/www/carpetree.com/ai/ && \
-  sudo -n rsync -a $REMOTE_TMP/site/ $WEB_ROOT/ && \
-  sudo -n chown -R www-data:www-data $WEB_ROOT && \
+ssh $SSH_OPTS "$HOST" "rsync -a $REMOTE_TMP/server/api/ /var/www/carpetree.com/server/api/ && \
+  rsync -a $REMOTE_TMP/server/utils/ /var/www/carpetree.com/server/utils/ && \
+  rsync -a $REMOTE_TMP/server/templates/ /var/www/carpetree.com/server/templates/ && \
+  rsync -a $REMOTE_TMP/ai/ /var/www/carpetree.com/ai/ && \
+  rsync -a $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
 echo deploy_ok
