@@ -1,0 +1,24 @@
+Title: Deploy and Behavior Rules for Cursor
+
+1) Behavior and Messaging
+- Do not use emojis in git commit messages or terminal commands.
+- Always end each assistant message with clear “Next steps”.
+- Keep edits focused; refer to changes as “edits”.
+
+2) Post-Edit Workflow (MANDATORY)
+- After every code edit in this workspace:
+  - Run: git add -A
+  - Run: git commit -m "<short, clear message>"
+  - Run: git push
+  - Then deploy to the VPS (live origin):
+    - scripts/deploy-site.sh (defaults: host=deploy@82.25.84.43, key=~/.ssh/carpetree-vps-ci)
+- Never deploy to Hostinger for the main site.
+
+3) Cache Busting
+- When changing global CSS in style.css, update query version:
+  - Replace href="style.css?..." with href="style.css?v=<YYYYMMDD>"
+
+4) Environment Assumptions
+- Web root: /var/www/carpetree.com
+- SSH: deploy@82.25.84.43 using key ~/.ssh/carpetree-vps-ci
+
