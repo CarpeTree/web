@@ -720,7 +720,8 @@
             restrictions: {
               maxFileSize: 1024 * 1024 * 1024, // 1GB
               allowedFileTypes: ['image/*', 'video/*', 'audio/*']
-            }
+            },
+            autoProceed: false
           });
 
           uppy.use(Uppy.Dashboard, {
@@ -733,6 +734,9 @@
             hidePauseResumeButton: false,
             hideCancelButton: false
           });
+
+          // Optional: wire to chunk endpoint if needed later
+          // uppy.use(Uppy.XHRUpload, { endpoint: '/server/api/upload-chunk.php', fieldName: 'file' });
 
           uppy.on('file-added', (file) => {
             this.uploadedFiles.push(file);
@@ -949,7 +953,8 @@
             // Add uploaded files
             // Upload with progress using XHR
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/server/api/submitQuote-working.php', true);
+            const endpoint = '/api/submitQuote-working.php';
+            xhr.open('POST', endpoint, true);
             xhr.setRequestHeader('Accept', 'application/json');
             xhr.timeout = 900000; // 15 minutes
             xhr.upload.onprogress = (e) => {
