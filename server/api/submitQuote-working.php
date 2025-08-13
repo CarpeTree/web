@@ -161,7 +161,7 @@ try {
         $customer_id,
         json_encode($selected_services),
         $_POST['notes'] ?? '',
-        'pending_files' // Will update to ai_processing or submitted based on file uploads
+        'submitted' // Initial status must match ENUM; later updates keep 'submitted'
     ]);
     
     $quote_id = $pdo->lastInsertId();
