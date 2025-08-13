@@ -36,7 +36,7 @@ rsync -r -e "ssh $SSH_OPTS" "$ROOT/images/"         "$HOST:$REMOTE_TMP/site/imag
 ssh $SSH_OPTS "$HOST" "mkdir -p $WEB_ROOT/server $WEB_ROOT/ai && \
   rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
   rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ $WEB_ROOT/ai/ && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/site/ $WEB_ROOT/ && \
+  rsync -r --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
 echo deploy_ok

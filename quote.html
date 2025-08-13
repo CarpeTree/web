@@ -1011,11 +1011,11 @@
               console.error('JSON parse error:', parseError);
               throw new Error('Invalid response from server: ' + String(responseText).substring(0, 120));
             }
-            if (result && result.success !== true) {
-              throw new Error(result.error || 'Submission failed');
+            if (!result || result.success !== true) {
+              throw new Error((result && result.error) || 'Submission failed');
             }
-          
-          if (response.ok && result.success) {
+
+          if (result && result.success) {
               console.log('Quote submitted successfully:', result);
               if (progressBar) progressBar.style.width = '100%';
               if (statusEl) statusEl.textContent = 'Upload complete. Starting AI analysis…';
