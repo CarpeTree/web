@@ -21,7 +21,9 @@ ssh $SSH_OPTS "$HOST" "rm -rf $REMOTE_TMP && mkdir -p $REMOTE_TMP/site $REMOTE_T
 
 # Sync server-side code (no perms/owner/group/times to avoid chown/chgrp issues)
 # Sync the entire server folder to preserve paths used by require/include
-rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/"            "$HOST:$REMOTE_TMP/server/"
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times \
+  --exclude "uploads/**" \
+  -e "ssh $SSH_OPTS" "$ROOT/server/" "$HOST:$REMOTE_TMP/server/"
 rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/ai/"               "$HOST:$REMOTE_TMP/ai/"
 
 # Sync key frontend assets (add more as needed)
@@ -34,9 +36,9 @@ rsync -r -e "ssh $SSH_OPTS" "$ROOT/images/"         "$HOST:$REMOTE_TMP/site/imag
 
 # Move into place with sudo and fix ownership
 ssh $SSH_OPTS "$HOST" "mkdir -p $WEB_ROOT/server $WEB_ROOT/ai && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
   rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ $WEB_ROOT/ai/ && \
-  rsync -r --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/site/ $WEB_ROOT/ && \
+  rsync -r --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' --exclude 'server/uploads/**' $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
 echo deploy_ok
