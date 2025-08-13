@@ -16,11 +16,11 @@ function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
 
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = $SMTP_HOST ?? 'smtp.hostinger.com';
+        $mail->Host       = $_ENV['SMTP_HOST'] ?? ($SMTP_HOST ?? 'smtp.hostinger.com');
         $mail->SMTPAuth   = true;
-        $mail->Username   = $SMTP_USER ?? '';
-        $mail->Password   = $SMTP_PASS ?? '';
-        $mail->Port       = $SMTP_PORT ?? 587;
+        $mail->Username   = $_ENV['SMTP_USER'] ?? ($SMTP_USER ?? '');
+        $mail->Password   = $_ENV['SMTP_PASS'] ?? ($SMTP_PASS ?? '');
+        $mail->Port       = (int)($_ENV['SMTP_PORT'] ?? ($SMTP_PORT ?? 587));
         // Optional debug
         $smtpDebug = $_ENV['SMTP_DEBUG'] ?? null;
         if (is_numeric($smtpDebug) && (int)$smtpDebug > 0) {
@@ -35,7 +35,7 @@ function sendEmail($to, $subject, $template, $data = [], $attachments = []) {
         }
 
         // Recipients
-        $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
+        $fromAddress = $_ENV['SMTP_FROM'] ?? ($SMTP_FROM ?: 'sapport@carpetree.com');
         $replyToAddress = $_ENV['SMTP_REPLY_TO'] ?? $_ENV['SUPPORT_EMAIL'] ?? $fromAddress;
         $mail->setFrom($fromAddress, 'Carpe Tree\'em');
         $mail->addReplyTo($replyToAddress);
