@@ -266,11 +266,6 @@ try {
         error_log("Customer email failed: " . $e->getMessage());
     }
     
-    // Send simple admin notification (async)
-    if (function_exists('fastcgi_finish_request')) {
-        fastcgi_finish_request();
-    }
-    
     // Return success immediately
     echo json_encode([
         'success' => true,
