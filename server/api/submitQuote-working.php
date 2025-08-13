@@ -177,6 +177,7 @@ try {
         writeProgressUpdate($progress_id, 'saving_files', 45);
         
         $files = $_FILES['files'];
+        $exifPayload = isset($_POST['exif']) ? $_POST['exif'] : [];
         if (is_array($files['name'])) {
             $total_files = count($files['name']);
             $saved_index = 0;
@@ -199,10 +200,18 @@ try {
                         // Log file in database (using correct media table schema)
                         $file_type = strpos($files['type'][$i], 'image/') === 0 ? 'image' : 
                                    (strpos($files['type'][$i], 'video/') === 0 ? 'video' : 'audio');
+                        $exif_json = null;
+                        if (is_array($exifPayload) && isset($exifPayload[$i])) {
+                            $raw = $exifPayload[$i];
+                            // Payload comes as JSON string per index
+                            if (is_string($raw)) {
+                                $exif_json = $raw;
+                            }
+                        }
                         
                         $file_stmt = $pdo->prepare("
-                            INSERT INTO media (quote_id, original_filename, filename, file_path, file_size, mime_type, file_type, uploaded_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                            INSERT INTO media (quote_id, original_filename, filename, file_path, file_size, mime_type, file_type, exif_data, uploaded_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
                         ");
                         $file_stmt->execute([
                             $quote_id,
@@ -211,7 +220,8 @@ try {
                             $file_path,
                             $files['size'][$i],
                             $files['type'][$i],
-                            $file_type
+                            $file_type,
+                            $exif_json
                         ]);
                     }
                 }

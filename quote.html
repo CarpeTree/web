@@ -551,6 +551,7 @@
   </div>
 
   <script src="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
   
   <!-- Mobile Menu JavaScript -->
   <script>
@@ -652,6 +653,7 @@
         locationText: '',
         gpsCoords: null,
         exifCoords: null,
+        exifByFileId: {},
         selectedServices: [],
         formData: {
           email: '',
@@ -827,9 +829,69 @@
         },
 
         async extractExifLocation(file) {
-          // This is a simplified version - in production you'd use a library like exif-js
-          // For now, we'll just note that EXIF extraction would happen here
-          console.log('EXIF extraction would happen here for:', file.name);
+          try {
+            if (!file || !file.data || !file.type || !/^image\//.test(file.type)) return;
+            const blob = file.data;
+            await new Promise((resolve) => {
+              EXIF.getData(blob, () => {
+                try {
+                  const all = EXIF.getAllTags(blob) || {};
+                  // Convert GPS to decimal degrees if present
+                  const toDec = (ref, arr) => {
+                    if (!Array.isArray(arr) || arr.length < 3) return null;
+                    const [d, m, s] = arr.map(v => {
+                      if (typeof v === 'object' && v.numerator !== undefined) {
+                        return v.numerator / (v.denominator || 1);
+                      }
+                      return Number(v);
+                    });
+                    let dec = d + (m / 60) + (s / 3600);
+                    if (ref === 'S' || ref === 'W') dec = -dec;
+                    return dec;
+                  };
+                  let exifLat = null;
+                  let exifLng = null;
+                  if (all.GPSLatitude && all.GPSLatitudeRef) {
+                    exifLat = toDec(all.GPSLatitudeRef, all.GPSLatitude);
+                  }
+                  if (all.GPSLongitude && all.GPSLongitudeRef) {
+                    exifLng = toDec(all.GPSLongitudeRef, all.GPSLongitude);
+                  }
+                  const plain = {};
+                  Object.keys(all).forEach(k => {
+                    const v = all[k];
+                    try {
+                      // best-effort toJSON
+                      if (typeof v === 'object' && v !== null) {
+                        if ('numerator' in v && 'denominator' in v) {
+                          plain[k] = v.numerator / (v.denominator || 1);
+                        } else if (Array.isArray(v)) {
+                          plain[k] = v.map(x => (x && x.numerator !== undefined) ? (x.numerator / (x.denominator || 1)) : x);
+                        } else {
+                          plain[k] = String(v);
+                        }
+                      } else {
+                        plain[k] = v;
+                      }
+                    } catch(e) {
+                      plain[k] = String(v);
+                    }
+                  });
+                  if (exifLat !== null && exifLng !== null) {
+                    this.exifCoords = { lat: exifLat, lng: exifLng };
+                    this.locationCaptured = true;
+                    this.locationText = `📷 EXIF GPS: ${exifLat.toFixed(6)}, ${exifLng.toFixed(6)}`;
+                  }
+                  this.exifByFileId[file.id] = { exif: plain, exifLat, exifLng };
+                } catch (err) {
+                  console.warn('EXIF parse error for', file.name, err);
+                }
+                resolve();
+              });
+            });
+          } catch (err) {
+            console.warn('EXIF extraction failed for', file && file.name, err);
+          }
         },
 
         getStepClass(stepNumber) {
@@ -983,6 +1045,10 @@
             };
             this.uploadedFiles.forEach((file, index) => {
               formData.append(`files[${index}]`, file.data);
+              const exif = this.exifByFileId[file.id];
+              if (exif) {
+                try { formData.append(`exif[${index}]`, JSON.stringify(exif)); } catch (e) {}
+              }
             });
             
             // Wrap XHR in a promise to reuse existing logic
