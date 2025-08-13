@@ -518,6 +518,9 @@
             <div id="submitProgressBar" style="height:8px;width:0%;background:var(--deep-forest-green);transition:width .2s;"></div>
           </div>
           <div id="submitStatus" style="font-size:12px;margin-top:6px;color:#2D5A27;">Preparing upload…</div>
+          <div id="submitStatusLink" style="font-size:12px;margin-top:6px;color:#555;display:none;">
+            Live status: <a id="progressLink" href="#" target="_blank" style="color:var(--deep-forest-green);text-decoration:underline;">open</a>
+          </div>
           <div style="font-size:12px;margin-top:4px;color:#555;">
             Large video uploads can take time. After upload finishes, we personally review all quotes. You’ll receive a response within 3 days.
           </div>
@@ -957,6 +960,16 @@
             xhr.open('POST', endpoint, true);
             xhr.setRequestHeader('Accept', 'application/json');
             xhr.timeout = 900000; // 15 minutes
+            // attach a client-side progress id so we can poll server
+            const progressId = 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+            formData.append('progress_id', progressId);
+            const statusLinkEl = document.getElementById('submitStatusLink');
+            const progressLink = document.getElementById('progressLink');
+            if (statusLinkEl && progressLink) {
+              const url = '/server/api/progress.php?id=' + encodeURIComponent(progressId);
+              progressLink.href = url;
+              statusLinkEl.style.display = 'block';
+            }
             xhr.upload.onprogress = (e) => {
               if (e.lengthComputable && progressBar && statusEl) {
                 const pct = Math.min(90, Math.round((e.loaded / e.total) * 90));

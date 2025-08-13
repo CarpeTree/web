@@ -9,6 +9,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Progress tracking
+require_once __DIR__ . '/../utils/progress-tracker.php';
+$progress_id = initializeProgressId($_POST['progress_id'] ?? null);
+writeProgressUpdate($progress_id, 'received', 1, ['ip' => $_SERVER['REMOTE_ADDR'] ?? null]);
+
 try {
     // Only accept POST requests
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -23,17 +28,22 @@ try {
     if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Invalid email format');
     }
+    writeProgressUpdate($progress_id, 'validated', 5);
     
     // Connect to database
     require_once '../config/database-simple.php';
+    writeProgressUpdate($progress_id, 'db_connected', 10);
     
     // Start transaction
     $pdo->beginTransaction();
+    writeProgressUpdate($progress_id, 'transaction_started', 12);
     
     // Enhanced duplicate customer detection by email, phone, name, AND address
     $customer = null;
     $is_duplicate = false;
     $duplicate_match_type = '';
+    
+    writeProgressUpdate($progress_id, 'customer_lookup', 15);
     
     // First check by email
     $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
@@ -101,6 +111,7 @@ try {
             isset($_POST['newsletter_opt_in']) ? ($_POST['newsletter_opt_in'] === 'true' ? 1 : 0) : null,
             $customer_id
         ]);
+        writeProgressUpdate($progress_id, 'customer_updated', 22, ['customer_id' => $customer_id, 'duplicate' => $is_duplicate]);
         
         // Log duplicate customer detection
         if ($is_duplicate) {
@@ -123,6 +134,7 @@ try {
         ]);
         $customer_id = $pdo->lastInsertId();
         $is_duplicate = false;
+        writeProgressUpdate($progress_id, 'customer_created', 22, ['customer_id' => $customer_id]);
     }
     
     // Parse services
@@ -153,6 +165,7 @@ try {
     ]);
     
     $quote_id = $pdo->lastInsertId();
+    writeProgressUpdate($progress_id, 'quote_created', 30, ['quote_id' => $quote_id]);
     
     // Handle file uploads (simplified)
     $file_count = 0;
@@ -161,16 +174,27 @@ try {
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
+        writeProgressUpdate($progress_id, 'saving_files', 45);
         
         $files = $_FILES['files'];
         if (is_array($files['name'])) {
-            for ($i = 0; $i < count($files['name']); $i++) {
+            $total_files = count($files['name']);
+            $saved_index = 0;
+            for ($i = 0; $i < $total_files; $i++) {
                 if ($files['error'][$i] === UPLOAD_ERR_OK) {
                     $file_name = 'upload_' . $i . '_' . time() . '_' . basename($files['name'][$i]);
                     $file_path = $upload_dir . '/' . $file_name;
                     
                     if (move_uploaded_file($files['tmp_name'][$i], $file_path)) {
                         $file_count++;
+                        $saved_index++;
+                        // Update progress based on number of files saved (upload already finished client-side)
+                        $percent = 50 + (int)floor(($saved_index / max(1, $total_files)) * 40);
+                        writeProgressUpdate($progress_id, 'file_saved', $percent, [
+                            'index' => $saved_index,
+                            'total' => $total_files,
+                            'name' => $files['name'][$i]
+                        ]);
                         
                         // Log file in database (using correct media table schema)
                         $file_type = strpos($files['type'][$i], 'image/') === 0 ? 'image' : 
@@ -205,9 +229,11 @@ try {
         $stmt->execute([$quote_id]);
         error_log("Quote $quote_id: No files uploaded, status set to submitted");
     }
+    writeProgressUpdate($progress_id, 'status_updated', 90, ['files_uploaded' => $file_count]);
     
     // Commit transaction
     $pdo->commit();
+    writeProgressUpdate($progress_id, 'committed', 93);
     
     // Send customer confirmation email
     $customer_email_sent = false;
@@ -234,6 +260,7 @@ try {
         $headers .= "From: Carpe Tree'em <quotes@carpetree.com>\r\n";
         
         $customer_email_sent = mail($to, $subject, $message, $headers);
+        writeProgressUpdate($progress_id, 'email_sent', 95, ['customer_email_sent' => (bool)$customer_email_sent]);
     } catch (Exception $e) {
         // Email failed but quote was saved - that's okay
         error_log("Customer email failed: " . $e->getMessage());
@@ -254,8 +281,11 @@ try {
         'is_duplicate_customer' => $is_duplicate,
         'duplicate_match_type' => $duplicate_match_type,
         'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}",
-        'message' => 'Quote submitted successfully! We will contact you within 24 hours.'
+        'message' => 'Quote submitted successfully! We will contact you within 24 hours.',
+        'progress_id' => $progress_id,
+        'progress_url' => '/server/api/progress.php?id=' . urlencode($progress_id)
     ]);
+    writeProgressUpdate($progress_id, 'responded', 98);
     
     // Send admin notification asynchronously (after response sent)
     if (function_exists('fastcgi_finish_request')) {
@@ -279,8 +309,10 @@ try {
     }
     
     // Remove immediate AI trigger; processing will be handled by admin action or cron.
+    writeProgressUpdate($progress_id, 'done', 100);
     
 } catch (Exception $e) {
+    writeProgressUpdate($progress_id, 'error', 100, ['message' => $e->getMessage()]);
     // Rollback transaction if it exists
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollback();

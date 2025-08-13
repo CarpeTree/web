@@ -264,9 +264,14 @@
             payload.append('notes', 'LetsTalk message');
             payload.append('selectedServices', JSON.stringify([document.getElementById('service')?.value || 'General Inquiry']));
             try {
+                const progressId = 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+                payload.append('progress_id', progressId);
                 const res = await fetch('/server/api/submitQuote-working.php', { method: 'POST', body: payload });
                 const json = await res.json();
                 if (!json.success) throw new Error(json.error || 'Submit failed');
+                const watch = document.createElement('p');
+                watch.innerHTML = `Live status: <a href="/server/api/progress.php?id=${encodeURIComponent(progressId)}" target="_blank">open</a>`;
+                document.querySelector('.form-container')?.appendChild(watch);
                 document.getElementById('contactForm').style.display = 'none';
                 document.getElementById('successMessage').style.display = 'block';
             } catch (err) {
