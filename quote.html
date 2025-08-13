@@ -953,7 +953,7 @@
             // Add uploaded files
             // Upload with progress using XHR
             const xhr = new XMLHttpRequest();
-            const endpoint = '/api/submitQuote-working.php';
+            const endpoint = '/server/api/submitQuote-working.php';
             xhr.open('POST', endpoint, true);
             xhr.setRequestHeader('Accept', 'application/json');
             xhr.timeout = 900000; // 15 minutes

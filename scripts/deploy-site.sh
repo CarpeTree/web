@@ -17,12 +17,11 @@ REMOTE_TMP="/tmp/ct_site_$$"
 echo "Deploying to $HOST ($WEB_ROOT)"
 
 # Prepare remote temp workspace
-ssh $SSH_OPTS "$HOST" "rm -rf $REMOTE_TMP && mkdir -p $REMOTE_TMP/site $REMOTE_TMP/server/api $REMOTE_TMP/server/utils $REMOTE_TMP/server/templates $REMOTE_TMP/ai"
+ssh $SSH_OPTS "$HOST" "rm -rf $REMOTE_TMP && mkdir -p $REMOTE_TMP/site $REMOTE_TMP/server $REMOTE_TMP/ai"
 
 # Sync server-side code (no perms/owner/group/times to avoid chown/chgrp issues)
-rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/api/"       "$HOST:$REMOTE_TMP/server/api/"
-rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/utils/"     "$HOST:$REMOTE_TMP/server/utils/"
-rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/templates/" "$HOST:$REMOTE_TMP/server/templates/"
+# Sync the entire server folder to preserve paths used by require/include
+rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/server/"            "$HOST:$REMOTE_TMP/server/"
 rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/ai/"               "$HOST:$REMOTE_TMP/ai/"
 
 # Sync key frontend assets (add more as needed)
@@ -34,11 +33,9 @@ rsync -r -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" ||
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/images/"         "$HOST:$REMOTE_TMP/site/images/" || true
 
 # Move into place with sudo and fix ownership
-ssh $SSH_OPTS "$HOST" "mkdir -p /var/www/carpetree.com/api /var/www/carpetree.com/ai && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/api/ /var/www/carpetree.com/api/ && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/utils/ /var/www/carpetree.com/api/utils/ && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/templates/ /var/www/carpetree.com/api/templates/ && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ /var/www/carpetree.com/ai/ && \
+ssh $SSH_OPTS "$HOST" "mkdir -p $WEB_ROOT/server $WEB_ROOT/ai && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
+  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ $WEB_ROOT/ai/ && \
   rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
