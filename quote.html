@@ -361,21 +361,16 @@
         <a href="philosophy.html">Philosophy</a>
         <a href="services.html">Services</a>
         <a href="root-knowledge.html">Root Knowledge</a>
-        <a href="lets-talk.html">Let's Talk Trees</a>
+        <a href="quote.html">Let's Talk Trees</a>
       </div>
     </div>
   </nav>
 
   <div class="quote-wizard" x-data="quoteWizard()">
-    <!-- Step Indicator -->
-    <div class="step-indicator">
-      <div class="step" :class="getStepClass(1)">1</div>
-      <div class="step" :class="getStepClass(2)">2</div>
-      <div class="step" :class="getStepClass(3)">3</div>
-    </div>
+    <!-- Unified single-page form (steps hidden) -->
 
-    <!-- Step 1: Upload Media -->
-    <div class="step-content" x-show="currentStep === 1" x-transition>
+    <!-- Upload Media -->
+    <div class="step-content">
       <h2>Step 1: Share Your Tree Photos & Videos</h2>
       <p>Upload photos, videos, or voice recordings of your trees. Include wide shots and close-ups of any problem areas.</p>
       
@@ -398,15 +393,11 @@
         <p><strong>📍 Location captured:</strong> <span x-text="locationText"></span></p>
       </div>
       
-      <div style="text-align: center; margin-top: 30px;">
-        <button class="btn btn-primary" @click="nextStep()" x-bind:disabled="!canProceedStep1()">
-          Next: Select Services
-        </button>
-      </div>
+      <!-- unified layout: continue below -->
     </div>
 
-    <!-- Step 2: Select Services -->
-    <div class="step-content" x-show="currentStep === 2" x-transition>
+    <!-- Select Services -->
+    <div class="step-content">
       <h2>Step 2: What Services Do You Need?</h2>
       <p>Select all services you're interested in. Our AI will analyze your media and provide specific recommendations.</p>
       
@@ -422,18 +413,13 @@
         </template>
       </div>
       
-      <div style="text-align: center; margin-top: 30px;">
-        <button class="btn" @click="prevStep()">Back</button>
-        <button class="btn btn-primary" @click="nextStep()" x-bind:disabled="selectedServices.length === 0">
-          Next: Contact Info
-        </button>
-      </div>
+      <!-- unified layout: submit section below -->
     </div>
 
-    <!-- Step 3: Contact Information -->
-    <div class="step-content" x-show="currentStep === 3" x-transition>
+    <!-- Contact Information -->
+    <div class="step-content">
       <h2>Step 3: Contact Information</h2>
-                <p>Upload videos and photos of your trees for a detailed quote within 24 hours.</p>
+                <p>Upload videos and photos of your trees. I personally review each submission within 2–5 days and may follow up by phone or email for details.</p>
       
       <form @submit.prevent="submitQuote()">
         <div class="form-group">
@@ -507,7 +493,6 @@
         </div>
         
         <div style="text-align: center; margin-top: 30px;">
-          <button type="button" class="btn" @click="prevStep()">Back</button>
           <button type="submit" id="submitBtn" class="btn btn-primary" x-bind:disabled="submitting">
             <span x-show="!submitting">Submit Quote Request</span>
             <span x-show="submitting">Submitting...</span>
@@ -542,7 +527,7 @@
             <p><strong>What happens next:</strong></p>
             <ul>
                 <li>Professional review of your photos/videos</li>
-                <li>Professional review and quote preparation (within 24 hours)</li>
+                <li>Personal review and quote preparation (typically within 2–5 days)</li>
                 <li>Detailed quote emailed to you with specific recommendations</li>
             </ul>
         </div>
