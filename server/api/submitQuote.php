@@ -225,16 +225,14 @@ try {
     $uploaded_files = [];
     if ($files_uploaded) {
         try {
-            // Create upload directory with full path
-            $uploads_base = dirname(dirname(__DIR__)) . '/uploads';
+            // Create upload directory with full path (local fallback)
+            require_once __DIR__ . '/../utils/media_store.php';
+            $uploads_base = media_ensure_quote_dir($quote_id);
             if (!file_exists($uploads_base)) {
                 mkdir($uploads_base, 0755, true);
             }
             
-            $upload_dir = "$uploads_base/$quote_id";
-            if (!file_exists($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
+            $upload_dir = $uploads_base;
             
             // Process uploaded files
             $files = $_FILES['files'];

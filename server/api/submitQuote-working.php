@@ -170,7 +170,8 @@ try {
     // Handle file uploads (simplified)
     $file_count = 0;
     if (!empty($_FILES['files'])) {
-        $upload_dir = '../uploads/quote_' . $quote_id;
+        require_once __DIR__ . '/../utils/media_store.php';
+        $upload_dir = media_ensure_quote_dir($quote_id);
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
@@ -208,7 +209,13 @@ try {
                                 $exif_json = $raw;
                             }
                         }
-                        
+
+                        // Upload to remote if enabled and use remote URL in DB
+                        $remote_url = null;
+                        if (function_exists('media_upload_remote') && media_remote_enabled()) {
+                            $remote_url = media_upload_remote($file_path, (int)$quote_id, $file_name);
+                        }
+
                         $file_stmt = $pdo->prepare("
                             INSERT INTO media (quote_id, original_filename, filename, file_path, file_size, mime_type, file_type, exif_data, uploaded_at)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
@@ -217,7 +224,7 @@ try {
                             $quote_id,
                             $files['name'][$i],
                             $file_name,
-                            $file_path,
+                            $remote_url ?: $file_path,
                             $files['size'][$i],
                             $files['type'][$i],
                             $file_type,
@@ -255,7 +262,7 @@ try {
             <body style='font-family: Arial, sans-serif;'>
                 <h2>Thank you for your quote request!</h2>
                 <p>Hi " . htmlspecialchars($_POST['name'] ?? 'there') . ",</p>
-                <p>We've received your tree service quote request and will get back to you within 24 hours.</p>
+                <p>We've received your tree service quote request. I personally review submissions within 2–5 days and may follow up by phone or email for additional details.</p>
                 <p><strong>Quote ID:</strong> #$quote_id</p>
                 <p><strong>Services requested:</strong> " . implode(', ', $selected_services) . "</p>
                 " . ($file_count > 0 ? "<p><strong>Files uploaded:</strong> $file_count photo(s)/video(s)</p>" : "") . "
@@ -286,7 +293,7 @@ try {
         'is_duplicate_customer' => $is_duplicate,
         'duplicate_match_type' => $duplicate_match_type,
         'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}",
-        'message' => 'Quote submitted successfully! We will contact you within 24 hours.',
+        'message' => 'Quote submitted successfully! I personally review submissions within 2–5 days and may follow up for details.',
         'progress_id' => $progress_id,
         'progress_url' => '/server/api/progress.php?id=' . urlencode($progress_id)
     ]);

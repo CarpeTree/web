@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../utils/media_store.php';
 
 function read_quote_row(PDO $pdo, int $quote_id) {
     $stmt = $pdo->prepare("SELECT * FROM quotes WHERE id = ? LIMIT 1");
@@ -73,6 +74,28 @@ function collect_images(int $quote_id) {
                 }
             }
         }
+    }
+    // Also include any media entries from DB that have remote URLs
+    try {
+        global $pdo;
+        $stmt = $pdo->prepare("SELECT filename, file_path FROM media WHERE quote_id = ? ORDER BY id ASC LIMIT 500");
+        $stmt->execute([$quote_id]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $path = $row['file_path'] ?? '';
+            $name = $row['filename'] ?? '';
+            if (!$name && $path) { $name = basename($path); }
+            // If remote mode or path is absolute URL, use as-is
+            if (filter_var($path, FILTER_VALIDATE_URL)) {
+                $images[] = [ 'url' => $path, 'source' => $name ];
+                continue;
+            }
+            // If local path, make a public URL via helper
+            if ($name) {
+                $images[] = [ 'url' => media_public_url($quote_id, $name), 'source' => $name ];
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('collect_images DB fetch failed: ' . $e->getMessage());
     }
     return $images;
 }

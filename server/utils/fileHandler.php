@@ -39,6 +39,7 @@ function generateUniqueFilename($originalName) {
 }
 
 function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
+    require_once __DIR__ . '/media_store.php';
     // Validate file type
     if (!validateFileType($file['type'])) {
         throw new Exception('File type not allowed: ' . $file['type']);
@@ -54,7 +55,7 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
     $unique_filename = generateUniqueFilename($file['name']);
     $file_path = $upload_dir . '/' . $unique_filename;
     
-    // Move uploaded file
+    // Move uploaded file (always write a local copy first for processing/transcripts)
     if (!move_uploaded_file($file['tmp_name'], $file_path)) {
         throw new Exception('Failed to save uploaded file');
     }
@@ -84,6 +85,16 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         }
     }
     
+    // If remote storage is enabled, upload to Hostinger and capture remote URL
+    $remote_url = null;
+    if (media_remote_enabled()) {
+        $remote_url = media_upload_remote($file_path, (int)$quote_id, $unique_filename);
+        if ($remote_url && media_get_config()['delete_local_after_upload']) {
+            // keep small side-effects minimal; only remove if upload succeeded
+            // leave DB file_path as remote URL when present
+        }
+    }
+
     // Insert into media table (correct table)
     $stmt = $pdo->prepare("
         INSERT INTO media (
@@ -96,7 +107,7 @@ function processUploadedFile($file, $quote_id, $upload_dir, $pdo) {
         $quote_id,
         $unique_filename,
         $file['name'],
-        $file_path,
+        $remote_url ?: $file_path,
         $file['size'],
         $file['type'],
         $file_type,
