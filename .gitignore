@@ -1,37 +1,11 @@
-# START NEW - Security and upload files
-.env
-.env.*
-server/.env
-server/.env.*
-server/config/config.php
-server/credentials/
-uploads/
-*.log
-**/api_keys.txt
-**/secrets.txt
-
-# Composer dependencies
-server/vendor/
-
-# Generated PDFs and invoices  
-server/uploads/invoices/
-
-# Temporary files
-*.tmp
-*.temp
-
-# MacOS
-.DS_Store
-
-# Windows
-Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Node modules (if any)
-node_modules/
-# END NEW 
+# Ignore large binaries and staging prototypes
+Archive.zip
+staging/
+*.zip
+*.7z
+*.rar
+*.mov
+*.MOV
+*.mp4
+*.tif
+*.tiff
