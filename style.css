@@ -217,12 +217,22 @@
   .contact-header a {
     color: #F5F5F5;
     text-decoration: none;
-    margin: 0 15px;
-    transition: color 0.3s;
+    margin: 0 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: inline-block;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.9em;
   }
   
   .contact-header a:hover {
+    background: rgba(255,255,255,0.25);
     color: var(--muted-golden-amber);
+    transform: translateY(-1px);
+    text-decoration: none;
   }
   
   /* Content spacing */
