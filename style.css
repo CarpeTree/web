@@ -1,3 +1,26 @@
+/* Liquid Glass shared styles */
+.glass{
+  backdrop-filter: saturate(1.15) blur(12px);
+  -webkit-backdrop-filter: saturate(1.15) blur(12px);
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.glass:hover{
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.glass-header{ padding: 8px 12px; }
+/* Dark glass utility for green header bars */
+.glass-dark{
+  backdrop-filter: saturate(1.2) blur(10px);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  background: rgba(44,95,45,0.85);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
 /* Carpe Tree'em Website Styling */
 
 :root {
@@ -17,6 +40,18 @@
     color: var(--text-color);
     margin: 0;
     padding: 0;
+  }
+  /* Subtle page backdrop so glass blur is visible */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(1200px 600px at 20% 0%, rgba(44,95,45,0.08), transparent 60%),
+      radial-gradient(1200px 600px at 80% 100%, rgba(212,163,115,0.08), transparent 60%);
+    background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -38,7 +73,7 @@
   }
   
   nav {
-    background-color: var(--background-color);
+    background-color: transparent; /* let .glass provide the glass effect */
     border-bottom: 1px solid var(--deep-forest-green);
     position: fixed;
     width: 100%;
@@ -100,6 +135,34 @@
     transform: translateY(-2px);
     text-decoration: none;
   }
+
+  /* Desktop submenu (hidden by default) */
+  .nav-links { position: relative; }
+  .nav-links .submenu {
+    display: none;
+    position: absolute;
+    top: 45px; /* below nav */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background-color);
+    border: 2px solid var(--deep-forest-green);
+    border-radius: 8px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    padding: 8px 0;
+    min-width: 280px;
+    z-index: 1003;
+  }
+  .nav-links .submenu a {
+    display: block;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(44,95,45,0.15);
+    color: var(--deep-forest-green);
+    background: var(--background-color);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .nav-links .submenu a:last-child { border-bottom: none; }
+  .nav-links .submenu.active { display: block; }
   
   a {
     color: var(--accent-color);
@@ -136,7 +199,9 @@
   
   /* Persistent contact header */
   .contact-header {
-    background-color: var(--deep-forest-green);
+    background: rgba(44,95,45,0.85);
+    backdrop-filter: saturate(1.2) blur(10px);
+    -webkit-backdrop-filter: saturate(1.2) blur(10px);
     color: var(--background-color);
     text-align: center;
     padding: 5px 20px;
@@ -146,6 +211,7 @@
     z-index: 1000;
     font-size: 0.9em;
     box-sizing: border-box;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
   }
   
   .contact-header a {
@@ -348,6 +414,9 @@
     color: var(--deep-forest-green);
     margin-bottom: 20px;
   }
+  /* Ensure headings occupy their own line so buttons don't overlap */
+  h2, h3 { display: block; clear: both; }
+  .cta-button, .service-button, button[type="submit"] { vertical-align: middle; margin-top: 10px; }
   
   .cta-button {
     background: var(--background-color);
@@ -361,6 +430,10 @@
     text-transform: uppercase;
     font-weight: bold;
     letter-spacing: 1px;
+    display: inline-flex; /* ensure proper box sizing and alignment */
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
   
   .cta-button:hover {
@@ -368,6 +441,13 @@
     color: var(--background-color);
     transform: translateY(-2px);
     text-decoration: none; /* Keep this to prevent underline on hover */
+  }
+
+  /* CTA layout fixes */
+  .hero-content .cta-button + .cta-button { margin-left: 12px; }
+  @media (max-width: 768px) {
+    .hero-content .cta-button { display: block; width: 90%; max-width: 420px; margin: 12px auto; }
+    .hero-content .cta-button + .cta-button { margin-left: 0; }
   }
   
   .service-header {
