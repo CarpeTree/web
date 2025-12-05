@@ -437,8 +437,28 @@ try {
     if (is_array($parsed)) {
         $services = [];
         
+        // Helper function to parse cost strings like "$3,200.00 CAD" to numbers
+        $parseCost = function($cost) {
+            if (is_numeric($cost)) return (float)$cost;
+            if (is_string($cost)) {
+                // Remove currency symbols, commas, and text
+                $cleaned = preg_replace('/[^0-9.]/', '', $cost);
+                return (float)$cleaned;
+            }
+            return 0;
+        };
+        
         // Try multiple paths to find services/line items
         if (isset($parsed['services']) && is_array($parsed['services'])) {
+            // Clean up services with cost strings
+            foreach ($parsed['services'] as &$svc) {
+                if (isset($svc['cost'])) {
+                    $svc['cost'] = $parseCost($svc['cost']);
+                }
+                if (isset($svc['total'])) {
+                    $svc['total'] = $parseCost($svc['total']);
+                }
+            }
             $services = $parsed['services'];
         } elseif (isset($parsed['estimation']['items']) && is_array($parsed['estimation']['items'])) {
             // Extract from estimation.items (common Gemini format)
