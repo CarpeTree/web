@@ -1,0 +1,47 @@
+{
+  "model": "gpt5",
+  "services": [
+    {
+      "id": "tree_a_prune",
+      "name": "Prune Tree A",
+      "tree": "Tree A",
+      "category": "Pruning",
+      "description": "Reduce canopy by 15% and remove hazardous deadwood over driveway.",
+      "price_cad": 680,
+      "price_notes": "Includes cleanup and haul away.",
+      "duration_hours": 3.5,
+      "crew": {
+        "climber": 1,
+        "ground": 1
+      },
+      "model_source": "mock"
+    },
+    {
+      "id": "tree_b_remove",
+      "name": "Remove Tree B",
+      "tree": "Tree B",
+      "category": "Removal",
+      "description": "Dismantle leaning birch near service drop; rig over utility lines with spotter.",
+      "price_cad": 1240,
+      "price_notes": "Includes traffic cones and door knock with neighbor.",
+      "duration_hours": 5,
+      "crew": {
+        "climber": 1,
+        "ground": 2
+      },
+      "model_source": "mock"
+    }
+  ],
+  "frames": [
+    {
+      "filename": "mock_frame_01.jpg",
+      "notes": "Tree A over driveway with sparse canopy"
+    },
+    {
+      "filename": "mock_frame_02.jpg",
+      "notes": "Tree B lean toward service drop"
+    }
+  ],
+  "raw": "MOCK GPT-5 response for regression tests.",
+  "errors": []
+}

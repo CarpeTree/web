@@ -1,0 +1,45 @@
+{
+  "model": "gemini",
+  "services": [
+    {
+      "id": "tree_a_rigging",
+      "name": "Rigging setup for Cedar A",
+      "tree": "Cedar A",
+      "category": "Rigging",
+      "description": "Establish primary lowering point, install redirect for swing clearance, and pre-clear drop zone.",
+      "price_cad": 420,
+      "crew": {
+        "climber": 1,
+        "ground": 1
+      },
+      "duration_hours": 2,
+      "model_source": "mock"
+    },
+    {
+      "id": "tree_c_cleanup",
+      "name": "Cleanup Poplar C debris",
+      "tree": "Poplar C",
+      "category": "Cleanup",
+      "description": "Chip brush and haul wood from driveway stack; confirm customer wants all debris removed.",
+      "price_cad": 360,
+      "crew": {
+        "climber": 0,
+        "ground": 2
+      },
+      "duration_hours": 3,
+      "model_source": "mock"
+    }
+  ],
+  "frames": [
+    {
+      "filename": "gemini_mock_01.jpg",
+      "notes": "Cedar A canopy conflicts with soffit"
+    },
+    {
+      "filename": "gemini_mock_02.jpg",
+      "notes": "Poplar C brush pile near driveway"
+    }
+  ],
+  "raw": "MOCK Gemini response for regression tests.",
+  "errors": []
+}

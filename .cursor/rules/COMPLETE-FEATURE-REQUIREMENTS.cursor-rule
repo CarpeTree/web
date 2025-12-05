@@ -1,0 +1,253 @@
+# 🌲 CARPE TREE COMPLETE SYSTEM - FEATURE REQUIREMENTS & VISION
+
+## ⚠️ CRITICAL: REFERENCE THIS ENTIRE DOCUMENT BEFORE ANY CHANGE
+
+### 🎯 CURRENT WORKING FEATURES (NEVER BREAK THESE)
+- [ ] **Quotes load and display properly** - Shows customer info, address, phone, email
+- [ ] **AI Analysis displays inline** - Both GPT-5 and Gemini results with checkboxes
+- [ ] **Individual AI buttons**: 🎤 Whisper, 🤖 GPT-5, 💎 Gemini (separate controls)
+- [ ] **🚀 Run All AI button** - Runs all three models at once
+- [ ] **Loading states** - Each button shows "Processing..." when running
+- [ ] **Context window per quote** - Click "📝 Context" to open/close
+- [ ] **Context saves to database** - Persists between sessions
+- [ ] **Context included in AI** - Added to prompt as "ADDITIONAL CONTEXT FROM USER:"
+- [ ] **🔍 Raw AI Output button** - Modal showing complete analysis + transcription
+- [ ] **Working light/dark mode toggle** - Theme persists, readable in both modes
+- [ ] **Liquid glass theme** - Beautiful gradients, backdrop blur, green color scheme (#2D5A27)
+- [ ] **Compact header** - Small AI model indicators (GPT-5, Gemini, Whisper badges)
+- [ ] **System prompt editor** - Edit GPT-5 and Gemini prompts from header
+- [ ] **Whisper transcription working** - Extracts audio from video files
+- [ ] **Audio chunking** - Handles large files by splitting into 24MB chunks
+- [ ] **All phone formats supported** - MP4, MOV, HEIC, AVI, etc.
+- [ ] **Navigation links** - Field capture, Maps accessible
+
+## 🚀 ULTIMATE VISION: COMPLETE QUOTE-TO-INVOICE SYSTEM
+
+### 📱 FIELD CAPTURE WORKFLOW (CRITICAL - MUST ALWAYS WORK)
+**PURPOSE: Admin leaves card at property, pre-processes estimate for when customer calls**
+- [ ] **ALL FIELDS OPTIONAL** - Can leave name, phone, email, address blank
+- [ ] **ONLY FILES REQUIRED** - Must have at least one photo/video
+- [ ] **No validation errors** - Form submits with any combination of fields
+- [ ] **Blank fields stay blank** - No placeholder data, no required field errors
+- [ ] **Customer name field** - Optional input (can be "Unknown Customer")
+- [ ] **Customer address field** - Optional input (can be "Property on Main St")
+- [ ] **Customer phone field** - OPTIONAL, leave blank if unknown, NEVER required for field capture
+- [ ] **Customer email field** - Optional input, usually blank in field capture
+- [ ] **File upload functionality** - Working media upload from phones/cameras
+- [ ] **Drag & drop file upload working** - MUST NEVER BREAK - User reported broken, fixed
+- [ ] **Google Maps address autocomplete working** - MUST NEVER BREAK - User reported broken, fixed
+- [ ] **UNLIMITED FILE SIZE UPLOAD** - MUST NEVER BREAK - Accept ANY file size (10GB iPhone videos, etc.)
+- [ ] **NO FILE SIZE LIMITS EVER** - MUST NEVER BREAK - Never reject files for being too big
+- [ ] **Automatic chunking for large files** - MUST NEVER BREAK - Use FFmpeg to split large files if needed
+- [ ] **ALL FILES MUST REACH SERVER** - MUST NEVER BREAK - No matter the size, make it work
+- [ ] **CORRECT FILE TYPE DETECTION** - MUST NEVER BREAK - MOV files show as MOV, not JPEG
+- [ ] **PROPER FILE EXTENSION HANDLING** - MUST NEVER BREAK - Preserve original file extensions
+- [ ] **FORM SUBMISSION MUST WORK** - MUST NEVER BREAK - No HTTP 400 errors, successful quote creation
+- [ ] **SERVER HANDLES ALL FILE UPLOADS** - MUST NEVER BREAK - submitQuote.php accepts any file size/type
+- [ ] **NO HTTP 500 ERRORS** - MUST NEVER BREAK - Server processes field capture without internal errors
+- [ ] **GOOGLE MAPS API KEY WORKING** - MUST NEVER BREAK - Address autocomplete functional
+- [ ] **DATABASE COLUMN COMPATIBILITY** - MUST NEVER BREAK - Use correct column names for quotes table
+- [ ] **ALLOW DUPLICATE CUSTOMERS** - MUST NEVER BREAK - Same email/phone can have multiple quotes
+- [ ] **NO UNIQUE CONSTRAINTS ON CUSTOMER DATA** - MUST NEVER BREAK - Never block duplicate emails/phones
+- [ ] **AUTO AI ANALYSIS ON QUOTE SUBMIT** - MUST NEVER BREAK - Whisper, GPT-5, Gemini automatically triggered
+- [ ] **GPT-5 API MUST WORK** - MUST NEVER BREAK - No 500 errors, processes quotes with transcription context
+- [ ] **GEMINI API MUST WORK** - MUST NEVER BREAK - No 500 errors, processes quotes with transcription context
+- [ ] **AI MODELS MUST SEE UPLOADED MEDIA** - MUST NEVER BREAK - Images/videos included in API calls, not just transcription
+- [ ] **FRAME-BY-FRAME VIDEO ANALYSIS** - MUST NEVER BREAK - Extract frames, analyze each photo separately
+- [ ] **TREE LABELING WITH LETTERS** - MUST NEVER BREAK - Label trees as A, B, C with clear identification
+- [ ] **HAZARD AND DROP ZONE ANNOTATION** - MUST NEVER BREAK - Identify hazards and drop zones in each frame
+- [ ] **GPS location capture** - Device location data for distance calculations
+- [ ] **Form submission working** - Creates quotes with partial data
+- [ ] **Navigation to admin/maps** - Links work from field capture
+- [ ] **Liquid glass theme consistency** - Matches rest of site styling
+- [ ] **Card-based workflow** - Generate code to leave at property
+- [ ] **Super low friction setup** - Quick upload from phone
+- [ ] **Cross-platform consistency** - Main site "Get Quote" matches field app
+- [ ] **Auto AI processing** - Video/audio/images processed immediately on upload
+- [ ] **Transfer station finder** - Multiple options with distance calculations
+
+### 🤖 AI PROCESSING PIPELINE
+- [ ] **Multi-tree detection** - AI identifies individual trees from video/audio
+- [ ] **Tree extraction from video** - Screenshot each individual tree
+- [ ] **Frame-by-frame video analysis** - Extract multiple frames, analyze each separately
+- [ ] **Tree labeling with letters** - Clear A, B, C labels matching customer descriptions (3 trees identified)
+- [ ] **STRUCTURED LINE ITEMS NOT RAW TEXT** - MUST NEVER BREAK - Show services as selectable line items, raw goes to Raw Output
+- [ ] **TREE PRESERVATION CLEARLY MARKED** - MUST NEVER BREAK - Trees to keep vs remove clearly delineated
+- [ ] **AI ANALYSIS SHOWS AS CHECKBOXES** - MUST NEVER BREAK - Structured JSON parsed into selectable line items, not raw text
+- [ ] **SERVICE LINE ITEMS WITH CHECKBOXES** - MUST NEVER BREAK - Each service has checkbox for estimate selection
+- [ ] **WOOD DISPOSAL OPTIONS AS LINE ITEMS** - MUST NEVER BREAK - Firewood bucking vs hauling as separate services
+- [ ] **BRUSH DISPOSAL AS SEPARATE LINE ITEM** - MUST NEVER BREAK - Brush hauling separate from wood disposal
+- [ ] **CUSTOMER DISPOSAL CHOICES** - MUST NEVER BREAK - Keep wood, haul wood, keep brush, haul brush options
+- [ ] **RAW AI BUTTON MUST WORK** - MUST NEVER BREAK - Shows complete AI analysis with images/frames
+- [ ] **CONTEXT BUTTON MUST WORK** - MUST NEVER BREAK - Opens context editor for each quote
+- [ ] **IMAGES SHOWN WITH AI ANALYSIS** - MUST NEVER BREAK - Raw AI shows frames/images that AI analyzed
+- [ ] **SYSTEM PROMPT EDITOR MUST WORK** - MUST NEVER BREAK - Edit GPT-5 and Gemini prompts from Prompts button
+- [ ] **AI APIS USE SAVED PROMPTS** - MUST NEVER BREAK - AI analysis uses prompts from editor, not hardcoded
+- [ ] **NEVER BREAK DASHBOARD WHEN ADDING FEATURES** - CRITICAL RULE - Always preserve existing functionality
+- [ ] **INDIVIDUAL AI BUTTONS MUST WORK** - MUST NEVER BREAK - Whisper, GPT-5, Gemini buttons functional
+- [ ] **GEMINI ANALYSIS MUST DISPLAY** - MUST NEVER BREAK - Show Gemini results alongside GPT-5
+- [ ] **HANDLE API RATE LIMITS GRACEFULLY** - MUST NEVER BREAK - No errors when APIs hit rate limits
+- [ ] **Hazard annotation per frame** - Identify power lines, structures, septics, landscaping
+- [ ] **Drop zone analysis per frame** - Assess available areas, rigging requirements, obstacles
+- [ ] **Species identification** - Use customer's language ("Douglas Fir on the left")
+- [ ] **Audio context integration** - "This tree needs removal, that one pruning"
+- [ ] **Rigging requirement assessment** - Detailed analysis of complex drop zones
+- [ ] **Multiple analysis per tree** - Each tree gets full removal AND pruning quotes
+- [ ] **Scientific + common names** - Tsuga menziesii + "Doug Fir" for customer
+
+### 💰 ESTIMATE BUILDER SYSTEM
+- [ ] **Individual tree cards** - Each tree separate with its extracted frame image
+- [ ] **Tree labeling with letters** - Clear A, B, C labels with customer descriptions
+- [ ] **Frame-specific hazard display** - Show identified hazards per tree/frame
+- [ ] **Drop zone visualization** - Display drop zone analysis for each tree
+- [ ] **Rigging cost breakdown** - Separate pricing based on frame analysis complexity
+- [ ] **Service separation** - Removal, pruning, cabling etc. as separate line items
+- [ ] **Pre-populated options** - All possible services generated, admin selects what to send
+- [ ] **Price adjustments** - Edit AI-suggested prices before sending
+- [ ] **Custom line items** - Text box to add additional context/services
+- [ ] **Travel cost integration** - Distance affects base pricing (85km = higher costs)
+- [ ] **Service explanations** - AI explains WHY each service needed (with frame references)
+- [ ] **Clear definitions** - "Removal = cut to 6 inches unless specified"
+- [ ] **Exclusion clarity** - "Does NOT include stump grinding"
+
+### 🌐 CUSTOMER ESTIMATE INTERFACE
+- [ ] **Web-based estimate viewer** - Customer clicks link to view estimate
+- [ ] **Service selection** - Customer can choose which services they want
+- [ ] **Detailed explanations** - Each line item explains what/why
+- [ ] **Tree-specific images** - Show image of the specific tree being discussed
+- [ ] **Interactive editing** - Customer and admin can go back-and-forth
+- [ ] **Final agreement process** - Both parties confirm final estimate
+- [ ] **Status tracking** - Draft → Sent → Reviewed → Agreed
+
+### 📄 INVOICE GENERATION
+- [ ] **Auto-invoice creation** - AI generates invoice from agreed estimate
+- [ ] **Clear service breakdown** - Exactly what is/isn't included
+- [ ] **Multiple delivery methods** - Email, SMS, or both
+- [ ] **Payment options** - E-transfer, cash, credit card
+- [ ] **Square integration** - Credit card processing with fee disclosure
+- [ ] **Deposit functionality** - Collect deposit on agreement
+- [ ] **GST integration** - Ready for future tax functionality (commented out for now)
+
+### 🗃️ DATABASE ARCHITECTURE
+```
+quotes (main quote)
+├── quote_trees (individual trees)
+│   ├── tree_image_path
+│   ├── tree_label ("Douglas Fir A")
+│   ├── customer_description ("the big one on the left")
+│   ├── species_common ("Doug Fir")
+│   ├── species_scientific ("Pseudotsuga menziesii")
+│   ├── ai_analysis_gpt5
+│   ├── ai_analysis_gemini
+│   └── transcription_context
+├── quote_services (line items)
+│   ├── tree_id
+│   ├── service_type (removal, pruning, cabling)
+│   ├── ai_suggested_price
+│   ├── adjusted_price
+│   ├── selected_for_estimate
+│   ├── rigging_required
+│   ├── explanation_text
+│   └── customer_selected
+├── quote_estimates (sent estimates)
+│   ├── estimate_url
+│   ├── customer_selections
+│   ├── status (draft/sent/reviewed/agreed)
+│   └── agreed_total
+└── quote_invoices (final invoices)
+    ├── invoice_number
+    ├── payment_method
+    ├── deposit_amount
+    └── final_amount
+```
+
+### 🎯 TRAVEL & DISTANCE INTEGRATION
+- [ ] **Distance calculation** - From GPS to job site
+- [ ] **Transfer station options** - Multiple choices with km to each
+- [ ] **Travel cost in pricing** - 85km job costs more than 5km job
+- [ ] **Haul cost separation** - Different pricing for brush vs wood disposal
+- [ ] **Base cost integration** - Travel built into service prices, not separate line item
+
+### 🔧 RIGGING & COMPLEXITY ANALYSIS
+- [ ] **Drop zone assessment** - AI analyzes what's under the tree
+- [ ] **Rigging requirements** - Zip line, crane, piece-by-piece removal
+- [ ] **Cost multipliers** - Same tree 2x cost if rigging needed
+- [ ] **Hazard flagging** - Septic tanks, valuable landscaping, structures
+- [ ] **Access difficulty** - Affects equipment choices and pricing
+
+### 📋 IMMEDIATE PRIORITIES (PHASE 1)
+1. **Estimate Builder** - Turn existing AI data into sendable estimates
+2. **Tree Separation** - Parse existing analysis for individual trees
+3. **Customer Estimate Viewer** - Web interface for customer review
+4. **Price Adjustment Interface** - Admin can modify AI suggestions
+5. **Basic Invoice Generation** - Create invoices from agreed estimates
+
+### 🔄 FUTURE ENHANCEMENTS (PHASE 2+)
+- Enhanced field capture with tree detection
+- Advanced rigging cost calculations  
+- Square payment integration
+- SMS/Email automation
+- GST tax functionality
+- Deposit collection system
+
+## 🛠️ DEPLOYMENT METHODOLOGY
+
+### BEFORE ANY CHANGE:
+1. **Reference this COMPLETE document** - Understand full vision
+2. **Identify current vs future features** - What exists vs what's planned
+3. **Plan surgical additions** - Add new without breaking existing
+4. **Consider integration points** - How new feature connects to vision
+
+### SAFE CHANGE PATTERNS:
+- **Build estimate builder alongside current admin** - Don't replace
+- **Add new database tables** - Don't modify existing structure
+- **Create new API endpoints** - Don't modify working ones
+- **Extend Alpine.js data** - Don't replace existing functions
+
+### TESTING REQUIREMENTS:
+- All current features still work
+- New features integrate properly
+- Database changes don't break existing data
+- APIs return expected data format
+
+## 🎯 CONTEXT FOR EVERY DECISION
+When making ANY change, consider:
+- How does this fit the ultimate quote-to-invoice vision?
+- Does this preserve existing working functionality?
+- How will this integrate with future features?
+- Is this building toward the complete system?
+
+This document represents the COMPLETE vision and must be referenced for every single change, no matter how small.
+
+## 🚨 CRITICAL RULE: AUTOMATIC FEATURE PROTECTION
+**ANY TIME USER ASKS TO FIX SOMETHING:**
+1. **IMMEDIATELY ADD IT TO THIS REQUIREMENTS LIST** - Document what was broken
+2. **MARK IT AS "MUST NEVER BREAK AGAIN"** - Add to critical features
+3. **TEST IT AFTER EVERY FUTURE CHANGE** - Verify it still works
+4. **NEVER REMOVE OR MODIFY** - Once added, it's permanent
+
+**EXAMPLES:**
+- User says "drag and drop not working" → Add "Drag & drop file upload working" to requirements
+- User says "address prediction broken" → Add "Google Maps address autocomplete working" to requirements  
+- User says "email should be optional" → Add "Email field optional, never required" to requirements
+
+**THIS PREVENTS REPEATED BREAKING OF THE SAME FEATURES**
+
+### ✅ NEW: Units, Labor, Travel & Disposal (MUST NEVER BREAK)
+- Always display dual units everywhere: metric as canonical numbers, imperial in text alongside. Include conversions in customer/admin text (e.g., "85 m (279 ft)", "15 km (9.3 mi)").
+- AI outputs must include dual-unit display in `customer_text` and `admin_notes` while keeping metric numeric fields; add `imperial_equivalents` where defined.
+- Labor rates: climber $150/hr, ground $50/hr.
+- Default crew: solo climber. Any rigging → +1 ground. Heavy rigging (scale ≥ 7) → +2 ground.
+- Road travel is billed at $1 CAD/km (round-trip). Show km and miles. Do not bill hourly travel by default unless toggled on.
+- Travel labor: bill driver (climber) travel time from Google Maps durations; default include driver only; optional toggle to include ground crew travel labor.
+- Disposal tipping fee: RDCK Yard & Garden Waste = $60.50 CAD/tonne. Estimate total disposal weight; if > 3 tonnes, require multiple trips and compute additional travel per trip.
+- Multi-trip disposal rule: trips_required = ceil(total_disposal_weight_tonnes / 3.0). Add 30 minutes dump wait per trip by default (configurable).
+- Each travel leg must be emitted as its own global line item with dual units and combined per‑km + travel‑labor math. Aggregate identical legs using a `trips` field.
+- Required travel legs (when disposal trips required): Home→Job, Job→Transfer Station (× trips), Transfer Station wait (× trips), Transfer Station→Job (× trips‑1), Transfer Station→Home (final). If no disposal: at minimum Home→Job and Job→Home.
+- UI must expose toggles for: include driver travel labor, include crew travel labor, dump wait minutes per trip, and station selection. Persist these settings per quote.
+- Hazard/tailboard data must include nearest hospital with distance and directions URL and use dual units.
+- Customer estimate toggles must update disposal and per‑trip travel math live (keep/haul wood/brush) in both units.
+ - Bucking estimator must compute: cut count, bucking time, fuel/oil, stem volume, brush loose/chips volumes, wood/brush weight; accepts DBH, height, piece length, species, saw class; returns dual units.
+ - Estimator must output per-piece diameters and lengths and a diameter-binned cut distribution (0–15, 15–30, 30–45, 45+ cm) to refine brush/wood weight and chipping time.
+ - Brush estimator must compute loose brush m³/yd³, chip m³/yd³, and chipper time based on throughput and access; returns dual units.
+ - Estimator outputs must auto-populate missing AI costs for “Bucking for firewood” and “Brush chipping/hauling,” editable in admin before sending estimates.

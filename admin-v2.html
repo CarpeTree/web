@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Workbench - Carpe Tree'em</title>
+    <style>
+        :root {
+            --forest: #2D5A27;
+            --forest-light: #4a7c59;
+            --amber: #D4A373;
+            --bg: #f8faf8;
+            --card: rgba(255, 255, 255, 0.92);
+            --glass: rgba(255, 255, 255, 0.15);
+            --border: rgba(44, 95, 45, 0.15);
+            --text: #1a1a1a;
+            --muted: #666;
+            --success: #28a745;
+            --warning: #f0ad4e;
+            --danger: #dc3545;
+        }
+        
+        .dark {
+            --bg: #0f1a0f;
+            --card: rgba(20, 35, 20, 0.95);
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f0f0f0;
+            --muted: #aaa;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* TOP HEADER BAR */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: saturate(1.2) blur(16px);
+            -webkit-backdrop-filter: saturate(1.2) blur(16px);
+            background: rgba(44, 95, 45, 0.95);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .top-bar h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .top-bar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .pill-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .pill-btn:hover {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--forest);
+            border-color: white;
+        }
+        
+        .pill-btn.active {
+            background: white;
+            color: var(--forest);
+        }
+        
+        /* QUOTE NAVIGATION */
+        .quote-nav {
+            position: fixed;
+            top: 52px;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quote-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--forest);
+            background: transparent;
+            color: var(--forest);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .nav-arrow:hover:not(:disabled) {
+            background: var(--forest);
+            color: white;
+        }
+        
+        .nav-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .quote-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .quote-id {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--forest);
+        }
+        
+        .quote-meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-submitted { background: #cce5ff; color: #004085; }
+        .status-analyzed { background: #d4edda; color: #155724; }
+        .status-draft { background: #fff3cd; color: #856404; }
+        .status-sent { background: #d1ecf1; color: #0c5460; }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            margin-top: 105px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 280px 1fr 340px;
+            gap: 16px;
+            min-height: calc(100vh - 105px);
+        }
+        
+        /* LEFT PANEL - Customer & Media */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: rgba(44, 95, 45, 0.08);
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--forest);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dark .card-header {
+            background: rgba(44, 95, 45, 0.2);
+        }
+        
+        .card-body {
+            padding: 14px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        
+        .info-row:last-child { border-bottom: none; }
+        
+        .info-label {
+            color: var(--muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .info-value {
+            font-weight: 500;
+            text-align: right;
+            max-width: 180px;
+            word-break: break-word;
+        }
+        
+        .info-value a {
+            color: var(--forest);
+            text-decoration: none;
+        }
+        
+        .info-value a:hover { text-decoration: underline; }
+        
+        /* Media Grid */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .media-thumb {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            background: #eee;
+        }
+        
+        .media-thumb img, .media-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .media-thumb .media-type {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+        }
+        
+        /* Distance Card */
+        .distance-grid {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .distance-item {
+            background: rgba(44, 95, 45, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .distance-item .label {
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .distance-item .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--forest);
+        }
+        
+        .distance-item .sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        
+        /* CENTER PANEL - AI Analysis */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ai-header {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .ai-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .ai-btn:hover {
+            border-color: var(--forest);
+            background: rgba(44, 95, 45, 0.05);
+        }
+        
+        .ai-btn.running {
+            border-color: var(--amber);
+            background: rgba(212, 163, 115, 0.1);
+        }
+        
+        .ai-btn .icon { font-size: 1.2rem; }
+        .ai-btn .name { font-weight: 600; font-size: 0.85rem; margin-top: 4px; }
+        .ai-btn .status { font-size: 0.7rem; color: var(--muted); }
+        
+        .ai-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .ai-column {
+            display: flex;
+            flex-direction: column;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .ai-column-header {
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ai-column-header.gpt { background: rgba(16, 163, 127, 0.1); color: #10a37f; }
+        .ai-column-header.gemini { background: rgba(66, 133, 244, 0.1); color: #4285f4; }
+        
+        .ai-output {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            max-height: 600px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .ai-service-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(44, 95, 45, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--forest);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .ai-service-item:hover {
+            background: rgba(44, 95, 45, 0.08);
+        }
+        
+        .ai-service-item.selected {
+            background: rgba(44, 95, 45, 0.15);
+            border-left-color: var(--success);
+        }
+        
+        .ai-service-item .tree-label {
+            font-weight: 700;
+            color: var(--forest);
+            font-size: 0.9rem;
+        }
+        
+        .ai-service-item .service-name {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .ai-service-item .price-range {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        
+        .ai-service-item .details {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 6px;
+            display: none;
+        }
+        
+        .ai-service-item.expanded .details {
+            display: block;
+        }
+        
+        /* Transcription */
+        .transcription-box {
+            background: rgba(44, 95, 45, 0.03);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            max-height: 150px;
+            overflow-y: auto;
+            font-style: italic;
+            color: var(--muted);
+        }
+        
+        /* Customer Notes Expandable */
+        .notes-preview {
+            max-height: 60px;
+            overflow: hidden;
+            font-size: 0.85rem;
+            position: relative;
+        }
+        
+        .notes-preview.expanded {
+            max-height: none;
+        }
+        
+        .notes-expand-btn {
+            font-size: 0.7rem;
+            color: var(--forest);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        
+        /* AI Service Pills - Fixed contrast */
+        .ai-service-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2D5A27;
+            border: 1px solid rgba(44, 95, 45, 0.3);
+        }
+        
+        .dark .ai-service-pill {
+            background: rgba(255, 255, 255, 0.15);
+            color: #a8d5a0;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Raw Modal Text Fix */
+        .raw-output-text {
+            white-space: pre-wrap;
+            font-size: 0.8rem;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        
+        .dark .raw-output-text {
+            background: #0f0f0f;
+            color: #f0f0f0;
+        }
+        
+        /* Voicenote/Transcript Section */
+        .transcript-section {
+            background: rgba(212, 163, 115, 0.1);
+            border: 1px solid rgba(212, 163, 115, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .transcript-section .label {
+            font-size: 0.7rem;
+            color: var(--amber);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* RIGHT PANEL - Estimate Builder */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .estimate-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .estimate-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: var(--card);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .estimate-tab.active {
+            border-bottom-color: var(--forest);
+            color: var(--forest);
+        }
+        
+        .estimate-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .tree-section {
+            margin-bottom: 16px;
+        }
+        
+        .tree-header {
+            background: var(--forest);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tree-items {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .line-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .line-item:last-child { border-bottom: none; }
+        
+        .line-item .item-name {
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .line-item .item-source {
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        
+        .line-item .item-price {
+            font-weight: 700;
+            color: var(--forest);
+        }
+        
+        .line-item input[type="number"] {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .line-item .remove-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: var(--danger);
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .internal-note {
+            background: #fff3cd;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            color: #856404;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .dark .internal-note {
+            background: rgba(255, 243, 205, 0.1);
+        }
+        
+        /* Quick Add Buttons */
+        .quick-add-btn {
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--forest);
+            background: transparent;
+            color: var(--forest);
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .quick-add-btn:hover {
+            background: var(--forest);
+            color: white;
+        }
+        
+        /* Line Item Card */
+        .line-item-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .line-item-card:hover {
+            border-color: var(--forest);
+        }
+        
+        .dark .line-item-card {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        /* Station chips */
+        .station-chip {
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(44, 95, 45, 0.1);
+            font-size: 0.7rem;
+            color: var(--forest);
+        }
+        
+        /* Totals */
+        .totals-card {
+            background: var(--forest);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9rem;
+        }
+        
+        .totals-row.grand {
+            border-top: 2px solid rgba(255,255,255,0.3);
+            margin-top: 8px;
+            padding-top: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .action-btn.primary {
+            background: var(--forest);
+            color: white;
+        }
+        
+        .action-btn.secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal {
+            background: var(--card);
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            background: var(--forest);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.1rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        
+        .modal-close:hover { opacity: 1; }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Prompt Editor */
+        .prompt-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .prompt-tab {
+            padding: 8px 16px;
+            border: none;
+            background: var(--card);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .prompt-tab.active {
+            border-bottom-color: var(--forest);
+            color: var(--forest);
+        }
+        
+        .prompt-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        
+        /* Media Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .lightbox img, .lightbox video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .ai-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading State */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+        }
+        
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body x-data="quoteWorkbench()" x-init="init()">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+        <h1>
+            <span>Carpe Tree'em</span>
+            <span style="opacity: 0.7; font-weight: 400;">Quote Workbench</span>
+        </h1>
+        <div class="top-bar-actions">
+            <button class="pill-btn" @click="showPromptEditor = true">Edit Prompts</button>
+            <button class="pill-btn" @click="toggleTheme()" x-text="isDark ? 'Light' : 'Dark'"></button>
+            <a href="field-capture.html" class="pill-btn">Field Capture</a>
+            <a href="customer-crm-dashboard.html" class="pill-btn">CRM</a>
+        </div>
+    </header>
+    
+    <!-- QUOTE NAVIGATION -->
+    <nav class="quote-nav">
+        <div class="quote-selector">
+            <button class="nav-arrow" @click="prevQuote()" :disabled="currentIndex === 0">&#8592;</button>
+            <div class="quote-info-bar">
+                <span class="quote-id" x-text="currentQuote ? `Quote #${currentQuote.id}` : 'No Quotes'"></span>
+                <span class="quote-meta" x-text="currentQuote ? currentQuote.customer_name : ''"></span>
+                <span class="status-pill" :class="`status-${currentQuote?.status || 'submitted'}`" x-text="currentQuote?.status || ''"></span>
+            </div>
+            <button class="nav-arrow" @click="nextQuote()" :disabled="currentIndex >= quotes.length - 1">&#8594;</button>
+            <span style="font-size: 0.8rem; color: var(--muted);" x-text="`${currentIndex + 1} of ${quotes.length}`"></span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <select @change="jumpToQuote($event.target.value)" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);">
+                <template x-for="(q, i) in quotes" :key="q.id">
+                    <option :value="i" :selected="i === currentIndex" x-text="`#${q.id} - ${q.customer_name || 'Unknown'}`"></option>
+                </template>
+            </select>
+            <button class="pill-btn" style="background: var(--forest); border-color: var(--forest); cursor: pointer;" @click="loadQuotes()" :disabled="loading">
+                <span x-show="!loading">Refresh</span>
+                <span x-show="loading">Loading...</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content" x-show="currentQuote">
+        <!-- LEFT PANEL: Customer & Media -->
+        <aside class="left-panel">
+            <!-- Customer Info -->
+            <div class="card">
+                <div class="card-header">
+                    <span>Customer</span>
+                    <a :href="`tel:${currentQuote?.customer_phone}`" style="font-size: 0.75rem; color: var(--forest);">Call</a>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Name</span>
+                        <span class="info-value" x-text="currentQuote?.customer_name || '-'"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">
+                            <a :href="`tel:${currentQuote?.customer_phone}`" x-text="currentQuote?.customer_phone || '-'"></a>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">
+                            <a :href="`mailto:${currentQuote?.customer_email}`" x-text="currentQuote?.customer_email || '-'"></a>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address</span>
+                        <span class="info-value" x-text="currentQuote?.address || '-'"></span>
+                    </div>
+                </div>
+                <!-- Expandable Customer Notes -->
+                <div x-show="currentQuote?.notes" style="padding: 10px 14px; border-top: 1px solid var(--border); background: rgba(212, 163, 115, 0.08);">
+                    <div style="font-size: 0.7rem; color: var(--amber); text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">📝 Customer Notes</div>
+                    <div class="notes-preview" :class="{ expanded: notesExpanded }">
+                        <span x-text="currentQuote?.notes"></span>
+                    </div>
+                    <span class="notes-expand-btn" @click="notesExpanded = !notesExpanded" x-text="notesExpanded ? '▲ Show less' : '▼ Show full notes'"></span>
+                </div>
+            </div>
+            
+            <!-- Distance & Logistics -->
+            <div class="card">
+                <div class="card-header">
+                    <span>Distance & Logistics</span>
+                    <button @click="recalculateDistance()" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--forest); background: transparent; color: var(--forest); cursor: pointer;">Recalc</button>
+                </div>
+                <div class="card-body">
+                    <div class="distance-grid">
+                        <div class="distance-item">
+                            <div class="label">Distance to Job</div>
+                            <div class="value" x-text="currentQuote?.distance_km ? `${currentQuote.distance_km} km` : '-'"></div>
+                            <div class="sub" x-text="logistics.driveTime || ''"></div>
+                        </div>
+                        <div class="distance-item">
+                            <div class="label">Nearest Transfer Station</div>
+                            <div class="value" x-text="logistics.nearestStation?.name || 'Grohman Narrows'"></div>
+                            <div class="sub" x-text="logistics.nearestStation?.distance || '~15 km from Nelson'"></div>
+                        </div>
+                        <div class="distance-item">
+                            <div class="label">On-Route Station</div>
+                            <div class="value" x-text="logistics.onRouteStation?.name || 'Castlegar'"></div>
+                            <div class="sub" x-text="logistics.onRouteStation?.note || 'Check route'"></div>
+                        </div>
+                        <div class="distance-item" style="background: rgba(44, 95, 45, 0.1);">
+                            <div class="label">Est. Travel Cost</div>
+                            <div class="value" x-text="`$${logistics.travelCost || 0}`"></div>
+                            <div class="sub">Round trip @ $2.15/km</div>
+                        </div>
+                    </div>
+                    <!-- Transfer Station Options -->
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);">
+                        <div style="font-size: 0.7rem; color: var(--muted); margin-bottom: 6px;">TRANSFER STATIONS:</div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <span class="station-chip">Grohman Narrows ($90/t)</span>
+                            <span class="station-chip">Castlegar ($85/t)</span>
+                            <span class="station-chip">Salmo ($80/t)</span>
+                            <span class="station-chip">Trail ($95/t)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transcription / Voicenotes (above media) -->
+            <div class="card" x-show="currentQuote?.ai_transcription || hasAudioVideo">
+                <div class="card-header" style="background: rgba(212, 163, 115, 0.15); color: var(--amber);">
+                    <span>🎤 Transcription</span>
+                    <span x-show="currentQuote?.ai_transcription" style="font-size: 0.65rem; background: var(--success); color: white; padding: 2px 6px; border-radius: 8px;">Complete</span>
+                </div>
+                <div class="card-body">
+                    <div x-show="currentQuote?.ai_transcription" class="transcription-box" x-text="currentQuote?.ai_transcription"></div>
+                    <div x-show="!currentQuote?.ai_transcription && hasAudioVideo" style="text-align: center; padding: 10px; color: var(--muted); font-size: 0.8rem;">
+                        <p>Audio/video files detected. Click "Whisper" above to transcribe.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Media -->
+            <div class="card" style="flex: 1; min-height: 200px;">
+                <div class="card-header">
+                    <span>Media</span>
+                    <span x-text="`${currentQuote?.files?.length || 0} files`" style="font-size: 0.75rem;"></span>
+                </div>
+                <div class="card-body">
+                    <div class="media-grid" x-show="currentQuote?.files?.length > 0">
+                        <template x-for="file in currentQuote?.files" :key="file.id">
+                            <div class="media-thumb" @click="openLightbox(file)">
+                                <template x-if="file.type?.startsWith('image') || file.filename?.match(/\.(jpg|jpeg|png|gif|webp|heic)$/i)">
+                                    <img :src="file.url" :alt="file.filename" loading="lazy">
+                                </template>
+                                <template x-if="file.type?.startsWith('video') || file.filename?.match(/\.(mp4|mov|avi|webm)$/i)">
+                                    <video :src="file.url" muted></video>
+                                </template>
+                                <span class="media-type" x-text="file.filename?.split('.').pop()?.toUpperCase() || 'FILE'"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="empty-state" x-show="!currentQuote?.files?.length">
+                        <div class="icon">📷</div>
+                        <p>No media uploaded</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- CENTER PANEL: AI Analysis -->
+        <section class="center-panel">
+            <!-- AI Controls -->
+            <div class="ai-header">
+                <button class="ai-btn" :class="{ running: aiRunning.whisper }" @click="runWhisper()">
+                    <div class="icon">🎤</div>
+                    <div class="name">Whisper</div>
+                    <div class="status" x-text="aiRunning.whisper ? 'Processing...' : (currentQuote?.ai_transcription ? 'Complete' : 'Ready')"></div>
+                </button>
+                <button class="ai-btn" :class="{ running: aiRunning.gpt }" @click="runGPT()">
+                    <div class="icon">🤖</div>
+                    <div class="name">GPT-5.1</div>
+                    <div class="status" x-text="aiRunning.gpt ? 'Processing...' : (currentQuote?.ai_gpt5_analysis ? 'Complete' : 'Ready')"></div>
+                </button>
+                <button class="ai-btn" :class="{ running: aiRunning.gemini }" @click="runGemini()">
+                    <div class="icon">💎</div>
+                    <div class="name">Gemini 3</div>
+                    <div class="status" x-text="aiRunning.gemini ? 'Processing...' : (currentQuote?.ai_gemini_analysis ? 'Complete' : 'Ready')"></div>
+                </button>
+                <button class="ai-btn" style="background: var(--forest); color: white;" @click="runAllAI()">
+                    <div class="icon">🚀</div>
+                    <div class="name">Run All</div>
+                    <div class="status">Full Pipeline</div>
+                </button>
+            </div>
+            
+            <!-- Transcription -->
+            <div class="card" x-show="currentQuote?.ai_transcription">
+                <div class="card-header">Whisper Transcription</div>
+                <div class="card-body">
+                    <div class="transcription-box" x-text="currentQuote?.ai_transcription"></div>
+                </div>
+            </div>
+            
+            <!-- AI Comparison -->
+            <div class="ai-comparison">
+                <!-- AI Reference Panel - Collapsible -->
+                <div class="ai-column" style="grid-column: span 2;">
+                    <div class="ai-column-header gpt" style="display: flex; justify-content: space-between; cursor: pointer;" @click="aiPanelExpanded = !aiPanelExpanded">
+                        <span>AI Reference (click to <span x-text="aiPanelExpanded ? 'collapse' : 'expand'"></span>)</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button @click.stop="showRawAI('gpt')" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid currentColor; background: transparent; cursor: pointer;">GPT Raw</button>
+                            <button @click.stop="showRawAI('gemini')" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid currentColor; background: transparent; cursor: pointer;">Gemini Raw</button>
+                        </div>
+                    </div>
+                    <div class="ai-output" x-show="aiPanelExpanded" style="max-height: 600px;">
+                        <!-- GPT-5.1 Summary -->
+                        <div x-show="currentQuote?.ai_gpt5_analysis?.analysis?.analysis" style="padding: 14px; background: rgba(16, 163, 127, 0.1); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #10a37f;">
+                            <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">🤖 GPT-5.1 Assessment:</div>
+                            <div style="max-height: 250px; overflow-y: auto; color: var(--text);" x-text="currentQuote?.ai_gpt5_analysis?.analysis?.analysis"></div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(16, 163, 127, 0.2); font-size: 0.75rem;">
+                                <strong>Species:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.species_identification || 'Unknown'"></span><br>
+                                <strong>Height:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.height_estimate || 'Unknown'"></span><br>
+                                <strong>DBH:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.dbh_estimate || 'Unknown'"></span><br>
+                                <strong>Crown:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.crown_spread || 'Unknown'"></span>
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.climbing_required" class="ai-service-pill">🧗 Climbing Required</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.rigging_required" class="ai-service-pill">🔗 Rigging Required</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_chipping_required" class="ai-service-pill">🪵 Chipping</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_hauling_required" class="ai-service-pill">🚛 Hauling</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Gemini Summary -->
+                        <div x-show="currentQuote?.ai_gemini_analysis" style="padding: 14px; background: rgba(66, 133, 244, 0.1); border-radius: 8px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #4285f4;">
+                            <div style="font-weight: 700; color: #4285f4; margin-bottom: 8px; font-size: 0.9rem;">💎 Gemini 3 Pro Data:</div>
+                            
+                            <!-- Show parsed data if available -->
+                            <template x-if="geminiParsedData">
+                                <div>
+                                    <!-- Location Context from metadata -->
+                                    <div x-show="geminiParsedData?.metadata?.location_context?.municipality" style="margin-bottom: 8px;">
+                                        <strong>🏛️ Municipality:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.municipality"></span>
+                                    </div>
+                                    <div x-show="geminiParsedData?.metadata?.location_context?.nearest_hospital" style="margin-bottom: 8px;">
+                                        <strong>🏥 Nearest Hospital:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.name"></span>
+                                        (<span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.distance?.km + ' km'"></span>, <span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.drive_time_minutes + ' min'"></span>)
+                                    </div>
+                                    <div x-show="geminiParsedData?.metadata?.location_context?.riparian_check" style="margin-bottom: 8px; padding: 6px 10px; background: rgba(245, 158, 11, 0.15); border-radius: 6px;">
+                                        <strong>🌊 Riparian:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.riparian_check"></span>
+                                    </div>
+                                    <div x-show="geminiParsedData?.metadata?.location_context?.zoning_check" style="margin-bottom: 8px;">
+                                        <strong>📋 Zoning:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.zoning_check"></span>
+                                    </div>
+                                    
+                                    <!-- Disposal Sites -->
+                                    <div x-show="geminiParsedData?.metadata?.disposal_sites?.length > 0" style="margin-bottom: 8px;">
+                                        <strong>🗑️ Disposal:</strong> 
+                                        <template x-for="site in geminiParsedData?.metadata?.disposal_sites" :key="site.name">
+                                            <span x-text="site.name + ' ($' + site.rate_per_tonne + '/t)'"></span>
+                                        </template>
+                                    </div>
+                                    
+                                    <!-- Job Status -->
+                                    <div x-show="geminiParsedData?.job_summary?.status" style="margin-top: 10px; padding: 8px 10px; background: rgba(66, 133, 244, 0.15); border-radius: 6px;">
+                                        <strong>Status:</strong> <span x-text="geminiParsedData?.job_summary?.status"></span>
+                                        <div x-show="geminiParsedData?.job_summary?.description" style="font-size: 0.8rem; margin-top: 4px;" x-text="geminiParsedData?.job_summary?.description"></div>
+                                    </div>
+                                    
+                                    <!-- Fallback to old site_data format -->
+                                    <div x-show="geminiParsedData?.site_data?.nearest_hospital && !geminiParsedData?.metadata" style="margin-bottom: 8px;">
+                                        <strong>Nearest Hospital:</strong> <span x-text="geminiParsedData?.site_data?.nearest_hospital?.name"></span>
+                                    </div>
+                                    <div x-show="geminiParsedData?.site_data?.municipal_jurisdiction && !geminiParsedData?.metadata" style="margin-bottom: 8px;">
+                                        <strong>Jurisdiction:</strong> <span x-text="geminiParsedData?.site_data?.municipal_jurisdiction"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Missing info warnings -->
+                            <div x-show="geminiMissingInfo?.length > 0" style="margin-top: 10px; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 6px; border-left: 3px solid #f59e0b;">
+                                <div style="font-weight: 600; color: #d97706; margin-bottom: 4px;">Gemini needs more info:</div>
+                                <ul style="margin: 0; padding-left: 16px; font-size: 0.75rem;">
+                                    <template x-for="item in geminiMissingInfo?.slice(0, 4)" :key="item">
+                                        <li x-text="item"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                            
+                            <!-- Fallback for old format -->
+                            <div x-show="currentQuote?.ai_gemini_analysis?.condition_assessment">
+                                <div x-text="currentQuote?.ai_gemini_analysis?.condition_assessment"></div>
+                                <div style="margin-top: 8px; font-size: 0.75rem; color: var(--muted);">
+                                    Species: <span x-text="currentQuote?.ai_gemini_analysis?.tree_species || 'Unknown'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div x-show="!currentQuote?.ai_gpt5_analysis && !currentQuote?.ai_gemini_analysis" class="empty-state" style="padding: 20px;">
+                            <p>Run AI analysis to get reference data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Context Input -->
+            <div class="card">
+                <div class="card-header">Additional Context for AI</div>
+                <div class="card-body">
+                    <textarea 
+                        x-model="aiContext" 
+                        @change="saveContext()"
+                        placeholder="Add context for AI analysis (e.g., 'Customer mentioned the oak is dropping branches', 'Budget is around $2000')"
+                        style="width: 100%; height: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; resize: vertical;"
+                    ></textarea>
+                </div>
+            </div>
+        </section>
+        
+        <!-- RIGHT PANEL: Estimate Builder -->
+        <aside class="right-panel">
+            <!-- View Toggle -->
+            <div class="estimate-tabs">
+                <button class="estimate-tab" :class="{ active: estimateView === 'customer' }" @click="estimateView = 'customer'">Customer View</button>
+                <button class="estimate-tab" :class="{ active: estimateView === 'internal' }" @click="estimateView = 'internal'">Internal View</button>
+            </div>
+            
+            <!-- Quick Add Bar -->
+            <div class="card" style="margin-bottom: 12px;">
+                <div class="card-body" style="padding: 10px;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button class="quick-add-btn" @click="quickAddService('Tree Removal')">+ Removal</button>
+                        <button class="quick-add-btn" @click="quickAddService('Pruning')">+ Pruning</button>
+                        <button class="quick-add-btn" @click="quickAddService('Rigging')">+ Rigging</button>
+                        <button class="quick-add-btn" @click="quickAddService('Climbing')">+ Climbing</button>
+                        <button class="quick-add-btn" @click="quickAddService('Brush Chipping')">+ Chipping</button>
+                        <button class="quick-add-btn" @click="quickAddService('Hauling')">+ Hauling</button>
+                        <button class="quick-add-btn" @click="quickAddService('Stump Grinding')">+ Stump</button>
+                        <button class="quick-add-btn" @click="addCustomItem()">+ Custom</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estimate Content -->
+            <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="card-header">
+                    <span>Line Items</span>
+                    <span style="font-size: 0.7rem; opacity: 0.7;" x-text="`${estimateItems.length} items`"></span>
+                </div>
+                <div class="estimate-content card-body" style="flex: 1; overflow-y: auto; padding: 8px;">
+                    <template x-if="estimateItems.length === 0">
+                        <div class="empty-state" style="padding: 30px 10px;">
+                            <div class="icon">📋</div>
+                            <p style="font-size: 0.85rem;">Use quick-add buttons above or click "+ Custom" to build your estimate</p>
+                        </div>
+                    </template>
+                    
+                    <template x-for="(item, idx) in estimateItems" :key="idx">
+                        <div class="line-item-card">
+                            <!-- Editable Service Name -->
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <input type="text" x-model="item.name" 
+                                       style="flex: 1; font-weight: 600; font-size: 0.9rem; border: none; background: transparent; padding: 0;"
+                                       placeholder="Service name">
+                                <button @click="removeItemByIndex(idx)" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 0 4px;">×</button>
+                            </div>
+                            
+                            <!-- Tree Label (editable) -->
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.7rem; color: var(--muted);">Tree:</span>
+                                <input type="text" x-model="item.tree" 
+                                       style="flex: 1; font-size: 0.8rem; padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px;"
+                                       placeholder="e.g., Douglas Fir A">
+                            </div>
+                            
+                            <!-- Price -->
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-size: 0.7rem; color: var(--muted);">Price: $</span>
+                                <input type="number" x-model.number="item.price" @change="updateTotals()"
+                                       style="width: 80px; font-size: 0.9rem; font-weight: 600; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; text-align: right;">
+                            </div>
+                            
+                            <!-- Internal Note (only in internal view) -->
+                            <div x-show="estimateView === 'internal'" style="margin-top: 8px;">
+                                <textarea x-model="item.internalNote" 
+                                          placeholder="Internal notes (not shown to customer)"
+                                          style="width: 100%; font-size: 0.75rem; padding: 6px; border: 1px dashed var(--border); border-radius: 4px; min-height: 40px; resize: vertical;"></textarea>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            <!-- Totals -->
+            <div class="totals-card">
+                <div class="totals-row">
+                    <span>Services</span>
+                    <span x-text="`$${totals.services}`"></span>
+                </div>
+                <div class="totals-row" x-show="estimateView === 'internal'">
+                    <span>Travel (internal)</span>
+                    <span x-text="`$${logistics.travelCost || 0}`"></span>
+                </div>
+                <div class="totals-row" x-show="estimateView === 'internal'">
+                    <span>Disposal Est. (internal)</span>
+                    <span x-text="`$${totals.disposal || 0}`"></span>
+                </div>
+                <div class="totals-row grand">
+                    <span x-text="estimateView === 'customer' ? 'Total' : 'Internal Total'"></span>
+                    <span x-text="`$${estimateView === 'customer' ? totals.services : totals.grand}`"></span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="action-buttons">
+                <button class="action-btn secondary" @click="saveDraft()">Save Draft</button>
+                <button class="action-btn primary" @click="sendEstimate()">Send to Customer</button>
+            </div>
+        </aside>
+    </main>
+    
+    <!-- Empty State -->
+    <div class="empty-state" x-show="!currentQuote && !loading" style="margin-top: 150px;">
+        <div class="icon">📭</div>
+        <h2>No Quotes</h2>
+        <p>No quotes found. Quotes will appear here when customers submit them.</p>
+    </div>
+    
+    <!-- Loading -->
+    <div class="empty-state" x-show="loading" style="margin-top: 150px;">
+        <div class="loading-spinner" style="width: 40px; height: 40px; border-width: 4px; margin: 0 auto 16px;"></div>
+        <p>Loading quotes...</p>
+    </div>
+    
+    <!-- PROMPT EDITOR MODAL -->
+    <div class="modal-overlay" x-show="showPromptEditor" @click.self="showPromptEditor = false" style="display: none;" x-cloak>
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Edit System Prompts</h2>
+                <button class="modal-close" @click="showPromptEditor = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="prompt-tabs">
+                    <button class="prompt-tab" :class="{ active: promptTab === 'gpt' }" @click="promptTab = 'gpt'">GPT-5.1</button>
+                    <button class="prompt-tab" :class="{ active: promptTab === 'gemini' }" @click="promptTab = 'gemini'">Gemini 3 Pro</button>
+                </div>
+                <textarea class="prompt-textarea" x-model="prompts[promptTab]" x-show="promptTab === 'gpt'"></textarea>
+                <textarea class="prompt-textarea" x-model="prompts[promptTab]" x-show="promptTab === 'gemini'"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" @click="showPromptEditor = false">Cancel</button>
+                <button class="action-btn primary" @click="savePrompts()">Save Prompts</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RAW AI OUTPUT MODAL -->
+    <div class="modal-overlay" x-show="showRawModal" @click.self="showRawModal = false" style="display: none;" x-cloak>
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 x-text="rawModalTitle"></h2>
+                <button class="modal-close" @click="showRawModal = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre class="raw-output-text" x-text="rawModalContent"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LIGHTBOX -->
+    <div class="lightbox" x-show="lightboxFile" @click="lightboxFile = null" style="display: none;" x-cloak>
+        <button class="lightbox-close">&times;</button>
+        <template x-if="lightboxFile?.type?.startsWith('image') || lightboxFile?.filename?.match(/\.(jpg|jpeg|png|gif|webp|heic)$/i)">
+            <img :src="lightboxFile?.url" @click.stop>
+        </template>
+        <template x-if="lightboxFile?.type?.startsWith('video') || lightboxFile?.filename?.match(/\.(mp4|mov|avi|webm)$/i)">
+            <video :src="lightboxFile?.url" controls autoplay @click.stop></video>
+        </template>
+    </div>
+    
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <script>
+        function quoteWorkbench() {
+            return {
+                // State
+                quotes: [],
+                currentIndex: 0,
+                loading: true,
+                isDark: false,
+                
+                // AI State
+                aiRunning: { whisper: false, gpt: false, gemini: false },
+                aiContext: '',
+                gptServices: [],
+                geminiServices: [],
+                aiPanelExpanded: true,
+                geminiParsedData: null,
+                geminiMissingInfo: [],
+                
+                // UI State
+                notesExpanded: false,
+                
+                // Estimate State
+                estimateView: 'customer',
+                selectedServices: { gpt: new Set(), gemini: new Set() },
+                estimateItems: [],
+                totals: { services: 0, disposal: 0, grand: 0 },
+                
+                // Logistics
+                logistics: {
+                    travelCost: 0,
+                    onRouteStation: null
+                },
+                
+                // Modals
+                showPromptEditor: false,
+                promptTab: 'gpt',
+                prompts: { gpt: '', gemini: '' },
+                showRawModal: false,
+                rawModalTitle: '',
+                rawModalContent: '',
+                lightboxFile: null,
+                
+                // Computed
+                get currentQuote() {
+                    return this.quotes[this.currentIndex] || null;
+                },
+                
+                get hasAudioVideo() {
+                    if (!this.currentQuote?.files) return false;
+                    return this.currentQuote.files.some(f => 
+                        f.type?.startsWith('audio') || 
+                        f.type?.startsWith('video') ||
+                        f.filename?.match(/\.(mp3|wav|m4a|ogg|mp4|mov|avi|webm)$/i)
+                    );
+                },
+                
+                get estimateByTree() {
+                    const grouped = {};
+                    this.estimateItems.forEach(item => {
+                        const tree = item.tree || 'General';
+                        if (!grouped[tree]) grouped[tree] = [];
+                        grouped[tree].push(item);
+                    });
+                    return grouped;
+                },
+                
+                // Init
+                async init() {
+                    this.isDark = localStorage.getItem('theme') === 'dark';
+                    if (this.isDark) document.documentElement.classList.add('dark');
+                    
+                    await this.loadQuotes();
+                    await this.loadPrompts();
+                },
+                
+                // Load quotes
+                async loadQuotes() {
+                    console.log('Loading quotes...');
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/server/api/admin-quotes.php');
+                        if (!res.ok) {
+                            throw new Error(`HTTP ${res.status}`);
+                        }
+                        const data = await res.json();
+                        console.log('Loaded', data.quotes?.length || 0, 'quotes');
+                        // Map the response to expected format
+                        this.quotes = (data.quotes || []).map(q => ({
+                            ...q,
+                            customer_name: q.customer_name || 'Unknown',
+                            customer_email: q.customer_email || '',
+                            customer_phone: q.phone || '',
+                            address: q.address || '',
+                            notes: q.notes || '',
+                            status: q.status || 'submitted',
+                            distance_km: q.distance_km || 0,
+                            driving_time_minutes: q.travel_time ? parseInt(q.travel_time) : 0,
+                            nearest_transfer_station: q.nearest_transfer_station || null,
+                            transfer_station_distance_km: q.transfer_station_distance_km || null,
+                            ai_transcription: q.ai_transcription || null,
+                            ai_gpt5_analysis: q.ai_o4_mini_analysis || null,
+                            ai_gemini_analysis: q.ai_gemini_analysis || null,
+                            context: q.context || '',
+                            files: (q.files || []).map(f => {
+                                // Fix the path - API returns /uploads/9/ but files are in /uploads/quote_9/
+                                let url = f.download_url || '';
+                                // Convert /uploads/9/ to /uploads/quote_9/
+                                url = url.replace(/\/uploads\/(\d+)\//, '/uploads/quote_$1/');
+                                return {
+                                    ...f,
+                                    file_path: url.replace(/^\//, ''),
+                                    url: url
+                                };
+                            })
+                        }));
+                        if (this.currentQuote) {
+                            this.parseAIResults();
+                            this.calculateLogistics();
+                            this.aiContext = this.currentQuote.context || '';
+                        }
+                    } catch (e) {
+                        console.error('Failed to load quotes:', e);
+                        alert('Failed to load quotes: ' + e.message);
+                    }
+                    this.loading = false;
+                    console.log('Loading complete, loading=', this.loading);
+                },
+                
+                // Navigation
+                prevQuote() {
+                    if (this.currentIndex > 0) {
+                        this.currentIndex--;
+                        this.onQuoteChange();
+                    }
+                },
+                
+                nextQuote() {
+                    if (this.currentIndex < this.quotes.length - 1) {
+                        this.currentIndex++;
+                        this.onQuoteChange();
+                    }
+                },
+                
+                jumpToQuote(index) {
+                    this.currentIndex = parseInt(index);
+                    this.onQuoteChange();
+                },
+                
+                onQuoteChange() {
+                    this.selectedServices = { gpt: new Set(), gemini: new Set() };
+                    this.estimateItems = [];
+                    this.notesExpanded = false;
+                    this.parseAIResults();
+                    this.calculateLogistics();
+                    this.aiContext = this.currentQuote?.context || '';
+                    this.updateTotals();
+                },
+                
+                // Parse AI results into selectable services
+                parseAIResults() {
+                    this.gptServices = [];
+                    this.geminiServices = [];
+                    
+                    // GPT-5.1 analysis (stored as ai_o4_mini_analysis in API)
+                    if (this.currentQuote?.ai_gpt5_analysis) {
+                        this.gptServices = this.parseGPTAnalysis(this.currentQuote.ai_gpt5_analysis);
+                    }
+                    
+                    // Gemini analysis
+                    if (this.currentQuote?.ai_gemini_analysis) {
+                        this.geminiServices = this.parseGeminiAnalysis(this.currentQuote.ai_gemini_analysis);
+                    }
+                    
+                    console.log('Parsed GPT services:', this.gptServices.length);
+                    console.log('Parsed Gemini services:', this.geminiServices.length);
+                },
+                
+                parseGPTAnalysis(analysis) {
+                    try {
+                        let data = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
+                        let services = [];
+                        
+                        // GPT-5.1 format: { model, analysis: { analysis, species_identification, ... } }
+                        if (data.analysis && typeof data.analysis === 'object') {
+                            const a = data.analysis;
+                            
+                            // Extract main analysis text as a service item
+                            if (a.analysis) {
+                                services.push({
+                                    name: 'Site Assessment',
+                                    tree: a.species_identification || 'General',
+                                    price_low: 0,
+                                    price_high: 0,
+                                    details: a.analysis
+                                });
+                            }
+                            
+                            // Create service items from analysis fields
+                            if (a.climbing_required) {
+                                services.push({
+                                    name: 'Technical Climbing',
+                                    tree: a.species_identification || 'Tree',
+                                    price_low: 400,
+                                    price_high: 1200,
+                                    details: `Height: ${a.height_estimate || 'Unknown'}, DBH: ${a.dbh_estimate || 'Unknown'}`
+                                });
+                            }
+                            
+                            if (a.rigging_required) {
+                                services.push({
+                                    name: 'Rigging / Technical Removal',
+                                    tree: a.species_identification || 'Tree',
+                                    price_low: 800,
+                                    price_high: 3500,
+                                    details: `Crown spread: ${a.crown_spread || 'Unknown'}`
+                                });
+                            }
+                            
+                            if (a.brush_chipping_required) {
+                                services.push({
+                                    name: 'Brush Chipping',
+                                    tree: 'General',
+                                    price_low: 150,
+                                    price_high: 500,
+                                    details: 'Chip brush and small diameter material on-site'
+                                });
+                            }
+                            
+                            if (a.brush_hauling_required) {
+                                services.push({
+                                    name: 'Brush Hauling',
+                                    tree: 'General',
+                                    price_low: 200,
+                                    price_high: 600,
+                                    details: 'Haul chipped material to transfer station'
+                                });
+                            }
+                            
+                            if (a.wood_removal_required) {
+                                services.push({
+                                    name: 'Wood Removal',
+                                    tree: 'General',
+                                    price_low: 300,
+                                    price_high: 800,
+                                    details: a.waste_disposal || 'Remove and dispose of large wood'
+                                });
+                            }
+                            
+                            if (a.firewood_processing) {
+                                services.push({
+                                    name: 'Firewood Processing',
+                                    tree: 'General',
+                                    price_low: 150,
+                                    price_high: 400,
+                                    details: 'Buck wood into firewood lengths'
+                                });
+                            }
+                        }
+                        
+                        // Also check for line_items from the quote
+                        if (this.currentQuote?.line_items) {
+                            this.currentQuote.line_items.forEach(item => {
+                                if (item.service_name && item.service_name !== 'AI Analysis Pending') {
+                                    services.push({
+                                        name: item.service_name,
+                                        tree: 'General',
+                                        price_low: item.min_price || 0,
+                                        price_high: item.max_price || 0,
+                                        details: item.description || ''
+                                    });
+                                }
+                            });
+                        }
+                        
+                        return services;
+                    } catch (e) {
+                        console.error('Failed to parse GPT analysis:', e);
+                        return [];
+                    }
+                },
+                
+                parseGeminiAnalysis(analysis) {
+                    try {
+                        let data = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
+                        let services = [];
+                        
+                        // Check for error
+                        if (data.error) {
+                            console.log('Gemini had error:', data.error);
+                            return [];
+                        }
+                        
+                        // New Gemini format has data in 'raw' field as JSON string
+                        if (data.raw && typeof data.raw === 'string') {
+                            // Extract JSON from markdown code block
+                            let rawJson = data.raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                            try {
+                                const parsed = JSON.parse(rawJson);
+                                // Store parsed data for display
+                                this.geminiParsedData = parsed;
+                                
+                                // Extract from financial_estimate.line_items
+                                if (parsed.financial_estimate?.line_items?.length > 0) {
+                                    services = parsed.financial_estimate.line_items.map(item => ({
+                                        name: item.service || item.name,
+                                        tree: 'General',
+                                        price_low: item.price || 0,
+                                        price_high: item.price || 0,
+                                        details: item.description || ''
+                                    }));
+                                }
+                                
+                                // Extract from tree_inventory if present
+                                if (parsed.tree_inventory?.length > 0) {
+                                    parsed.tree_inventory.forEach(tree => {
+                                        services.push({
+                                            name: `${tree.species || 'Tree'} - Assessment`,
+                                            tree: tree.label || tree.species || 'Tree',
+                                            price_low: 0,
+                                            price_high: 0,
+                                            details: `DBH: ${tree.dbh || 'Unknown'}, Height: ${tree.height || 'Unknown'}`
+                                        });
+                                    });
+                                }
+                                
+                                // Show missing info requests
+                                if (parsed.missing_information_request?.length > 0) {
+                                    this.geminiMissingInfo = parsed.missing_information_request;
+                                }
+                                
+                                return services;
+                            } catch (e) {
+                                console.log('Could not parse Gemini raw JSON:', e);
+                            }
+                        }
+                        
+                        // Fallback: old Gemini format
+                        if (data.services && Array.isArray(data.services) && data.services.length > 0) {
+                            services = data.services.map(s => ({
+                                name: s.name || s.service,
+                                tree: data.tree_species || 'General',
+                                price_low: parseInt(s.cost) * 0.8 || 0,
+                                price_high: parseInt(s.cost) * 1.2 || 0,
+                                details: s.description || ''
+                            }));
+                        }
+                        
+                        if (data.condition_assessment) {
+                            services.unshift({
+                                name: 'Condition Assessment',
+                                tree: data.tree_species || 'General',
+                                price_low: 0,
+                                price_high: 0,
+                                details: data.condition_assessment
+                            });
+                        }
+                        
+                        return services;
+                    } catch (e) {
+                        console.error('Failed to parse Gemini analysis:', e);
+                        return [];
+                    }
+                },
+                
+                // Service selection
+                isServiceSelected(source, idx) {
+                    return this.selectedServices[source].has(idx);
+                },
+                
+                toggleService(source, idx, service) {
+                    if (this.selectedServices[source].has(idx)) {
+                        this.selectedServices[source].delete(idx);
+                        // Remove from estimate
+                        this.estimateItems = this.estimateItems.filter(
+                            item => !(item.sourceType === source && item.sourceIdx === idx)
+                        );
+                    } else {
+                        this.selectedServices[source].add(idx);
+                        // Add to estimate
+                        this.estimateItems.push({
+                            name: service.name,
+                            tree: service.tree || 'General',
+                            price: Math.round((service.price_low + service.price_high) / 2) || 0,
+                            source: source === 'gpt' ? 'GPT-5.1' : 'Gemini 3',
+                            sourceType: source,
+                            sourceIdx: idx,
+                            internalNote: service.details || ''
+                        });
+                    }
+                    this.updateTotals();
+                },
+                
+                // Quick add common services
+                quickAddService(serviceName) {
+                    const defaults = {
+                        'Tree Removal': { price: 800, tree: 'Tree A' },
+                        'Pruning': { price: 400, tree: 'Tree A' },
+                        'Rigging': { price: 600, tree: 'Tree A' },
+                        'Climbing': { price: 300, tree: 'Tree A' },
+                        'Brush Chipping': { price: 200, tree: 'General' },
+                        'Hauling': { price: 250, tree: 'General' },
+                        'Stump Grinding': { price: 150, tree: 'Tree A' }
+                    };
+                    
+                    const def = defaults[serviceName] || { price: 0, tree: 'General' };
+                    
+                    // Get species from AI if available
+                    const species = this.currentQuote?.ai_gpt5_analysis?.analysis?.species_identification || 
+                                   this.currentQuote?.ai_gemini_analysis?.tree_species || '';
+                    
+                    this.estimateItems.push({
+                        name: serviceName,
+                        tree: species || def.tree,
+                        price: def.price,
+                        source: 'Manual',
+                        internalNote: '',
+                        addedAt: new Date().toISOString()
+                    });
+                    this.updateTotals();
+                },
+                
+                addCustomItem() {
+                    // Get species from AI if available
+                    const species = this.currentQuote?.ai_gpt5_analysis?.analysis?.species_identification || 
+                                   this.currentQuote?.ai_gemini_analysis?.tree_species || 'General';
+                    
+                    this.estimateItems.push({
+                        name: 'New Service',
+                        tree: species,
+                        price: 0,
+                        source: 'Manual',
+                        internalNote: '',
+                        addedAt: new Date().toISOString()
+                    });
+                    this.updateTotals();
+                },
+                
+                removeItemByIndex(idx) {
+                    this.estimateItems.splice(idx, 1);
+                    this.updateTotals();
+                },
+                
+                removeItem(treeName, idx) {
+                    const items = this.estimateByTree[treeName];
+                    const item = items[idx];
+                    
+                    // Deselect if from AI
+                    if (item.sourceType && item.sourceIdx !== undefined) {
+                        this.selectedServices[item.sourceType].delete(item.sourceIdx);
+                    }
+                    
+                    // Remove from estimateItems
+                    const globalIdx = this.estimateItems.findIndex(
+                        i => i.name === item.name && i.tree === item.tree && i.price === item.price
+                    );
+                    if (globalIdx > -1) {
+                        this.estimateItems.splice(globalIdx, 1);
+                    }
+                    this.updateTotals();
+                },
+                
+                updateTotals() {
+                    this.totals.services = this.estimateItems.reduce((sum, item) => sum + (item.price || 0), 0);
+                    this.totals.disposal = 0; // Could calculate based on wood volume
+                    this.totals.grand = this.totals.services + (this.logistics.travelCost || 0) + this.totals.disposal;
+                },
+                
+                // Logistics
+                calculateLogistics() {
+                    if (!this.currentQuote) return;
+                    
+                    const distanceKm = this.currentQuote.distance_km || 0;
+                    // Round trip @ $2.15/km
+                    this.logistics.travelCost = Math.round(distanceKm * 2 * 2.15);
+                    
+                    // Drive time
+                    const travelTime = this.currentQuote.travel_time || this.currentQuote.driving_time_minutes;
+                    if (travelTime) {
+                        if (typeof travelTime === 'string') {
+                            this.logistics.driveTime = travelTime;
+                        } else {
+                            const hours = Math.floor(travelTime / 60);
+                            const mins = travelTime % 60;
+                            this.logistics.driveTime = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
+                        }
+                    }
+                    
+                    // Transfer stations - determine best based on job location
+                    this.calculateTransferStations();
+                },
+                
+                calculateTransferStations() {
+                    // Transfer station data (from Nelson base)
+                    const stations = [
+                        { name: 'Grohman Narrows', distance: 15, cost: 90, direction: 'north' },
+                        { name: 'Castlegar', distance: 35, cost: 85, direction: 'west' },
+                        { name: 'Salmo', distance: 40, cost: 80, direction: 'south' },
+                        { name: 'Trail', distance: 50, cost: 95, direction: 'southwest' }
+                    ];
+                    
+                    // Simple heuristic based on address
+                    const addr = (this.currentQuote?.address || '').toLowerCase();
+                    
+                    if (addr.includes('christina') || addr.includes('grand forks') || addr.includes('trail')) {
+                        this.logistics.nearestStation = { name: 'Castlegar', distance: '35 km from Nelson' };
+                        this.logistics.onRouteStation = { name: 'Castlegar', note: 'On the way back' };
+                    } else if (addr.includes('salmo') || addr.includes('creston') || addr.includes('fruitvale')) {
+                        this.logistics.nearestStation = { name: 'Salmo', distance: '40 km from Nelson' };
+                        this.logistics.onRouteStation = { name: 'Salmo', note: 'On the way back' };
+                    } else if (addr.includes('kaslo') || addr.includes('ainsworth') || addr.includes('balfour')) {
+                        this.logistics.nearestStation = { name: 'Grohman Narrows', distance: '15 km from Nelson' };
+                        this.logistics.onRouteStation = { name: 'Grohman Narrows', note: 'Closest to route' };
+                    } else {
+                        // Default to Grohman Narrows for Nelson area
+                        this.logistics.nearestStation = { name: 'Grohman Narrows', distance: '15 km from Nelson' };
+                        this.logistics.onRouteStation = { name: 'Grohman Narrows', note: 'Closest option' };
+                    }
+                },
+                
+                async recalculateDistance() {
+                    if (!this.currentQuote) return;
+                    try {
+                        const res = await fetch(`/server/api/comprehensive-distance-calculator.php?quote_id=${this.currentQuote.id}`);
+                        const data = await res.json();
+                        if (data.success) {
+                            // Reload quote data
+                            await this.loadQuotes();
+                        }
+                    } catch (e) {
+                        console.error('Distance calculation failed:', e);
+                    }
+                },
+                
+                // AI Functions
+                async runWhisper() {
+                    if (!this.currentQuote || this.aiRunning.whisper) return;
+                    this.aiRunning.whisper = true;
+                    try {
+                        const res = await fetch('/server/api/whisper-transcription.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ quote_id: this.currentQuote.id })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.currentQuote.ai_transcription = data.transcription;
+                        }
+                    } catch (e) {
+                        console.error('Whisper failed:', e);
+                    }
+                    this.aiRunning.whisper = false;
+                },
+                
+                async runGPT() {
+                    if (!this.currentQuote || this.aiRunning.gpt) return;
+                    this.aiRunning.gpt = true;
+                    try {
+                        const res = await fetch('/server/api/openai-o4-mini-analysis.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                quote_id: this.currentQuote.id,
+                                context: this.aiContext
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.currentQuote.ai_gpt5_analysis = data.analysis;
+                            this.parseAIResults();
+                        }
+                    } catch (e) {
+                        console.error('GPT failed:', e);
+                    }
+                    this.aiRunning.gpt = false;
+                },
+                
+                async runGemini() {
+                    if (!this.currentQuote || this.aiRunning.gemini) return;
+                    this.aiRunning.gemini = true;
+                    try {
+                        const res = await fetch('/server/api/gemini-2-5-pro-analysis.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                quote_id: this.currentQuote.id,
+                                context: this.aiContext
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.currentQuote.ai_gemini_analysis = data.analysis;
+                            this.parseAIResults();
+                        }
+                    } catch (e) {
+                        console.error('Gemini failed:', e);
+                    }
+                    this.aiRunning.gemini = false;
+                },
+                
+                async runAllAI() {
+                    await this.runWhisper();
+                    await Promise.all([this.runGPT(), this.runGemini()]);
+                },
+                
+                async saveContext() {
+                    if (!this.currentQuote) return;
+                    try {
+                        await fetch('/server/api/save-quote-context.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                quote_id: this.currentQuote.id,
+                                context: this.aiContext
+                            })
+                        });
+                    } catch (e) {
+                        console.error('Failed to save context:', e);
+                    }
+                },
+                
+                // Prompts
+                async loadPrompts() {
+                    try {
+                        const res = await fetch('/server/ai/system_prompts.json');
+                        const data = await res.json();
+                        this.prompts.gpt = data['gpt5.1']?.prompt || '';
+                        this.prompts.gemini = data['gemini3']?.prompt || '';
+                    } catch (e) {
+                        console.error('Failed to load prompts:', e);
+                    }
+                },
+                
+                async savePrompts() {
+                    try {
+                        await fetch('/server/api/save-prompts.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                'gpt5.1': { prompt: this.prompts.gpt },
+                                'gemini3': { prompt: this.prompts.gemini }
+                            })
+                        });
+                        this.showPromptEditor = false;
+                        alert('Prompts saved!');
+                    } catch (e) {
+                        console.error('Failed to save prompts:', e);
+                        alert('Failed to save prompts');
+                    }
+                },
+                
+                // Raw output
+                showRawAI(type) {
+                    if (type === 'gpt') {
+                        this.rawModalTitle = 'GPT-5.1 Raw Output';
+                        const data = this.currentQuote?.ai_gpt5_analysis;
+                        if (data?.analysis?.analysis) {
+                            // Show the main analysis text prominently
+                            this.rawModalContent = `=== ANALYSIS ===\n${data.analysis.analysis}\n\n=== DETAILS ===\nSpecies: ${data.analysis.species_identification || 'Unknown'}\nHeight: ${data.analysis.height_estimate || 'Unknown'}\nDBH: ${data.analysis.dbh_estimate || 'Unknown'}\nCrown Spread: ${data.analysis.crown_spread || 'Unknown'}\n\nClimbing Required: ${data.analysis.climbing_required ? 'Yes' : 'No'}\nRigging Required: ${data.analysis.rigging_required ? 'Yes' : 'No'}\nBrush Chipping: ${data.analysis.brush_chipping_required ? 'Yes' : 'No'}\nWood Removal: ${data.analysis.wood_removal_required ? 'Yes' : 'No'}\n\n=== FULL JSON ===\n${JSON.stringify(data, null, 2)}`;
+                        } else {
+                            this.rawModalContent = JSON.stringify(data, null, 2) || 'No GPT analysis available';
+                        }
+                    } else {
+                        this.rawModalTitle = 'Gemini 3 Pro Raw Output';
+                        const data = this.currentQuote?.ai_gemini_analysis;
+                        if (data?.error) {
+                            this.rawModalContent = `=== ERROR ===\n${data.error}\n\n=== FULL RESPONSE ===\n${JSON.stringify(data, null, 2)}`;
+                        } else if (data?.services) {
+                            let content = `=== SERVICES ===\n`;
+                            data.services.forEach((s, i) => {
+                                content += `${i + 1}. ${s.name}: $${s.cost} - ${s.description}\n`;
+                            });
+                            content += `\n=== TREE SPECIES ===\n${data.tree_species || 'Unknown'}\n`;
+                            content += `\n=== CONDITION ===\n${data.condition_assessment || 'Unknown'}\n`;
+                            if (data.recommendations) {
+                                content += `\n=== RECOMMENDATIONS ===\n${data.recommendations.join('\n')}\n`;
+                            }
+                            content += `\n=== FULL JSON ===\n${JSON.stringify(data, null, 2)}`;
+                            this.rawModalContent = content;
+                        } else {
+                            this.rawModalContent = JSON.stringify(data, null, 2) || 'No Gemini analysis available';
+                        }
+                    }
+                    this.showRawModal = true;
+                },
+                
+                // Lightbox
+                openLightbox(file) {
+                    this.lightboxFile = file;
+                },
+                
+                // Theme
+                toggleTheme() {
+                    this.isDark = !this.isDark;
+                    document.documentElement.classList.toggle('dark', this.isDark);
+                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+                },
+                
+                // Estimate actions - includes AI reference data for learning
+                async saveDraft() {
+                    if (!this.currentQuote) return;
+                    try {
+                        // Build learning data - what AI suggested vs what you chose
+                        const learningData = {
+                            ai_gpt_analysis: this.currentQuote.ai_gpt5_analysis || null,
+                            ai_gemini_analysis: this.currentQuote.ai_gemini_analysis || null,
+                            ai_suggested_services: {
+                                gpt: this.gptServices,
+                                gemini: this.geminiServices
+                            },
+                            chosen_items: this.estimateItems,
+                            distance_km: this.currentQuote.distance_km,
+                            customer_address: this.currentQuote.address,
+                            saved_at: new Date().toISOString()
+                        };
+                        
+                        await fetch('/server/api/save-estimate-draft.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                quote_id: this.currentQuote.id,
+                                items: this.estimateItems,
+                                totals: this.totals,
+                                learning_data: learningData
+                            })
+                        });
+                        alert('Draft saved!');
+                    } catch (e) {
+                        console.error('Failed to save draft:', e);
+                        alert('Failed to save draft');
+                    }
+                },
+                
+                async sendEstimate() {
+                    if (!this.currentQuote) return;
+                    if (!confirm('Send estimate to customer?')) return;
+                    
+                    try {
+                        const res = await fetch('/server/api/send-estimate.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                quote_id: this.currentQuote.id,
+                                items: this.estimateItems,
+                                totals: this.totals,
+                                customer_email: this.currentQuote.customer_email
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            alert('Estimate sent to customer!');
+                            await this.loadQuotes();
+                        } else {
+                            throw new Error(data.error);
+                        }
+                    } catch (e) {
+                        console.error('Failed to send estimate:', e);
+                        alert('Failed to send estimate: ' + e.message);
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
+

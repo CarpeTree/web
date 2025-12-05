@@ -54,13 +54,13 @@
       top: 0; 
       backdrop-filter: saturate(1.2) blur(12px);
       -webkit-backdrop-filter: saturate(1.2) blur(12px);
-      background: rgba(44, 95, 45, 0.85);
+      background: rgba(44, 95, 45, 0.92);
       color: #fff; 
-      padding: 16px 20px; 
+      padding: 12px 20px; 
       font-weight: 800; 
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       z-index: 10;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -68,22 +68,30 @@
     
     .header-links {
       display: flex;
-      gap: 12px;
+      gap: 8px;
     }
     
+    /* GLASS PILL HEADER LINKS */
     .header-links a {
       color: white;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 600;
       padding: 6px 12px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.15);
-      transition: all 0.2s ease;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     
     .header-links a:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--green);
+      border-color: white;
     }
     
     /* LIQUID GLASS CARDS */

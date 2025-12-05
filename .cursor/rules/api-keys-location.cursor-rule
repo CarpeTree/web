@@ -1,0 +1,86 @@
+# API KEYS LOCATION AND LOADING - CARPE TREE PROJECT
+
+## NEVER ASK WHERE API KEYS ARE - THEY ARE DOCUMENTED HERE
+
+### PRIMARY API KEY STORAGE LOCATION
+- **Server Path**: `/var/www/carpetree.com/server/config/.env`
+- **Local Dev**: `server/config/.env` (not committed to git)
+
+### API KEYS ARE STORED IN .env FILES (NEVER COMMIT ACTUAL KEYS)
+The .env file contains:
+- OPENAI_API_KEY
+- GOOGLE_GEMINI_API_KEY
+- GOOGLE_MAPS_API_KEY
+
+### HOW API KEYS ARE LOADED IN WORKING APIS:
+
+#### Method 1: Via secure-config.php (PREFERRED - used by GPT-5, Gemini, Whisper)
+```php
+require_once __DIR__ . '/../config/database-simple.php';
+require_once __DIR__ . '/../config/secure-config.php';
+
+// Use exact same pattern as GPT-5:
+$api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: '');
+```
+
+#### Method 2: Via config.php (ALSO WORKS)
+```php
+require_once __DIR__ . '/../config/config.php';
+// Now $OPENAI_API_KEY is available globally
+```
+
+#### Method 3: Direct .env parsing (FALLBACK)
+```php
+$env_file = __DIR__ . "/../config/.env";
+$OPENAI_API_KEY = null;
+if (file_exists($env_file)) {
+    $env_lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($env_lines as $line) {
+        if (strpos($line, "OPENAI_API_KEY=") === 0) {
+            $OPENAI_API_KEY = trim(substr($line, 15));
+            break;
+        }
+    }
+}
+```
+
+### WORKING API EXAMPLES:
+- `server/api/openai-o4-mini-analysis.php` - Uses Method 1 (secure-config.php)
+- `server/api/gemini-2-5-pro-analysis.php` - Uses Method 1  
+
+### SECURE CONFIG DETAILS:
+- File: `server/config/secure-config.php`
+- Loads `.env` from same directory: `__DIR__ . '/.env'`
+- Creates constants: `OPENAI_API_KEY`, `GOOGLE_GEMINI_API_KEY`, etc.
+- Also creates global variables for legacy code: `$OPENAI_API_KEY`, etc.
+
+### DATABASE CONFIG (stored in .env):
+- DB_HOST
+- DB_NAME
+- DB_USER
+- DB_PASS
+
+### SMTP CONFIG (stored in .env):
+- SMTP_HOST
+- SMTP_PORT
+- SMTP_USER
+- SMTP_PASS
+- SMTP_FROM
+
+### DEPLOYMENT NOTES:
+- Config files are loaded via `server/config/secure-config.php`
+- The secure config loads `.env` and defines constants
+- All APIs should use the GPT-5 pattern: `defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: '')`
+
+### NEVER DO THIS AGAIN:
+- Don't ask where API keys are stored
+- Don't ask how to load API keys  
+- Don't create new config loading methods
+- Use the existing working pattern
+- Always use `require_once __DIR__ . '/../config/secure-config.php'`
+- NEVER commit actual API keys to git
+
+### IF ANY API FAILS:
+1. Check if using `require_once __DIR__ . '/../config/secure-config.php'`
+2. Use pattern: `$api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: '');`
+3. Verify `server/config/.env` exists and has correct keys

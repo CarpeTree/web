@@ -8,7 +8,8 @@
   <link rel="icon" type="image/png" href="images/favicon.png">
   
   <!-- Link to external stylesheet containing color variables and base styles -->
-  <link rel="stylesheet" href="style.css?v=20250131">
+  <link rel="stylesheet" href="style.css?v=20251205">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   
   <!-- Internal styles for specific page components -->
@@ -29,70 +30,117 @@
       color: inherit;
     }
 
-    /* Navigation bar styling */
+    /* Contact header - TOP BAR - LIQUID GLASS */
+    .contact-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1010;
+      backdrop-filter: saturate(1.5) blur(20px);
+      -webkit-backdrop-filter: saturate(1.5) blur(20px);
+      background: linear-gradient(180deg, rgba(44, 95, 45, 0.94) 0%, rgba(44, 95, 45, 0.88) 100%);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .contact-header a {
+      color: white;
+      text-decoration: none;
+      padding: 7px 18px;
+      border: 1.5px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 600;
+      font-size: 0.82em;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .contact-header a:hover {
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--deep-forest-green);
+      border-color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Navigation bar styling - BELOW contact header - LIQUID GLASS */
     nav {
-      /* Fixed navigation at the top of the page */
-      background-color: var(--background-color);
-      border-bottom: 1px solid var(--deep-forest-green);
       position: fixed;
       width: 100%;
-      top: 30px; /* Account for contact header */
-      z-index: 1002; /* Ensure nav stays above other content and contact header */
-      padding: 15px 0;
+      top: 44px;
+      z-index: 1005;
+      padding: 10px 0;
+      backdrop-filter: saturate(1.5) blur(20px);
+      -webkit-backdrop-filter: saturate(1.5) blur(20px);
+      background: linear-gradient(180deg, rgba(44, 95, 45, 0.90) 0%, rgba(44, 95, 45, 0.82) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
 
     /* Container for nav elements */
     .nav-container {
       display: flex;
-      justify-content: space-between; /* Space out logo and links */
+      justify-content: center;
       align-items: center;
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
 
-    /* Logo container in nav */
-    .nav-logo {
-      height: 40px; /* Match your logo's height */
-      padding: 5px 0;
-    }
-
-    /* Logo image sizing */
-    .nav-logo-img {
-      height: 50px;  /* Increased height slightly */
-      width: auto;
-      object-fit: contain;  /* Ensures image maintains aspect ratio */
-    }
-
     /* Navigation links container */
     .nav-links {
       display: flex;
-      height: 45px;
+      height: auto;
       align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    /* Navigation link styling */
-    nav a {
-      color: var(--text-color);
+    /* Navigation link styling - LIQUID GLASS PILL BUTTONS */
+    .nav-links a {
+      color: white;
       text-decoration: none;
-      font-weight: bold;
-      transition: color 0.3s;
+      font-weight: 600;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 9px 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.45);
+      border-radius: 50px;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
 
-    nav a:hover {
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.95);
       color: var(--deep-forest-green);
+      border-color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
-    /* Hero section with parallax background */
+    /* Hero section - TIGHT spacing */
     .hero {
       position: relative;
-      height: 80vh;
-      margin-top: 200px;  /* Increased from 90px to 200px */
+      height: auto;
+      min-height: auto;
+      margin-top: 100px;
+      padding: 20px 20px 15px;
       background-color: var(--background-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 20px;
     }
 
     .hero-video {
@@ -124,74 +172,69 @@
     }
 
     .hero-logos {
-      margin-bottom: 40px;
+      margin-bottom: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 8px;
     }
 
     .hero-logo-main {
-      width: 600px;  /* Set width to 600px */
-      height: auto;  /* Height will adjust automatically to maintain proportions */
-      max-width: 100%;  /* Ensures logo doesn't overflow on mobile */
+      width: 500px;
+      height: auto;
+      max-width: 90%;
     }
 
     .hero-logo-secondary {
-      width: 400px;  /* Proportionally smaller than main logo */
+      width: 350px;
       height: auto;
-      max-width: 100%;  /* Ensures logo doesn't overflow on mobile */
+      max-width: 80%;
     }
 
     .hero-content p {
       color: var(--text-color);
-      font-size: 1.2em;
-      line-height: 1.6;
-      margin-bottom: 40px;
+      font-size: 1em;
+      line-height: 1.4;
+      margin-bottom: 12px;
       font-weight: 300;
     }
 
+    /* CTA BUTTONS - LIQUID GLASS PILL STYLE */
     .cta-button, 
     .service-button,
     button[type="submit"] {
-        background: var(--background-color);
+        backdrop-filter: blur(12px) saturate(1.4);
+        -webkit-backdrop-filter: blur(12px) saturate(1.4);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.78) 100%);
         color: var(--deep-forest-green);
-        padding: 15px 30px;
-        border: 2px solid var(--deep-forest-green);
-        border-radius: 3px;
-        font-size: 1.1em;
+        padding: 12px 28px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 50px;
+        font-size: 0.88em;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         text-transform: uppercase;
-        font-weight: bold;
-        letter-spacing: 1px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin: 6px 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .cta-button:hover, 
     .service-button:hover,
     button[type="submit"]:hover {
-        background: var(--deep-forest-green);
-        color: var(--background-color);
-        transform: translateY(-2px);
-    }
-
-    /* Update navigation links to match Tree First */
-    .nav-links a {
-      padding: 0 20px; /* Reduced padding for tighter fit */
-      border-left: 2px solid var(--deep-forest-green);
-      border-right: none;
-      box-sizing: border-box;
-    }
-
-    .nav-links a:first-child {
-      border-left: none;
+        background: linear-gradient(180deg, var(--deep-forest-green) 0%, #1a4d1a 100%);
+        color: white;
+        border-color: var(--deep-forest-green);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(44, 95, 45, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     /* Content section styling */
     .content {
-      margin-top: 200px;  /* Add margin to content sections */
       max-width: 800px;
-      margin: 200px auto 40px;  /* First value is top margin */
+      margin: 20px auto 16px;
       padding: 0 20px;
       background-color: transparent;
     }
@@ -208,7 +251,7 @@
     /* Services section styling */
     .services {
       text-align: center;
-      margin: 200px auto 60px;
+      margin: 16px auto 24px;
       background-color: transparent;
       max-width: 1200px;
       padding: 0 20px;
@@ -360,7 +403,8 @@
         border-bottom: none;
       }
       .hero {
-        margin-top: 250px;  /* Increased for mobile */
+        margin-top: 100px;
+        padding: 20px 15px 15px;
       }
       .hero-image {
         height: 300px;
@@ -378,7 +422,7 @@
         padding: 10px 0;
       }
       .content, .services {
-        margin-top: 250px;  /* Increased for mobile */
+        margin-top: 16px;
       }
 
       /* Prevent scroll when menu open */
@@ -523,30 +567,7 @@
       }
     }
 
-    /* Persistent contact header */
-    .contact-header {
-        background-color: var(--deep-forest-green);
-        color: var(--background-color);
-        text-align: center;
-        padding: 5px 20px;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1001;
-        font-size: 0.9em;
-        box-sizing: border-box;
-    }
-
-    .contact-header a {
-        color: #F5F5F5;  /* Light color by default */
-        text-decoration: none;
-        margin: 0 15px;
-        transition: color 0.3s;
-    }
-
-    .contact-header a:hover {
-        color: var(--muted-golden-amber);  /* Golden amber on hover */
-    }
+    /* Contact header styles moved to top of file */
 
     /* Remove the main-logo section since we don't want anything above carpeclear */
     .main-logo {
@@ -756,7 +777,7 @@
 </head>
 <body>
   <div class="contact-header glass glass-header glass-dark">
-     <a href="tel:+17786553741">778-655-3741</a> |
+     <a href="tel:+17786553741">778-655-3741</a>
      <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
    </div>
 
@@ -774,11 +795,11 @@
       </button>
       <div class="nav-links" id="nav-links">
         <a href="index.html">Home</a>
-        <a href="quote.html">Get Quote</a>
+        <a href="quote.html">Let's Talk Trees</a>
         <a href="philosophy.html">Philosophy</a>
-        <a href="#" id="servicesParent" aria-expanded="false">Services ▸</a>
+        <a href="#" id="servicesParent" aria-expanded="false">Services</a>
         <div class="submenu" id="servicesSubmenu" aria-hidden="true">
-          <a href="services.html"><strong>All Services →</strong></a>
+          <a href="services.html"><strong>All Services</strong></a>
           <a href="services/assessments.html">Risk Assessments</a>
           <a href="services/pruning.html">Pruning</a>
           <a href="services/soil-health.html">Soil & Root Health</a>
@@ -793,7 +814,6 @@
           <a href="services/treehouse-installation.html">Treehouse & Walkways</a>
         </div>
         <a href="root-knowledge.html">Root Knowledge</a>
-        <a href="quote.html">Let's Talk Trees</a>
       </div>
     </div>
   </nav>
@@ -811,6 +831,24 @@
     </div>
   </section>
 
+  <!-- FEATURE VIDEO SECTION: Trust-building video showcase -->
+  <section id="feature-video" style="max-width: 900px; margin: 0 auto 16px; padding: 0 16px;">
+    <h2 style="text-align: center; font-size: 1.5rem; margin-bottom: 12px; color: var(--deep-forest-green);">
+      Our Work In Motion
+    </h2>
+    <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <iframe 
+        src="https://www.youtube.com/embed/F8MmsQei_Po?si=WKs8vToihpdn3aSz"
+        title="Carpe Tree'em - Tree Care Video"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+        style="position:absolute; top:0; left:0; width:100%; height:100%;">
+      </iframe>
+    </div>
+  </section>
+
   <!-- ABOUT SECTION: Your Vision and Mission Statements -->
   <section class="content" id="about">
     <h2>About Us</h2>
@@ -824,6 +862,12 @@
     <p>
       If you are looking for accountable and focused long-term tree care, reach out to us. We are looking for clients like you.
     </p>
+    
+    <!-- Leave a Review CTA -->
+    <div style="text-align: center; padding: 30px 20px; background: rgba(44, 95, 45, 0.08); border-radius: 12px; margin-top: 30px;">
+      <p style="font-size: 1.1rem; margin-bottom: 16px; color: var(--text, #1a1a1a);">Had a great experience with us? We'd appreciate your feedback!</p>
+      <a href="https://maps.app.goo.gl/eUyERXrrzMp8ZmCL8" target="_blank" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #2D5A27, #4a7c59); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s; border: none; box-shadow: 0 4px 15px rgba(44, 95, 45, 0.3);">⭐ Leave a Review on Google</a>
+    </div>
   </section>
 
   <!-- GOOGLE REVIEWS SECTION -->
@@ -838,9 +882,9 @@
         <!-- <div class="elfsight-app-reviews" data-elfsight-google-reviews-place-id="YOUR_GOOGLE_PLACE_ID"></div> -->
     </div>
     
-    <div class="google-review-cta">
-      <p>Had a great experience with us? We'd appreciate your feedback!</p>
-      <a href="https://g.page/r/YOUR_REVIEW_URL/review" target="_blank" class="review-button">Leave a Review</a>
+    <div class="google-review-cta" style="text-align: center; padding: 30px 20px; background: rgba(44, 95, 45, 0.05); border-radius: 12px; margin: 30px auto; max-width: 600px;">
+      <p style="font-size: 1.1rem; margin-bottom: 16px;">Had a great experience with us? We'd appreciate your feedback!</p>
+      <a href="https://maps.app.goo.gl/eUyERXrrzMp8ZmCL8" target="_blank" class="review-button" style="display: inline-block; padding: 12px 28px; background: var(--forest, #2D5A27); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s;">⭐ Leave a Review</a>
     </div>
   </section>
   -->

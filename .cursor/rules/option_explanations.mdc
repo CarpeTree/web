@@ -1,0 +1,13 @@
+Decision Options Rule
+
+When presenting 2+ implementation options to the user, always include a concise cost–benefit analysis:
+
+- For each option, list:
+  - Advantages (speed, reliability, security, UX)
+  - Disadvantages/risks (maintenance, complexity, permissions)
+  - Effort/time to implement
+  - Reversibility (how easy to undo)
+- Provide a clear recommendation and when to choose each option (e.g., quick fix vs. durable solution).
+- Keep the comparison scannable with short bullets; avoid jargon.
+
+This rule is additive to existing style rules (no emojis for git, etc.).

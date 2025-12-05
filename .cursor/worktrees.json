@@ -1,0 +1,36 @@
+{
+  "repo": "/Users/Unity/.cursor/worktrees/carpe_tree_website/vol",
+  "worktrees": [
+    {
+      "name": "main",
+      "path": "/Users/Unity/dev/carpe-tree-main",
+      "branch": "main",
+      "tracking": "origin/main",
+      "setup": [
+        "npm install || true"
+      ],
+      "purpose": "Stable live branch; matches VPS via webhook"
+    },
+    {
+      "name": "staging",
+      "path": "/Users/Unity/dev/carpe-tree-staging",
+      "branch": "staging",
+      "tracking": "origin/staging",
+      "setup": [
+        "npm install || true"
+      ],
+      "purpose": "Pre-prod validation (theme toggle, cache-busting, webhook checks)"
+    },
+    {
+      "name": "feature-liquid-glass",
+      "path": "/Users/Unity/dev/carpe-tree-liquid-glass",
+      "branch": "feature/liquid-glass-dark-mode",
+      "tracking": "origin/feature/liquid-glass-dark-mode",
+      "setup": [
+        "npm install || true"
+      ],
+      "purpose": "UI work: Liquid Glass + dark/light mode experiments"
+    }
+  ]
+}
+

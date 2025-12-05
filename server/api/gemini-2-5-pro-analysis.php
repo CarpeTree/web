@@ -80,7 +80,7 @@ try {
     }
     
     // Use Gemini 3 Pro with thinking enabled for maximum reasoning
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro:generateContent?key=" . $api_key;
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=" . $api_key;
     
     // Build the prompt (load from system_prompts.json - prefer gemini3 key for Gemini 3 Pro)
     $system_prompt = 'You are an expert ISA Certified Arborist analyzing tree service requirements. Provide detailed, actionable recommendations based on visual evidence and context. Output JSON only with {"services":[], "frames":[], "raw":""}.';
@@ -220,7 +220,7 @@ try {
             'success' => true,
             'quote_id' => $quote_id,
             'analysis' => $mock,
-            'model' => 'gemini-3-pro',
+            'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'timestamp' => date('Y-m-d H:i:s'),
             'cached' => false,
@@ -245,7 +245,7 @@ try {
             'success' => true,
             'quote_id' => $quote_id,
             'analysis' => $cachedPayload,
-            'model' => 'gemini-3-pro',
+            'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'timestamp' => date('Y-m-d H:i:s'),
             'cached' => true,
@@ -260,7 +260,7 @@ try {
             'success' => true,
             'quote_id' => $quote_id,
             'analysis' => $cachedPayload,
-            'model' => 'gemini-3-pro',
+            'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'timestamp' => date('Y-m-d H:i:s'),
             'cached' => true,
@@ -344,14 +344,10 @@ try {
     $request_body = [
         'contents' => [ [ 'parts' => $parts ] ],
         'generationConfig' => [ 
-            'temperature' => 0.2,  // Lower temperature for more accurate estimates
+            'temperature' => 0.2,
             'topK' => 40, 
             'topP' => 0.9, 
-            'maxOutputTokens' => 65536  // Increased for detailed analysis
-        ],
-        // Enable extended thinking for Gemini 3 Pro - maximum reasoning capability
-        'thinkingConfig' => [
-            'thinkingBudget' => 32768  // Maximum thinking tokens for thorough analysis
+            'maxOutputTokens' => 65536
         ]
     ];
     
@@ -407,7 +403,7 @@ try {
             }
         }
         $normalized = [
-            'model' => 'gemini-3-pro',
+            'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'services' => $services,
             'frames' => !empty($parsed['frames']) ? $parsed['frames'] : array_map(function($f){ return ['filename' => $f]; }, (count($attached_frames) ? $attached_frames : array_map('basename', $image_candidates))),
@@ -416,7 +412,7 @@ try {
         ];
     } else {
         $normalized = [
-            'model' => 'gemini-3-pro',
+            'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'services' => [],
             'frames' => array_map(function($f){ return ['filename' => $f]; }, (count($attached_frames) ? $attached_frames : array_map('basename', $image_candidates))),
@@ -438,7 +434,7 @@ try {
         'success' => true,
         'quote_id' => $quote_id,
         'analysis' => $normalized,
-        'model' => 'gemini-3-pro',
+        'model' => 'gemini-3-pro-preview',
         'thinking_budget' => 32768,
         'timestamp' => date('Y-m-d H:i:s'),
         'debug' => $debug,

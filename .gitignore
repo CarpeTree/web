@@ -1,6 +1,15 @@
-# Ignore large binaries and staging prototypes
-Archive.zip
-staging/
+# Archive directory (cleanup artifacts)
+.archive/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Large binaries
 *.zip
 *.7z
 *.rar
@@ -9,3 +18,23 @@ staging/
 *.mp4
 *.tif
 *.tiff
+*.tar.gz
+
+# Logs
+*.log
+debug.log
+server.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads (user content)
+uploads/
+
+# Staging/dev
+staging/

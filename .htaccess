@@ -1,17 +1,74 @@
-# Increase PHP upload limits for large video files
-php_value upload_max_filesize 1G
-php_value post_max_size 1G
-php_value max_execution_time 300
-php_value max_input_time 300
-php_value memory_limit 512M
+# Carpe Tree'em - Security Configuration
+# Apache .htaccess
 
-# Enable file uploads
-php_flag file_uploads On
+# Deny access to sensitive files
+<FilesMatch "^\.env|\.env\..*|\.git|\.cursor|composer\.json|package\.json|.*\.sql|.*\.log|.*\.md$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
 
-# Set maximum file uploads
-php_value max_file_uploads 10
+# Deny access to config directory
+<Directory "server/config">
+    Order allow,deny
+    Deny from all
+</Directory>
 
-# Rewrite API calls to the correct directory
+# Deny access to backup files
+<FilesMatch "\.(bak|backup|old|orig|save)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+
+# Enable rewrite engine
 RewriteEngine On
-RewriteRule ^server/api/(.*)$ /server/api/$1 [L,R=301]
- 
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Block access to hidden files and directories
+RewriteCond %{SCRIPT_FILENAME} -d [OR]
+RewriteCond %{SCRIPT_FILENAME} -f
+RewriteRule "(^|/)\." - [F]
+
+# Protect uploads directory from PHP execution
+<Directory "uploads">
+    <FilesMatch "\.php$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Prevent access to PHP files that shouldn't be directly accessed
+<FilesMatch "^(config|database|mailer|utils)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
+
+# Compress text files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript text/xml application/xml
+</IfModule>

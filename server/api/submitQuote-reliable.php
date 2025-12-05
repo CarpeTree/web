@@ -179,21 +179,25 @@ try {
             $selected_services = json_decode($_POST['selectedServices'], true) ?: [];
         }
         
+        // Store referral info in notes if provided (columns may not exist)
+        $notes_with_meta = $_POST['notes'] ?? '';
+        $referral_source = $_POST['referralSource'] ?? '';
+        $referrer_name = $_POST['referrerName'] ?? '';
+        if ($referral_source || $referrer_name) {
+            $notes_with_meta .= "\n\n--- Referral Info ---\nSource: {$referral_source}" . ($referrer_name ? "\nReferred by: {$referrer_name}" : "");
+        }
+        
         $stmt = $pdo->prepare("
             INSERT INTO quotes (
-                customer_id, selected_services, notes, quote_status, 
-                referral_source, referrer_name, newsletter_opt_in, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                customer_id, selected_services, notes, quote_status, created_at
+            ) VALUES (?, ?, ?, ?, NOW())
         ");
         
         $stmt->execute([
             $customer_id,
             json_encode($selected_services),
-            $_POST['notes'] ?? null,
-            'submitted',
-            $_POST['referralSource'] ?? null,
-            $_POST['referrerName'] ?? null,
-            isset($_POST['newsletterOptIn']) && $_POST['newsletterOptIn'] === 'true' ? 1 : 0
+            trim($notes_with_meta) ?: null,
+            'submitted'
         ]);
         
         $quote_id = $pdo->lastInsertId();
@@ -262,16 +266,63 @@ try {
     // CRITICAL: Send IMMEDIATE admin email notification BEFORE any AI processing
     // This ensures customer data reaches CRM even if AI fails
     try {
+        // Ensure config is loaded for SMTP settings
+        if (!isset($SMTP_HOST) && file_exists(__DIR__ . '/../config/config.php')) {
+            require_once __DIR__ . '/../config/config.php';
+        }
         require_once __DIR__ . '/../utils/mailer.php';
         
-        $admin_email = $_ENV['ADMIN_EMAIL'] ?? 'phil.bajenski@gmail.com';
+        $admin_email = $_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: 'phil.bajenski@gmail.com';
         $customer_name = $_POST['name'] ?? 'Unknown';
         $customer_email = $_POST['email'];
         $customer_phone = $_POST['phone'] ?? 'Not provided';
         $customer_address = $_POST['address'] ?? 'Not provided';
         $customer_notes = $_POST['notes'] ?? '';
+        $referral_source = $_POST['referralSource'] ?? 'Not specified';
+        $referrer_name = $_POST['referrerName'] ?? '';
+        $newsletter_opt = isset($_POST['newsletterOptIn']) && $_POST['newsletterOptIn'] === 'true' ? 'Yes' : 'No';
         
-        // Build immediate notification email (no AI data yet)
+        // Get uploaded file details for email
+        $file_list_html = '';
+        if ($file_count > 0) {
+            $stmt = $pdo->prepare("SELECT original_filename, file_path, file_size, mime_type FROM media WHERE quote_id = ?");
+            $stmt->execute([$quote_id]);
+            $uploaded_files = $stmt->fetchAll();
+            
+            $file_list_html = "<h2>Uploaded Files ({$file_count})</h2><ul style='list-style:none; padding:0;'>";
+            foreach ($uploaded_files as $file) {
+                $size_kb = round($file['file_size'] / 1024, 1);
+                $file_url = "https://carpetree.com/{$file['file_path']}";
+                $is_image = strpos($file['mime_type'], 'image/') === 0;
+                $is_video = strpos($file['mime_type'], 'video/') === 0;
+                $icon = $is_image ? '📷' : ($is_video ? '🎥' : '📎');
+                
+                $file_list_html .= "<li style='margin:8px 0; padding:10px; background:white; border-radius:4px;'>";
+                $file_list_html .= "{$icon} <a href='{$file_url}' target='_blank'>" . htmlspecialchars($file['original_filename']) . "</a>";
+                $file_list_html .= " <span style='color:#666;'>({$size_kb} KB - {$file['mime_type']})</span>";
+                $file_list_html .= "</li>";
+            }
+            $file_list_html .= "</ul>";
+        }
+        
+        // Selected services
+        $services_html = '';
+        if (!empty($selected_services)) {
+            $services_html = "<h2>Selected Services</h2><ul style='list-style:none; padding:0;'>";
+            foreach ($selected_services as $service) {
+                $services_html .= "<li style='margin:5px 0; padding:8px; background:#e8f5e9; border-radius:4px;'>✓ " . htmlspecialchars($service) . "</li>";
+            }
+            $services_html .= "</ul>";
+        }
+        
+        // GPS/Location data
+        $location_html = '';
+        if ($geo_lat && $geo_lng) {
+            $maps_url = "https://www.google.com/maps?q={$geo_lat},{$geo_lng}";
+            $location_html = "<div class='info-row'><span class='label'>GPS Location:</span> <a href='{$maps_url}' target='_blank'>View on Google Maps</a> ({$geo_lat}, {$geo_lng})</div>";
+        }
+        
+        // Build immediate notification email with ALL data
         $immediate_subject = "NEW QUOTE #{$quote_id} - {$customer_name} - IMMEDIATE NOTIFICATION";
         
         $immediate_html = "
@@ -281,10 +332,11 @@ try {
             .header { background: linear-gradient(135deg, #2D5A27, #4a7c59); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
             .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
             .info-row { margin: 10px 0; padding: 10px; background: white; border-radius: 4px; }
-            .label { font-weight: bold; color: #2D5A27; }
-            .urgent { background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 8px; }
+            .label { font-weight: bold; color: #2D5A27; min-width: 120px; display: inline-block; }
+            .urgent { background: #d4edda; border: 2px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 8px; }
             .footer { background: #2D5A27; color: white; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; }
             a { color: #2D5A27; }
+            h2 { color: #2D5A27; border-bottom: 2px solid #2D5A27; padding-bottom: 5px; margin-top: 25px; }
         </style></head>
         <body>
             <div class='header'>
@@ -293,8 +345,8 @@ try {
             </div>
             <div class='content'>
                 <div class='urgent'>
-                    <strong>IMMEDIATE NOTIFICATION</strong><br>
-                    This email was sent immediately upon form submission. AI analysis is processing separately and you will receive a follow-up email with results.
+                    <strong>NEW LEAD - IMMEDIATE ACTION</strong><br>
+                    Quote #{$quote_id} submitted at " . date('Y-m-d H:i:s') . ". Customer data below. AI analysis processing separately.
                 </div>
                 
                 <h2>Customer Information</h2>
@@ -302,17 +354,26 @@ try {
                 <div class='info-row'><span class='label'>Email:</span> <a href='mailto:" . htmlspecialchars($customer_email) . "'>" . htmlspecialchars($customer_email) . "</a></div>
                 <div class='info-row'><span class='label'>Phone:</span> <a href='tel:" . htmlspecialchars($customer_phone) . "'>" . htmlspecialchars($customer_phone) . "</a></div>
                 <div class='info-row'><span class='label'>Address:</span> " . htmlspecialchars($customer_address) . "</div>
+                {$location_html}
                 
                 <h2>Quote Details</h2>
                 <div class='info-row'><span class='label'>Quote ID:</span> #{$quote_id}</div>
+                <div class='info-row'><span class='label'>Customer ID:</span> #{$customer_id}</div>
+                <div class='info-row'><span class='label'>Submitted:</span> " . date('l, F j, Y \a\t g:i A') . "</div>
                 <div class='info-row'><span class='label'>Files Uploaded:</span> {$file_count}</div>
-                <div class='info-row'><span class='label'>Submitted:</span> " . date('Y-m-d H:i:s') . "</div>
-                " . (!empty($customer_notes) ? "<div class='info-row'><span class='label'>Notes:</span> " . htmlspecialchars($customer_notes) . "</div>" : "") . "
+                <div class='info-row'><span class='label'>Referral Source:</span> " . htmlspecialchars($referral_source) . ($referrer_name ? " - " . htmlspecialchars($referrer_name) : "") . "</div>
+                <div class='info-row'><span class='label'>Newsletter:</span> {$newsletter_opt}</div>
+                " . (!empty($customer_notes) ? "<div class='info-row'><span class='label'>Notes:</span><br>" . nl2br(htmlspecialchars($customer_notes)) . "</div>" : "") . "
+                
+                {$services_html}
+                
+                {$file_list_html}
                 
                 <h2>Quick Actions</h2>
                 <p>
-                    <a href='https://carpetree.com/admin-dashboard.html?quote_id={$quote_id}' style='display:inline-block; background:#2D5A27; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; margin:5px;'>View in Dashboard</a>
-                    <a href='https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}' style='display:inline-block; background:#4a7c59; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; margin:5px;'>View Customer</a>
+                    <a href='https://carpetree.com/admin-dashboard.html?quote_id={$quote_id}' style='display:inline-block; background:#2D5A27; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Quote in Dashboard</a>
+                    <a href='https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}' style='display:inline-block; background:#4a7c59; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Customer Profile</a>
+                    <a href='tel:" . htmlspecialchars($customer_phone) . "' style='display:inline-block; background:#1976d2; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>Call Customer</a>
                 </p>
             </div>
             <div class='footer'>
@@ -322,15 +383,20 @@ try {
         </html>";
         
         // Send immediate notification using direct method (no template dependency)
-        sendEmailDirect($admin_email, $immediate_subject, $immediate_html, $quote_id);
+        $email_sent = sendEmailDirect($admin_email, $immediate_subject, $immediate_html, $quote_id);
         
-        error_log("IMMEDIATE admin notification sent for quote #{$quote_id} to {$admin_email}");
+        if ($email_sent) {
+            error_log("IMMEDIATE admin notification sent for quote #{$quote_id} to {$admin_email}");
+        } else {
+            error_log("IMMEDIATE admin notification FAILED for quote #{$quote_id} - sendEmailDirect returned false");
+        }
         
     } catch (Throwable $emailErr) {
         // Log but don't fail - the quote was already saved
         logError('Immediate admin email failed (quote still saved)', [
             'quote_id' => $quote_id,
-            'error' => $emailErr->getMessage()
+            'error' => $emailErr->getMessage(),
+            'trace' => $emailErr->getTraceAsString()
         ]);
     }
 

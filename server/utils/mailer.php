@@ -204,18 +204,29 @@ function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
     try {
         $mail = new PHPMailer(true);
 
-        // Server settings
+        // Server settings - use globals first, then $_ENV, then getenv()
         $mail->isSMTP();
-        $mail->Host       = $SMTP_HOST ?? 'smtp.hostinger.com';
+        $smtp_host = $SMTP_HOST ?? $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: 'smtp.mail.me.com';
+        $smtp_user = $SMTP_USER ?? $_ENV['SMTP_USER'] ?? getenv('SMTP_USER') ?: '';
+        $smtp_pass = $SMTP_PASS ?? $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '';
+        $smtp_port = $SMTP_PORT ?? $_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587;
+        $smtp_from = $SMTP_FROM ?? $_ENV['SMTP_FROM'] ?? getenv('SMTP_FROM') ?: 'sapport@carpetree.com';
+        
+        $mail->Host       = $smtp_host;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $SMTP_USER ?? '';
-        $mail->Password   = $SMTP_PASS ?? '';
-        $mail->Port       = $SMTP_PORT ?? 587;
-        $smtpDebug = $_ENV['SMTP_DEBUG'] ?? null;
+        $mail->Username   = $smtp_user;
+        $mail->Password   = $smtp_pass;
+        $mail->Port       = (int)$smtp_port;
+        
+        // Debug logging
+        error_log("sendEmailDirect: Attempting to send email to {$to}");
+        error_log("sendEmailDirect: SMTP Host={$smtp_host}, Port={$smtp_port}, User={$smtp_user}, From={$smtp_from}");
+        
+        $smtpDebug = $_ENV['SMTP_DEBUG'] ?? getenv('SMTP_DEBUG') ?? null;
         if (is_numeric($smtpDebug) && (int)$smtpDebug > 0) {
             $mail->SMTPDebug = (int)$smtpDebug;
         }
-        $securePref = $_ENV['SMTP_SECURE'] ?? null; // 'ssl' or 'tls'
+        $securePref = $_ENV['SMTP_SECURE'] ?? getenv('SMTP_SECURE') ?? null;
         if ((int)$mail->Port === 465 || (is_string($securePref) && strtolower($securePref) === 'ssl')) {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         } else {
@@ -223,11 +234,16 @@ function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
         }
 
         // Recipients
-        $fromAddress = $SMTP_FROM ?: 'sapport@carpetree.com';
-        $replyToAddress = $_ENV['SMTP_REPLY_TO'] ?? $_ENV['SUPPORT_EMAIL'] ?? $fromAddress;
-        $mail->setFrom($fromAddress, 'Carpe Tree\'em');
-        $mail->addReplyTo($replyToAddress);
-        $mail->Sender = $fromAddress; // envelope-from for better alignment
+        $replyToAddress = $_ENV['SMTP_REPLY_TO'] ?? $_ENV['SUPPORT_EMAIL'] ?? getenv('SUPPORT_EMAIL') ?? getenv('SMTP_REPLY_TO') ?? $smtp_from;
+        // Only add reply-to if it's a valid email
+        if (empty($replyToAddress) || !filter_var($replyToAddress, FILTER_VALIDATE_EMAIL)) {
+            $replyToAddress = $smtp_from;
+        }
+        $mail->setFrom($smtp_from, 'Carpe Tree\'em');
+        if (!empty($replyToAddress)) {
+            $mail->addReplyTo($replyToAddress);
+        }
+        $mail->Sender = $smtp_from;
         $mail->addAddress($to);
 
         // Content
@@ -240,13 +256,16 @@ function sendEmailDirect($to, $subject, $html_body, $quote_id = null) {
 
         $mail->send();
         
+        error_log("sendEmailDirect: Email sent successfully to {$to}");
+        
         // Log successful email (simpler version)
         logEmailSimple($to, $subject, 'direct', 'sent', '', $quote_id);
         
         return true;
         
     } catch (Exception $e) {
-        error_log("Email sending failed: " . $e->getMessage());
+        error_log("sendEmailDirect FAILED: " . $e->getMessage());
+        error_log("sendEmailDirect details: to={$to}, subject={$subject}, quote_id={$quote_id}");
         
         // Log failed email
         logEmailSimple($to, $subject, 'direct', 'failed', $e->getMessage(), $quote_id);

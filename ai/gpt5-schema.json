@@ -1,0 +1,398 @@
+{
+  "type": "function",
+  "function": {
+    "name": "generate_tree_assessment_quote",
+    "description": "Generate a comprehensive tree care assessment and quote using GPT-5's advanced vision capabilities. Follow ANSI A300 standards and provide detailed technical analysis.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "comprehensive_analysis": {
+          "type": "string",
+          "description": "Detailed multi-paragraph technical analysis including species identification, biomechanical assessment, environmental context, safety evaluation, and preservation recommendations. Should be comprehensive and professional."
+        },
+        "species_identification": {
+          "type": "object",
+          "properties": {
+            "primary_species": {
+              "type": "string",
+              "description": "Common name of the primary tree species (e.g., 'Douglas Fir', 'Western Red Cedar')"
+            },
+            "confidence_score": {
+              "type": "number",
+              "description": "Confidence percentage for species identification (0-100)"
+            },
+            "classification": {
+              "type": "string",
+              "enum": ["deciduous", "coniferous", "mixed"],
+              "description": "Tree classification type"
+            },
+            "seasonal_considerations": {
+              "type": "string",
+              "description": "Notes about seasonal variations affecting identification"
+            }
+          },
+          "required": ["primary_species", "confidence_score", "classification"]
+        },
+        "measurements": {
+          "type": "object",
+          "properties": {
+            "height_metric": {
+              "type": "string",
+              "description": "Estimated height in meters (e.g., '18-22 meters')"
+            },
+            "height_imperial": {
+              "type": "string", 
+              "description": "Estimated height in feet (e.g., '60-72 feet')"
+            },
+            "dbh_metric": {
+              "type": "string",
+              "description": "Diameter at Breast Height in centimeters (e.g., '45-50 cm')"
+            },
+            "dbh_imperial": {
+              "type": "string",
+              "description": "Diameter at Breast Height in inches (e.g., '18-20 inches')"
+            },
+            "crown_spread_metric": {
+              "type": "string",
+              "description": "Crown spread in meters (e.g., '12-15 meters')"
+            },
+            "crown_spread_imperial": {
+              "type": "string",
+              "description": "Crown spread in feet (e.g., '40-50 feet')"
+            },
+            "measurement_method": {
+              "type": "string",
+              "description": "How measurements were inferred (visual cues, reference objects, etc.)"
+            }
+          },
+          "required": ["height_metric", "height_imperial", "dbh_metric", "dbh_imperial", "crown_spread_metric", "crown_spread_imperial"]
+        },
+        "health_assessment": {
+          "type": "object",
+          "properties": {
+            "overall_health": {
+              "type": "string",
+              "enum": ["excellent", "good", "fair", "poor", "dead"],
+              "description": "Overall tree health rating"
+            },
+            "structural_defects": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of identified structural defects, decay, or damage"
+            },
+            "lean_assessment": {
+              "type": "object",
+              "properties": {
+                "has_lean": {
+                  "type": "boolean"
+                },
+                "direction": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["minimal", "moderate", "severe"]
+                }
+              }
+            }
+          },
+          "required": ["overall_health"]
+        },
+        "safety_risk_assessment": {
+          "type": "object",
+          "properties": {
+            "proximity_to_structures": {
+              "type": "object",
+              "properties": {
+                "within_20_meters": {
+                  "type": "boolean"
+                },
+                "distance_estimate": {
+                  "type": "string"
+                },
+                "target_structures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "power_line_proximity": {
+              "type": "object",
+              "properties": {
+                "near_power_lines": {
+                  "type": "boolean"
+                },
+                "clearance_issues": {
+                  "type": "boolean"
+                },
+                "utility_notification_required": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "immediate_safety_concerns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of immediate safety hazards requiring urgent attention"
+            }
+          }
+        },
+        "recommended_services": {
+          "type": "object",
+          "properties": {
+            "pruning_services": {
+              "type": "object",
+              "properties": {
+                "crown_cleaning": {
+                  "type": "boolean",
+                  "description": "Remove deadwood >5cm diameter"
+                },
+                "crown_thinning": {
+                  "type": "object",
+                  "properties": {
+                    "recommended": {
+                      "type": "boolean"
+                    },
+                    "percentage": {
+                      "type": "string",
+                      "description": "Percentage of foliage to remove (e.g., '15-20%')"
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "description": "Reason for thinning (wind load reduction, light penetration, etc.)"
+                    }
+                  }
+                },
+                "crown_raising": {
+                  "type": "object",
+                  "properties": {
+                    "recommended": {
+                      "type": "boolean"
+                    },
+                    "height_metric": {
+                      "type": "string",
+                      "description": "Height to raise canopy in meters"
+                    },
+                    "height_imperial": {
+                      "type": "string",
+                      "description": "Height to raise canopy in feet"
+                    }
+                  }
+                },
+                "crown_reduction": {
+                  "type": "object",
+                  "properties": {
+                    "recommended": {
+                      "type": "boolean"
+                    },
+                    "percentage": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "topping_refused": {
+                  "type": "boolean",
+                  "description": "Always true - topping is harmful and violates ANSI standards"
+                },
+                "topping_explanation": {
+                  "type": "string",
+                  "description": "Educational explanation of why topping is harmful"
+                }
+              }
+            },
+            "removal_services": {
+              "type": "object",
+              "properties": {
+                "removal_recommended": {
+                  "type": "boolean"
+                },
+                "removal_reason": {
+                  "type": "string",
+                  "description": "Justification for removal (dead, dying, structurally compromised)"
+                },
+                "removal_method": {
+                  "type": "string",
+                  "enum": ["crane", "climber", "bucket_truck", "felling"],
+                  "description": "Recommended removal method"
+                },
+                "stump_grinding": {
+                  "type": "boolean",
+                  "description": "Whether stump grinding is needed"
+                }
+              }
+            },
+            "sprinkler_system": {
+              "type": "object",
+              "properties": {
+                "recommended": {
+                  "type": "boolean",
+                  "description": "Recommend for conifers within 20m of buildings"
+                },
+                "wildfire_risk_reduction": {
+                  "type": "string",
+                  "description": "Explanation of wildfire protection benefits"
+                },
+                "separate_line_item": {
+                  "type": "boolean",
+                  "description": "Include as separate quote item"
+                }
+              }
+            }
+          }
+        },
+        "cost_breakdown": {
+          "type": "object",
+          "properties": {
+            "base_hourly_rate": {
+              "type": "number",
+              "description": "Base rate of $150 CAD per hour"
+            },
+            "labor_estimates": {
+              "type": "object",
+              "properties": {
+                "climbing_rigging_hours": {
+                  "type": "number"
+                },
+                "crown_work_hours": {
+                  "type": "number"
+                },
+                "cleanup_hours": {
+                  "type": "number"
+                }
+              }
+            },
+            "equipment_costs": {
+              "type": "object",
+              "properties": {
+                "crane_rental": {
+                  "type": "number"
+                },
+                "bucket_truck": {
+                  "type": "number"
+                },
+                "specialized_equipment": {
+                  "type": "number"
+                }
+              }
+            },
+            "material_costs": {
+              "type": "object",
+              "properties": {
+                "cabling_hardware": {
+                  "type": "number"
+                },
+                "fertilizer": {
+                  "type": "number"
+                },
+                "other_materials": {
+                  "type": "number"
+                }
+              }
+            },
+            "disposal_costs": {
+              "type": "object",
+              "properties": {
+                "chipping": {
+                  "type": "number"
+                },
+                "hauling": {
+                  "type": "number"
+                },
+                "disposal_fees": {
+                  "type": "number"
+                }
+              }
+            },
+            "total_estimate_low": {
+              "type": "number",
+              "description": "Lower bound of cost estimate in CAD"
+            },
+            "total_estimate_high": {
+              "type": "number",
+              "description": "Upper bound of cost estimate in CAD"
+            },
+            "sprinkler_system_cost": {
+              "type": "number",
+              "description": "Separate line item for sprinkler system ($800-1200 CAD)"
+            }
+          },
+          "required": ["base_hourly_rate", "total_estimate_low", "total_estimate_high"]
+        },
+        "environmental_considerations": {
+          "type": "object",
+          "properties": {
+            "site_conditions": {
+              "type": "string",
+              "description": "Assessment of site conditions affecting tree health"
+            },
+            "soil_assessment": {
+              "type": "string",
+              "description": "Notes on soil compaction, drainage, etc."
+            },
+            "competing_vegetation": {
+              "type": "string"
+            },
+            "microclimatic_factors": {
+              "type": "string"
+            },
+            "preservation_opportunities": {
+              "type": "string",
+              "description": "Opportunities for tree preservation and longevity"
+            }
+          }
+        },
+        "compliance_notes": {
+          "type": "object",
+          "properties": {
+            "ansi_a300_compliance": {
+              "type": "boolean",
+              "description": "All recommendations follow ANSI A300 standards"
+            },
+            "site_visit_required": {
+              "type": "boolean",
+              "description": "Whether detailed on-site assessment is needed"
+            },
+            "permit_requirements": {
+              "type": "string",
+              "description": "Any municipal permits or notifications required"
+            },
+            "limitations": {
+              "type": "string",
+              "description": "Limitations of photo/video-based assessment"
+            }
+          },
+          "required": ["ansi_a300_compliance"]
+        }
+      },
+      "required": [
+        "comprehensive_analysis",
+        "species_identification", 
+        "measurements",
+        "health_assessment",
+        "safety_risk_assessment",
+        "recommended_services",
+        "cost_breakdown",
+        "compliance_notes"
+      ]
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+

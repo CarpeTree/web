@@ -1,0 +1,85 @@
+{
+  "name": "Carpe Tree Field Capture",
+  "short_name": "Field Quote",
+  "description": "Professional tree service field quote capture tool",
+  "start_url": "/field-quote.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2D5A27",
+  "theme_color": "#2D5A27",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/carpeclear.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Quote",
+      "short_name": "Quote",
+      "description": "Start a new field quote",
+      "url": "/field-quote.html",
+      "icons": [{ "src": "/images/favicon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "View Map",
+      "short_name": "Map",
+      "description": "View quotes on map",
+      "url": "/quote-map-dashboard.html",
+      "icons": [{ "src": "/images/favicon.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot1.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "features": [
+    "camera",
+    "geolocation",
+    "microphone",
+    "storage"
+  ],
+  "permissions": {
+    "camera": {
+      "description": "Required to capture tree photos and videos"
+    },
+    "geolocation": {
+      "description": "Required to record precise tree locations"
+    },
+    "microphone": {
+      "description": "Required to record voice notes"
+    },
+    "storage": {
+      "description": "Required to save quotes offline"
+    },
+    "notifications": {
+      "description": "Optional for urgent quote alerts"
+    }
+  },
+  "prefer_related_applications": false,
+  "related_applications": []
+}
+
+
+
+
+
+
+
+
+
+
+

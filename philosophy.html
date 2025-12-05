@@ -5,8 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Philosophy - Carpe Tree'em</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
-    <link rel="stylesheet" href="style.css?v=20250131">
-    <!-- Include the same styles from index.html -->
+    <link rel="stylesheet" href="style.css?v=20251205">
+    
+    <style>
+      /* Ensure consistent glass pill styling and spacing */
+      .contact-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1010;
+        backdrop-filter: saturate(1.2) blur(12px);
+        -webkit-backdrop-filter: saturate(1.2) blur(12px);
+        background: rgba(44, 95, 45, 0.92);
+        padding: 6px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+      }
+      .contact-header a {
+        color: white;
+        text-decoration: none;
+        padding: 5px 14px;
+        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.8em;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .contact-header a:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--deep-forest-green);
+        border-color: white;
+      }
+      nav {
+        position: fixed;
+        top: 38px;
+        z-index: 1005;
+      }
+      .content {
+        margin-top: 100px;
+        padding: 20px;
+      }
+    </style>
 </head>
 <body>
   <div class="contact-header glass glass-header glass-dark">

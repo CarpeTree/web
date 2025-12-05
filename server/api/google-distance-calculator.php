@@ -2,16 +2,44 @@
 // Google Maps Distance Matrix API Calculator
 require_once __DIR__ . '/../config/config.php';
 
-function calculateDistanceWithGoogleMaps($customer_address, $customer_lat = null, $customer_lng = null) {
-    global $GOOGLE_MAPS_API_KEY;
+function calculateDistanceWithGoogleMaps($customer_address, $customer_lat = null, $customer_lng = null, $origin_lat = null, $origin_lng = null) {
+    global $GOOGLE_MAPS_API_KEY, $HOME_LAT, $HOME_LNG;
     
     if (empty($GOOGLE_MAPS_API_KEY)) {
         error_log("Google Maps API key not configured - falling back to AI distance");
         return null;
     }
     
-    // Base location: Carpe Tree'em office in Nelson, BC
-    $origin = "4530 Blewitt Rd, Nelson, BC V1L 6X1, Canada";
+    // Base location: Carpe Tree'em office (prefer fixed coordinates if provided)
+    // Allow dynamic base camp via JSON config
+    $camp_file = dirname(__DIR__) . '/data/base-camps.json';
+    $current_camp = null;
+    if (file_exists($camp_file)) {
+        $camp_json = json_decode(file_get_contents($camp_file), true);
+        if (!empty($camp_json['current']['latitude']) && !empty($camp_json['current']['longitude'])) {
+            $current_camp = [
+                'lat' => (float)$camp_json['current']['latitude'],
+                'lng' => (float)$camp_json['current']['longitude']
+            ];
+        } elseif (!empty($camp_json['base_camps'])) {
+            foreach ($camp_json['base_camps'] as $bc) {
+                if (!empty($bc['default'])) {
+                    $current_camp = [ 'lat' => (float)$bc['latitude'], 'lng' => (float)$bc['longitude'] ];
+                    break;
+                }
+            }
+        }
+    }
+
+    if ($origin_lat && $origin_lng) {
+        $origin = "$origin_lat,$origin_lng";
+    } elseif ($current_camp) {
+        $origin = $current_camp['lat'] . ',' . $current_camp['lng'];
+    } elseif (!empty($HOME_LAT) && !empty($HOME_LNG)) {
+        $origin = "$HOME_LAT,$HOME_LNG";
+    } else {
+        $origin = "4530 Blewitt Rd, Nelson, BC V1L 6X1, Canada";
+    }
     
     // Determine destination
     if ($customer_lat && $customer_lng) {

@@ -1,0 +1,27 @@
+{
+  "base_camps": [
+    {
+      "id": "nelson_home",
+      "name": "Nelson Home",
+      "latitude": 49.4599,
+      "longitude": -117.2852,
+      "region": "Kootenays",
+      "default": true
+    },
+    {
+      "id": "vancouver_mobile",
+      "name": "Vancouver Mobile",
+      "latitude": 49.2827,
+      "longitude": -123.1207,
+      "region": "Lower Mainland",
+      "default": false
+    }
+  ],
+  "current": {
+    "id": "nelson_home",
+    "latitude": 49.4599,
+    "longitude": -117.2852
+  }
+}
+
+

@@ -5,39 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Get Your Tree Service Quote - Carpe Tree'em</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css?v=20250131">
+  <link rel="stylesheet" href="style.css?v=20251205">
+  
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
-    /* LIQUID GLASS THEME - Quote Form */
-    :root {
-      --glass-bg: rgba(255, 255, 255, 0.18);
-      --glass-border: rgba(255, 255, 255, 0.28);
-      --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-      --glass-hover: rgba(255, 255, 255, 0.25);
+    /* LIQUID GLASS THEME - Quote Form - Consistent with Homepage */
+    
+    /* Contact header - TOP BAR */
+    .contact-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1010;
+      backdrop-filter: saturate(1.2) blur(12px);
+      -webkit-backdrop-filter: saturate(1.2) blur(12px);
+      background: rgba(44, 95, 45, 0.92);
+      padding: 6px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
     }
     
-    .dark {
-      --glass-bg: rgba(15, 23, 42, 0.25);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      --glass-hover: rgba(255, 255, 255, 0.15);
+    .contact-header a {
+      color: white;
+      text-decoration: none;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(255, 255, 255, 0.7);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.8em;
+      background: rgba(255, 255, 255, 0.1);
     }
     
-    body {
-      background: linear-gradient(135deg, var(--background-color) 0%, rgba(44, 95, 45, 0.08) 50%, var(--background-color) 100%);
-      min-height: 100vh;
+    .contact-header a:hover {
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--deep-forest-green);
+      border-color: white;
     }
     
-    .dark body {
-      background: linear-gradient(135deg, #1a1a1a 0%, rgba(44, 95, 45, 0.15) 50%, #1a1a1a 100%);
+    /* Navigation - BELOW contact header */
+    nav {
+      position: fixed;
+      top: 38px;
+      z-index: 1005;
+      padding: 8px 0;
     }
     
-    /* Ensure nav overlays contact header on mobile */
-    nav { z-index: 1002; }
+    /* GLASS PILL NAV LINKS */
+    .nav-links a {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: white !important;
+      padding: 7px 14px !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+      border-radius: 20px !important;
+      font-size: 0.78em !important;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: var(--deep-forest-green) !important;
+      border-color: white !important;
+    }
     .quote-wizard {
       max-width: 800px;
-      margin: 120px auto 40px;
+      margin: 95px auto 30px;
       padding: 0 20px;
     }
     
@@ -354,9 +391,9 @@
           right: 0;
           z-index: 1002;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          /* Override global collapsing nav */
           max-height: calc(100vh - 90px) !important;
           overflow-y: auto !important;
+          gap: 0;
         }
         
         .nav-links.active {
@@ -365,13 +402,16 @@
         }
         
         .nav-links a {
-          padding: 18px 20px;
+          padding: 14px 20px;
           border: none;
+          border-radius: 0;
           text-align: center;
           width: 100%;
           border-bottom: 1px solid var(--deep-forest-green);
-          font-size: 1.1rem;
+          font-size: 1rem;
           font-weight: 600;
+          color: var(--deep-forest-green);
+          background: transparent;
         }
         
         .nav-links a:last-child {
@@ -379,8 +419,8 @@
         }
         
         .nav-links a:hover {
-          background: var(--muted-golden-amber);
-          color: var(--deep-forest-green);
+          background: var(--deep-forest-green);
+          color: var(--background-color);
         }
         
         /* Prevent body scroll when menu is open */
@@ -391,7 +431,7 @@
         }
         
         .quote-wizard {
-          margin-top: 150px;
+          margin-top: 105px;
           padding: 0 15px;
         }
         
@@ -408,7 +448,7 @@
 <body>
   <!-- Contact Header -->
   <div class="contact-header glass glass-header glass-dark">
-    <a href="tel:+17786553741">778-655-3741</a> |
+    <a href="tel:+17786553741">778-655-3741</a>
     <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
   </div>
 
@@ -426,11 +466,10 @@
       </button>
       <div class="nav-links" id="nav-links">
         <a href="index.html">Home</a>
-                    <a href="quote.html">Get Quote</a>
+        <a href="quote.html">Let's Talk Trees</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="services.html">Services</a>
         <a href="root-knowledge.html">Root Knowledge</a>
-        <a href="quote.html">Let's Talk Trees</a>
       </div>
     </div>
   </nav>

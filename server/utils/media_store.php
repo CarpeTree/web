@@ -80,3 +80,10 @@ function media_public_url(int $quote_id, string $filename): string {
 ?>
 
 
+
+
+
+
+
+
+

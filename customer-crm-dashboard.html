@@ -293,9 +293,8 @@
                            placeholder="123 Main St"
                            @input="searchCustomers()">
                 </div>
-                <button class="btn btn-primary" @click="searchCustomers()">
-                    🔍 Search
-                </button>
+                <button class="btn btn-primary" @click="searchCustomers()">🔍 Search</button>
+                <button class="btn" @click="showAllCustomers(1)">👥 Show All</button>
             </div>
         </div>
 
@@ -492,6 +491,9 @@
                         await this.searchCustomers();
                     } else if (customerId) {
                         await this.searchByCustomerId(customerId);
+                    } else {
+                        // Default to showing first page of customers
+                        await this.showAllCustomers();
                     }
                 },
 
@@ -528,6 +530,30 @@
                     } catch (error) {
                         console.error('Error searching customers:', error);
                         this.customers = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async showAllCustomers(page = 1) {
+                    this.loading = true;
+                    try {
+                        const response = await fetch(`/server/api/customer-search.php?all=1&limit=25&page=${page}`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.customers = data.customers;
+                            // Update URL to reflect list mode
+                            const newUrl = new URL(window.location);
+                            newUrl.searchParams.delete('email');
+                            newUrl.searchParams.delete('phone');
+                            newUrl.searchParams.delete('name');
+                            newUrl.searchParams.delete('address');
+                            newUrl.searchParams.delete('customer_id');
+                            newUrl.searchParams.set('all', '1');
+                            window.history.replaceState({}, '', newUrl);
+                        }
+                    } catch (e) {
+                        console.error('Show all customers failed', e);
                     } finally {
                         this.loading = false;
                     }

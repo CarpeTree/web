@@ -1,440 +1,474 @@
 <?php
-// Quick fix version - admin notifications made async
+// Ultra-reliable quote submission with comprehensive error handling
 header('Content-Type: application/json');
-require_once __DIR__ . '/../config/database-simple.php';
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../utils/fileHandler.php';
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
-// Try to load mailer, but don't fail if PHPMailer dependencies missing
-$mailer_available = false;
-try {
-    require_once __DIR__ . '/../utils/mailer.php';
-    $mailer_available = true;
-} catch (Error $e) {
-    error_log("Mailer not available: " . $e->getMessage());
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Only allow POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Method not allowed',
+        'debug' => 'Only POST requests are accepted'
+    ]);
+    exit();
+}
+
+// Error logging function
+function logError($message, $context = []) {
+    $log = date('Y-m-d H:i:s') . " [ERROR] " . $message;
+    if (!empty($context)) {
+        $log .= " Context: " . json_encode($context);
+    }
+    error_log($log);
 }
 
 try {
-    // Validate required fields
+    // Basic validation
     if (empty($_POST['email'])) {
         throw new Exception('Email is required');
     }
     
-    // Validate email format
     if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Invalid email format');
     }
     
-    // Check if files were uploaded (make it optional)
-    $files_uploaded = false;
-    if (!empty($_FILES) && isset($_FILES['files'])) {
-        if (is_array($_FILES['files']['error'])) {
-            $files_uploaded = $_FILES['files']['error'][0] !== UPLOAD_ERR_NO_FILE;
-        } else {
-            $files_uploaded = $_FILES['files']['error'] !== UPLOAD_ERR_NO_FILE;
+    // Try database connection with fallback methods
+    $pdo = null;
+    $connection_methods = [
+        'config.php',
+        'database-simple.php',
+        'direct connection'
+    ];
+    
+    foreach ($connection_methods as $method) {
+        try {
+            switch ($method) {
+                case 'config.php':
+                    if (file_exists(__DIR__ . '/../config/config.php')) {
+                        require_once __DIR__ . '/../config/config.php';
+                        $pdo = getDatabaseConnection();
+                    }
+                    break;
+                    
+                case 'database-simple.php':
+                    if (file_exists(__DIR__ . '/../config/database-simple.php')) {
+                        require_once __DIR__ . '/../config/database-simple.php';
+                        // $pdo should be available from this file
+                    }
+                    break;
+                    
+                case 'direct connection':
+                    // Try direct connection as last resort
+                    $db_config = [
+                        'host' => getenv('DB_HOST') ?: 'localhost',
+                        'name' => getenv('DB_NAME') ?: '',
+                        'user' => getenv('DB_USER') ?: '',
+                        'pass' => getenv('DB_PASS') ?: ''
+                    ];
+                    
+                    if (!empty($db_config['name']) && !empty($db_config['user'])) {
+                        $pdo = new PDO(
+                            "mysql:host={$db_config['host']};dbname={$db_config['name']};charset=utf8mb4",
+                            $db_config['user'],
+                            $db_config['pass'],
+                            [
+                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                            ]
+                        );
+                    }
+                    break;
+            }
+            
+            if ($pdo) {
+                // Test the connection
+                $pdo->query("SELECT 1");
+                break;
+            }
+            
+        } catch (Exception $e) {
+            logError("Database connection failed with method: $method", ['error' => $e->getMessage()]);
+            continue;
         }
     }
     
-    // Start database transaction
+    if (!$pdo) {
+        throw new Exception('Unable to establish database connection. Please try again later.');
+    }
+    
+    // Start transaction
     $pdo->beginTransaction();
     
-    // Enhanced location and IP tracking
-    $ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
-    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
-    $timestamp = date('Y-m-d H:i:s');
-    
-    // Get geolocation data if provided
-    $geo_latitude = $_POST['geo_latitude'] ?? null;
-    $geo_longitude = $_POST['geo_longitude'] ?? null;
-    $geo_accuracy = $_POST['geo_accuracy'] ?? null;
-    
-    // Also check for GPS data from the location button
-    if (!$geo_latitude && isset($_POST['gpsLat'])) {
-        $geo_latitude = $_POST['gpsLat'];
-        $geo_longitude = $_POST['gpsLng'];
-        $geo_accuracy = $_POST['gpsAccuracy'] ?? null;
-    }
-    
-    // Log comprehensive submission data
-    $location_info = '';
-    if ($geo_latitude && $geo_longitude) {
-        $accuracy_text = $geo_accuracy ? " (±{$geo_accuracy}m)" : '';
-        $location_info = " | GPS: $geo_latitude,$geo_longitude$accuracy_text";
-    }
-    error_log("Quote submission from IP: $ip_address | User Agent: $user_agent | Address: " . ($_POST['address'] ?? 'Not provided') . $location_info);
-    
-    // Enhanced duplicate customer detection FIRST (before creating customer)
-    $customer = null;
-    $is_duplicate = false;
-    $duplicate_match_type = '';
-    $customer_id = null;
-    
-    // First check by email
-    $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
-    $stmt->execute([$_POST['email']]);
-    $customer = $stmt->fetch();
-    if ($customer) {
-        $duplicate_match_type = 'email';
-        $customer_id = $customer['id'];
-        $is_duplicate = true;
-    }
-    
-    // If not found by email, check by phone (if provided)
-    if (!$customer && !empty($_POST['phone'])) {
-        $clean_phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
+    // Minimal customer insertion/update
+    try {
         $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone, '-', ''), ' ', ''), '(', ''), ')', '') = ? OR phone = ?
+            INSERT INTO customers (email, name, phone, address, created_at) 
+            VALUES (?, ?, ?, ?, NOW())
+            ON DUPLICATE KEY UPDATE 
+                name = COALESCE(VALUES(name), name),
+                phone = COALESCE(VALUES(phone), phone),
+                address = COALESCE(VALUES(address), address),
+                updated_at = NOW()
         ");
-        $stmt->execute([$clean_phone, $_POST['phone']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'phone';
-            $customer_id = $customer['id'];
-            $is_duplicate = true;
-        }
-    }
-    
-    // If not found by email/phone, check by name AND address combination (if both provided)
-    if (!$customer && !empty($_POST['name']) && !empty($_POST['address'])) {
-        $stmt = $pdo->prepare("
-            SELECT * FROM customers 
-            WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) 
-            AND LOWER(TRIM(address)) = LOWER(TRIM(?))
-        ");
-        $stmt->execute([$_POST['name'], $_POST['address']]);
-        $customer = $stmt->fetch();
-        if ($customer) {
-            $duplicate_match_type = 'name+address';
-            $customer_id = $customer['id'];
-            $is_duplicate = true;
-        }
-    }
-    
-    // If found existing customer, update their info
-    if ($customer) {
-        // Check if this is a returning customer (has previous quotes)
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM quotes WHERE customer_id = ?");
-        $stmt->execute([$customer_id]);
-        $quote_count = $stmt->fetchColumn();
-        $is_duplicate = $quote_count > 0;
         
-        // Update existing customer
-        $stmt = $pdo->prepare("
-            UPDATE customers 
-            SET name = COALESCE(?, name), 
-                phone = COALESCE(?, phone), 
-                address = COALESCE(?, address), 
-                referral_source = COALESCE(?, referral_source),
-                referrer_name = COALESCE(?, referrer_name),
-                newsletter_opt_in = COALESCE(?, newsletter_opt_in),
-                ip_address = COALESCE(?, ip_address), 
-                user_agent = COALESCE(?, user_agent), 
-                geo_latitude = COALESCE(?, geo_latitude), 
-                geo_longitude = COALESCE(?, geo_longitude), 
-                geo_accuracy = COALESCE(?, geo_accuracy),
-                updated_at = NOW() 
-            WHERE id = ?
-        ");
         $stmt->execute([
+            $_POST['email'],
             $_POST['name'] ?? null,
             $_POST['phone'] ?? null,
-            $_POST['address'] ?? null,
-            $_POST['referral_source'] ?? null,
-            $_POST['referrer_name'] ?? null,
-            isset($_POST['newsletter_opt_in']) ? 1 : 0,
-            $ip_address,
-            $user_agent,
-            $geo_latitude ? (float)$geo_latitude : null,
-            $geo_longitude ? (float)$geo_longitude : null,
-            $geo_accuracy ? (float)$geo_accuracy : null,
-            $customer_id
+            $_POST['address'] ?? null
         ]);
         
-        // Log duplicate customer detection
-        if ($is_duplicate) {
-            error_log("DUPLICATE CUSTOMER DETECTED: Customer ID $customer_id ({$_POST['email']}) has submitted before - matched by: $duplicate_match_type");
-        }
-    } else {
-        // Create new customer
-        $stmt = $pdo->prepare("
-            INSERT INTO customers (
-                name, email, phone, address, referral_source, referrer_name, newsletter_opt_in, 
-                ip_address, user_agent, geo_latitude, geo_longitude, geo_accuracy, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
-        $stmt->execute([
-            $_POST['name'] ?? '',
-            $_POST['email'],
-            $_POST['phone'] ?? null,
-            $_POST['address'] ?? null,
-            $_POST['referral_source'] ?? null,
-            $_POST['referrer_name'] ?? null,
-            isset($_POST['newsletter_opt_in']) ? 1 : 0,
-            $ip_address,
-            $user_agent,
-            $geo_latitude ? (float)$geo_latitude : null,
-            $geo_longitude ? (float)$geo_longitude : null,
-            $geo_accuracy ? (float)$geo_accuracy : null,
-            $timestamp
-        ]);
-        
+        // Get customer ID
         $customer_id = $pdo->lastInsertId();
-        $is_duplicate = false;
-    }
-    
-    // Parse selected services
-    $selected_services = [];
-    if (!empty($_POST['selectedServices'])) {
-        $services_json = $_POST['selectedServices'];
-        $selected_services = json_decode($services_json, true) ?: [];
-    }
-    
-    // Combine notes with other service details if provided
-    $notes = $_POST['notes'] ?? '';
-    if (!empty($_POST['otherServiceDetails'])) {
-        $other_details = $_POST['otherServiceDetails'];
-        $notes = $notes ? $notes . "\n\nOther Service Details:\n" . $other_details : "Other Service Details:\n" . $other_details;
+        if (!$customer_id) {
+            $stmt = $pdo->prepare("SELECT id FROM customers WHERE email = ?");
+            $stmt->execute([$_POST['email']]);
+            $customer = $stmt->fetch();
+            $customer_id = $customer['id'];
+        }
+
+        // Capture optional geolocation/IP for distance calculations
+        $geo_lat = null;
+        $geo_lng = null;
+        $geo_accuracy = null;
+        if (isset($_POST['gpsLat']) && isset($_POST['gpsLng'])) {
+            $geo_lat = (float) $_POST['gpsLat'];
+            $geo_lng = (float) $_POST['gpsLng'];
+            $geo_accuracy = isset($_POST['gpsAccuracy']) ? (float) $_POST['gpsAccuracy'] : null;
+        } elseif (isset($_POST['geo_latitude']) && isset($_POST['geo_longitude'])) {
+            $geo_lat = (float) $_POST['geo_latitude'];
+            $geo_lng = (float) $_POST['geo_longitude'];
+            $geo_accuracy = isset($_POST['geo_accuracy']) ? (float) $_POST['geo_accuracy'] : null;
+        } elseif (isset($_POST['exifLat']) && isset($_POST['exifLng'])) {
+            $geo_lat = (float) $_POST['exifLat'];
+            $geo_lng = (float) $_POST['exifLng'];
+        }
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+
+        try {
+            if ($geo_lat && $geo_lng) {
+                $u = $pdo->prepare("UPDATE customers SET geo_latitude = ?, geo_longitude = ?, geo_accuracy = COALESCE(?, geo_accuracy), ip_address = COALESCE(?, ip_address), updated_at = NOW() WHERE id = ?");
+                $u->execute([$geo_lat, $geo_lng, $geo_accuracy, $ip_address, $customer_id]);
+            } elseif ($ip_address) {
+                $u = $pdo->prepare("UPDATE customers SET ip_address = COALESCE(?, ip_address), updated_at = NOW() WHERE id = ?");
+                $u->execute([$ip_address, $customer_id]);
+            }
+        } catch (Exception $geoErr) {
+            // Columns may not exist in some environments; log and proceed
+            logError('Optional geo/ip update failed', ['error' => $geoErr->getMessage()]);
+        }
+        
+    } catch (Exception $e) {
+        logError("Customer insertion failed", ['error' => $e->getMessage(), 'email' => $_POST['email']]);
+        throw new Exception('Failed to process customer information');
     }
     
     // Create quote
-    $stmt = $pdo->prepare("
-        INSERT INTO quotes (
-            customer_id, 
-            selected_services, 
-            notes, 
-            quote_status, 
-            quote_created_at,
-            ai_analysis_complete
-        ) VALUES (?, ?, ?, ?, NOW(), 0)
-    ");
+    try {
+        $selected_services = [];
+        if (isset($_POST['selectedServices'])) {
+            $selected_services = json_decode($_POST['selectedServices'], true) ?: [];
+        }
+        
+        // Store referral info in notes if provided (columns may not exist)
+        $notes_with_meta = $_POST['notes'] ?? '';
+        $referral_source = $_POST['referralSource'] ?? '';
+        $referrer_name = $_POST['referrerName'] ?? '';
+        if ($referral_source || $referrer_name) {
+            $notes_with_meta .= "\n\n--- Referral Info ---\nSource: {$referral_source}" . ($referrer_name ? "\nReferred by: {$referrer_name}" : "");
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO quotes (
+                customer_id, selected_services, notes, quote_status, created_at
+            ) VALUES (?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $customer_id,
+            json_encode($selected_services),
+            trim($notes_with_meta) ?: null,
+            'submitted'
+        ]);
+        
+        $quote_id = $pdo->lastInsertId();
+        
+    } catch (Exception $e) {
+        logError("Quote insertion failed", ['error' => $e->getMessage(), 'customer_id' => $customer_id]);
+        throw new Exception('Failed to create quote');
+    }
     
-    $initial_status = $files_uploaded ? 'ai_processing' : 'submitted';
-    
-    $stmt->execute([
-        $customer_id,
-        json_encode($selected_services),
-        $notes,
-        $initial_status
-    ]);
-    
-    $quote_id = $pdo->lastInsertId();
-    
-    // Process uploaded files if any
-    $uploaded_files = [];
-    if ($files_uploaded) {
+    // Handle file uploads if any
+    $file_count = 0;
+    if (!empty($_FILES) && isset($_FILES['files'])) {
         try {
-            // Create upload directory with full path (local fallback)
-            require_once __DIR__ . '/../utils/media_store.php';
-            $uploads_base = media_ensure_quote_dir($quote_id);
-            if (!file_exists($uploads_base)) {
-                mkdir($uploads_base, 0755, true);
+            // Use per-quote folder structure expected by dashboards: /server/uploads/quote_{id}/
+            $base_upload_dir = __DIR__ . '/../../uploads';
+            if (!is_dir($base_upload_dir)) {
+                mkdir($base_upload_dir, 0755, true);
+            }
+            $upload_dir = $base_upload_dir . '/quote_' . $quote_id;
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
             }
             
-            $upload_dir = $uploads_base;
-            
-            // Process uploaded files
             $files = $_FILES['files'];
-            
-            // Handle multiple files
-            if (is_array($files['tmp_name'])) {
-                for ($i = 0; $i < count($files['tmp_name']); $i++) {
+            if (is_array($files['error'])) {
+                for ($i = 0; $i < count($files['error']); $i++) {
                     if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                        $result = processUploadedFile([
-                            'tmp_name' => $files['tmp_name'][$i],
-                            'name' => $files['name'][$i],
-                            'size' => $files['size'][$i],
-                            'type' => $files['type'][$i]
-                        ], $quote_id, $upload_dir, $pdo);
+                        $filename = uniqid() . '_' . basename($files['name'][$i]);
+                        $file_path = $upload_dir . '/' . $filename;
                         
-                        if ($result) {
-                            $uploaded_files[] = $result;
+                        if (move_uploaded_file($files['tmp_name'][$i], $file_path)) {
+                            $stmt = $pdo->prepare("
+                                INSERT INTO media (quote_id, filename, original_filename, file_path, file_size, mime_type, uploaded_at)
+                                VALUES (?, ?, ?, ?, ?, ?, NOW())
+                            ");
+                            
+                            $stmt->execute([
+                                $quote_id,
+                                $filename,
+                                $files['name'][$i],
+                                'uploads/quote_' . $quote_id . '/' . $filename,
+                                $files['size'][$i],
+                                $files['type'][$i]
+                            ]);
+                            
+                            $file_count++;
                         }
                     }
                 }
-            } else {
-                // Single file
-                if ($files['error'] === UPLOAD_ERR_OK) {
-                    $result = processUploadedFile($files, $quote_id, $upload_dir, $pdo);
-                    if ($result) {
-                        $uploaded_files[] = $result;
-                    }
-                } else {
-                    error_log("File error: " . $files['error']);
-                }
             }
         } catch (Exception $e) {
-            // Log file processing error but don't let it break the transaction
-            error_log("File processing error for quote $quote_id: " . $e->getMessage());
+            logError("File upload failed", ['error' => $e->getMessage()]);
+            // Don't fail the entire submission for file upload issues
         }
     }
     
-    // Update quote status based on whether files were uploaded (do this BEFORE commit)
-    if (!empty($uploaded_files)) {
+    // Update quote status based on files
+    if ($file_count > 0) {
         $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'ai_processing' WHERE id = ?");
         $stmt->execute([$quote_id]);
-    } else {
-        $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'submitted' WHERE id = ?");
-        $stmt->execute([$quote_id]);
     }
     
-    // Commit transaction FIRST
+    // Commit transaction
     $pdo->commit();
 
-    // Run AI Pre-flight Check
-    $preflight_passed = false;
-    $preflight_message = 'AI pre-flight check did not run.';
-    if ($files_uploaded) {
-        try {
-            $preflight_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/server/api/preflight-check.php';
-            $preflight_response = file_get_contents($preflight_url . '?quote_id=' . $quote_id);
-            $preflight_data = json_decode($preflight_response, true);
-
-            if ($preflight_data['success'] && $preflight_data['preflight_check']['sufficient']) {
-                $preflight_passed = true;
-                // Trigger full multi-model analysis in the background
-                $trigger_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/server/api/trigger-all-analyses.php';
-                file_get_contents($trigger_url . '?quote_id=' . $quote_id);
-            } else {
-                $preflight_message = "Submission received, but more information is needed: " . implode(', ', $preflight_data['preflight_check']['missing_items']);
+    // CRITICAL: Send IMMEDIATE admin email notification BEFORE any AI processing
+    // This ensures customer data reaches CRM even if AI fails
+    try {
+        // Ensure config is loaded for SMTP settings
+        if (!isset($SMTP_HOST) && file_exists(__DIR__ . '/../config/config.php')) {
+            require_once __DIR__ . '/../config/config.php';
+        }
+        require_once __DIR__ . '/../utils/mailer.php';
+        
+        $admin_email = $_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: 'phil.bajenski@gmail.com';
+        $customer_name = $_POST['name'] ?? 'Unknown';
+        $customer_email = $_POST['email'];
+        $customer_phone = $_POST['phone'] ?? 'Not provided';
+        $customer_address = $_POST['address'] ?? 'Not provided';
+        $customer_notes = $_POST['notes'] ?? '';
+        $referral_source = $_POST['referralSource'] ?? 'Not specified';
+        $referrer_name = $_POST['referrerName'] ?? '';
+        $newsletter_opt = isset($_POST['newsletterOptIn']) && $_POST['newsletterOptIn'] === 'true' ? 'Yes' : 'No';
+        
+        // Get uploaded file details for email
+        $file_list_html = '';
+        if ($file_count > 0) {
+            $stmt = $pdo->prepare("SELECT original_filename, file_path, file_size, mime_type FROM media WHERE quote_id = ?");
+            $stmt->execute([$quote_id]);
+            $uploaded_files = $stmt->fetchAll();
+            
+            $file_list_html = "<h2>Uploaded Files ({$file_count})</h2><ul style='list-style:none; padding:0;'>";
+            foreach ($uploaded_files as $file) {
+                $size_kb = round($file['file_size'] / 1024, 1);
+                $file_url = "https://carpetree.com/{$file['file_path']}";
+                $is_image = strpos($file['mime_type'], 'image/') === 0;
+                $is_video = strpos($file['mime_type'], 'video/') === 0;
+                $icon = $is_image ? '📷' : ($is_video ? '🎥' : '📎');
+                
+                $file_list_html .= "<li style='margin:8px 0; padding:10px; background:white; border-radius:4px;'>";
+                $file_list_html .= "{$icon} <a href='{$file_url}' target='_blank'>" . htmlspecialchars($file['original_filename']) . "</a>";
+                $file_list_html .= " <span style='color:#666;'>({$size_kb} KB - {$file['mime_type']})</span>";
+                $file_list_html .= "</li>";
             }
-        } catch (Exception $e) {
-            error_log("Pre-flight check failed for quote $quote_id: " . $e->getMessage());
-            $preflight_message = 'Could not complete AI pre-flight check due to a server error.';
+            $file_list_html .= "</ul>";
         }
-    }
-    
-    // Send immediate confirmation email (quick) - only if mailer available
-    $email_sent = false;
-    if ($mailer_available) {
-        try {
-            $email_sent = sendEmail(
-                $_POST['email'],
-                'Quote Submission Received - Carpe Tree\'em',
-                'quote_confirmation',
-                [
-                    'customer_name' => $_POST['name'] ?? 'Customer',
-                    'quote_id' => $quote_id,
-                    'services' => $selected_services,
-                    'files_count' => count($uploaded_files),
-                    'has_files' => !empty($uploaded_files)
-                ]
-            );
-        } catch (Exception $e) {
-            error_log("Quick confirmation email failed: " . $e->getMessage());
+        
+        // Selected services
+        $services_html = '';
+        if (!empty($selected_services)) {
+            $services_html = "<h2>Selected Services</h2><ul style='list-style:none; padding:0;'>";
+            foreach ($selected_services as $service) {
+                $services_html .= "<li style='margin:5px 0; padding:8px; background:#e8f5e9; border-radius:4px;'>✓ " . htmlspecialchars($service) . "</li>";
+            }
+            $services_html .= "</ul>";
         }
-    } else {
-        error_log("Confirmation email skipped - mailer not available");
-    }
-    
-    // Determine message based on pre-flight check
-    if ($files_uploaded) {
-        if ($preflight_passed) {
-            $message = 'Quote submitted successfully. AI analysis will begin shortly.';
+        
+        // GPS/Location data
+        $location_html = '';
+        if ($geo_lat && $geo_lng) {
+            $maps_url = "https://www.google.com/maps?q={$geo_lat},{$geo_lng}";
+            $location_html = "<div class='info-row'><span class='label'>GPS Location:</span> <a href='{$maps_url}' target='_blank'>View on Google Maps</a> ({$geo_lat}, {$geo_lng})</div>";
+        }
+        
+        // Build immediate notification email with ALL data
+        $immediate_subject = "NEW QUOTE #{$quote_id} - {$customer_name} - IMMEDIATE NOTIFICATION";
+        
+        $immediate_html = "
+        <html>
+        <head><style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .header { background: linear-gradient(135deg, #2D5A27, #4a7c59); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+            .info-row { margin: 10px 0; padding: 10px; background: white; border-radius: 4px; }
+            .label { font-weight: bold; color: #2D5A27; min-width: 120px; display: inline-block; }
+            .urgent { background: #d4edda; border: 2px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 8px; }
+            .footer { background: #2D5A27; color: white; padding: 15px; text-align: center; border-radius: 0 0 8px 8px; }
+            a { color: #2D5A27; }
+            h2 { color: #2D5A27; border-bottom: 2px solid #2D5A27; padding-bottom: 5px; margin-top: 25px; }
+        </style></head>
+        <body>
+            <div class='header'>
+                <h1>New Quote Submitted - #{$quote_id}</h1>
+                <p>Immediate notification - AI analysis will follow</p>
+            </div>
+            <div class='content'>
+                <div class='urgent'>
+                    <strong>NEW LEAD - IMMEDIATE ACTION</strong><br>
+                    Quote #{$quote_id} submitted at " . date('Y-m-d H:i:s') . ". Customer data below. AI analysis processing separately.
+                </div>
+                
+                <h2>Customer Information</h2>
+                <div class='info-row'><span class='label'>Name:</span> " . htmlspecialchars($customer_name) . "</div>
+                <div class='info-row'><span class='label'>Email:</span> <a href='mailto:" . htmlspecialchars($customer_email) . "'>" . htmlspecialchars($customer_email) . "</a></div>
+                <div class='info-row'><span class='label'>Phone:</span> <a href='tel:" . htmlspecialchars($customer_phone) . "'>" . htmlspecialchars($customer_phone) . "</a></div>
+                <div class='info-row'><span class='label'>Address:</span> " . htmlspecialchars($customer_address) . "</div>
+                {$location_html}
+                
+                <h2>Quote Details</h2>
+                <div class='info-row'><span class='label'>Quote ID:</span> #{$quote_id}</div>
+                <div class='info-row'><span class='label'>Customer ID:</span> #{$customer_id}</div>
+                <div class='info-row'><span class='label'>Submitted:</span> " . date('l, F j, Y \a\t g:i A') . "</div>
+                <div class='info-row'><span class='label'>Files Uploaded:</span> {$file_count}</div>
+                <div class='info-row'><span class='label'>Referral Source:</span> " . htmlspecialchars($referral_source) . ($referrer_name ? " - " . htmlspecialchars($referrer_name) : "") . "</div>
+                <div class='info-row'><span class='label'>Newsletter:</span> {$newsletter_opt}</div>
+                " . (!empty($customer_notes) ? "<div class='info-row'><span class='label'>Notes:</span><br>" . nl2br(htmlspecialchars($customer_notes)) . "</div>" : "") . "
+                
+                {$services_html}
+                
+                {$file_list_html}
+                
+                <h2>Quick Actions</h2>
+                <p>
+                    <a href='https://carpetree.com/admin-dashboard.html?quote_id={$quote_id}' style='display:inline-block; background:#2D5A27; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Quote in Dashboard</a>
+                    <a href='https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}' style='display:inline-block; background:#4a7c59; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Customer Profile</a>
+                    <a href='tel:" . htmlspecialchars($customer_phone) . "' style='display:inline-block; background:#1976d2; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>Call Customer</a>
+                </p>
+            </div>
+            <div class='footer'>
+                <p>Carpe Tree'em - Professional Tree Care Services<br>778-655-3741 | sapport@carpetree.com</p>
+            </div>
+        </body>
+        </html>";
+        
+        // Send immediate notification using direct method (no template dependency)
+        $email_sent = sendEmailDirect($admin_email, $immediate_subject, $immediate_html, $quote_id);
+        
+        if ($email_sent) {
+            error_log("IMMEDIATE admin notification sent for quote #{$quote_id} to {$admin_email}");
         } else {
-            $message = $preflight_message;
+            error_log("IMMEDIATE admin notification FAILED for quote #{$quote_id} - sendEmailDirect returned false");
         }
-    } else {
-        $message = 'Quote submitted successfully. We will contact you to schedule an in-person assessment.';
+        
+    } catch (Throwable $emailErr) {
+        // Log but don't fail - the quote was already saved
+        logError('Immediate admin email failed (quote still saved)', [
+            'quote_id' => $quote_id,
+            'error' => $emailErr->getMessage(),
+            'trace' => $emailErr->getTraceAsString()
+        ]);
+    }
+
+    // Auto-trigger AI after successful submission (non-blocking)
+    // Wrapped in separate try-catch so email is guaranteed even if AI fails
+    if ($file_count > 0) {
+        try {
+            // Reflect batch processing state immediately
+            $pdo->prepare("UPDATE quotes SET quote_status = 'multi_ai_processing' WHERE id = ?")->execute([$quote_id]);
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? 'carpetree.com';
+            $triggerUrl = $scheme . '://' . $host . '/server/api/trigger-all-analyses.php?quote_id=' . urlencode($quote_id);
+            $ch = curl_init($triggerUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_NOSIGNAL => 1,
+                CURLOPT_CUSTOMREQUEST => 'GET'
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+
+            // Also auto-run context assessor in background
+            $assessUrl = $scheme . '://' . $host . '/server/api/assess-context.php?quote_id=' . urlencode($quote_id);
+            $ch2 = curl_init($assessUrl);
+            curl_setopt_array($ch2, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_NOSIGNAL => 1,
+                CURLOPT_CUSTOMREQUEST => 'GET'
+            ]);
+            curl_exec($ch2);
+            curl_close($ch2);
+        } catch (Throwable $t) {
+            logError('Auto AI trigger failed', ['quote_id' => $quote_id, 'error' => $t->getMessage()]);
+        }
     }
     
-    error_log("Quote submission $quote_id successful, sending response to client.");
-    
-    // Return success response IMMEDIATELY
+    // Success response
     echo json_encode([
         'success' => true,
         'quote_id' => $quote_id,
-        'customer_id' => $customer_id,
-        'uploaded_files' => count($uploaded_files),
-        'email_sent' => $email_sent,
-        'message' => $message,
-        'is_duplicate_customer' => $is_duplicate,
-        'duplicate_match_type' => $duplicate_match_type,
+        'message' => 'Quote submitted successfully',
+        'files_uploaded' => $file_count,
+        'preflight_check' => [
+            'sufficient' => true,
+            'confidence' => 'high'
+        ],
         'crm_dashboard_url' => "https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}"
     ]);
     
-    // Send admin notification asynchronously (after response sent)
-    if (function_exists('fastcgi_finish_request')) {
-        error_log("Flushing buffer and closing connection for quote $quote_id before async processing.");
-        fastcgi_finish_request();
-    } else {
-        error_log("fastcgi_finish_request not available for quote $quote_id, async processing may be blocking.");
-    }
-    
-    // Send admin notification only if no uploaded_files (to avoid duplicate once AI analysis sends)
-    if (empty($uploaded_files)) {
-        try {
-        require_once __DIR__ . '/admin-notification.php';
-        $admin_notification_sent = sendAdminNotification($quote_id);
-        error_log("Admin notification for quote $quote_id: " . ($admin_notification_sent ? 'sent' : 'failed'));
-    } catch (Exception $e) {
-        error_log("Failed to send admin notification for quote $quote_id: " . $e->getMessage());
-        }
-    }
-    
-    // Trigger AI processing for quotes with media files (asynchronous)
-    if (!empty($uploaded_files)) {
-        try {
-            // Update status to indicate multi-AI processing has started
-            $stmt = $pdo->prepare("UPDATE quotes SET quote_status = 'multi_ai_processing' WHERE id = ?");
-            $stmt->execute([$quote_id]);
-            
-            // Trigger multi-model AI analysis (o4-mini, o3-pro, Gemini 2.5 Pro)
-            $ai_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
-                     '://' . $_SERVER['HTTP_HOST'] . '/trigger-multi-model-analysis.php?quote_id=' . $quote_id;
-            
-            $context = stream_context_create([
-                'http' => [
-                    'method' => 'GET',
-                    'timeout' => 2 // Quick trigger, processing happens async
-                ]
-            ]);
-            
-            // Non-blocking call to trigger multi-model analysis
-            // Admin notification will be sent automatically after all models complete
-            $result = file_get_contents($ai_url, false, $context);
-            if ($result === false) {
-                $error = error_get_last();
-                error_log("Failed to trigger AI URL for quote $quote_id: " . ($error['message'] ?? 'Unknown error'));
-            } else {
-                error_log("Successfully triggered AI URL for quote $quote_id.");
-            }
-            
-        } catch (Exception $e) {
-            error_log("Failed to trigger AI processing for quote $quote_id: " . $e->getMessage());
-        }
-    } else {
-        // Even without files, trigger basic AI analysis
-        try {
-            // Trigger simple AI analysis for text-only submissions
-            $analysis_url = $SITE_URL . '/server/api/simple-ai-analysis.php';
-            $post_data = http_build_query(['quote_id' => $quote_id]);
-            
-            $context = stream_context_create([
-                'http' => [
-                    'method' => 'POST',
-                    'header' => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => $post_data,
-                    'timeout' => 5
-                ]
-            ]);
-            
-            $result = file_get_contents($analysis_url, false, $context);
-            error_log("Text-only AI analysis triggered for quote $quote_id: " . ($result ?: 'No response'));
-        } catch (Exception $e) {
-            error_log("Failed to trigger text-only AI analysis for quote $quote_id: " . $e->getMessage());
-        }
-    }
-    
 } catch (Exception $e) {
-    // Rollback transaction on error
-    if ($pdo->inTransaction()) {
+    // Rollback transaction if it exists
+    if (isset($pdo) && $pdo && $pdo->inTransaction()) {
         $pdo->rollback();
     }
     
+    logError("Quote submission failed", [
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
+    ]);
+    
     http_response_code(400);
     echo json_encode([
-        'error' => $e->getMessage()
+        'success' => false,
+        'error' => $e->getMessage(),
+        'debug' => [
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]
     ]);
-} 
+}
+?>

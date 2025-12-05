@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ct-deploy-static: install a static asset from /home/deploy/tmp to webroot
+# Usage: ct-deploy-static <relative-filename>
+# Only allows .html, .css, .js files. Writes file as www-data:www-data 0644.
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <relative-filename>" >&2
+  exit 2
+fi
+
+readonly target_filename="$1"
+
+case "$target_filename" in
+  *.html|*.css|*.js) ;;
+  *) echo "Refusing to deploy non-static file: $target_filename" >&2; exit 3;;
+esac
+
+readonly src="/home/deploy/tmp/$target_filename"
+readonly dest="/var/www/carpetree.com/$target_filename"
+
+if [[ ! -f "$src" ]]; then
+  echo "Source file not found: $src" >&2
+  exit 4
+fi
+
+# Ensure destination directory exists
+install -d -o www-data -g www-data -m 0755 "$(dirname "$dest")"
+
+# Atomic replace with correct ownership and permissions
+install -o www-data -g www-data -m 0644 "$src" "$dest"
+echo "Deployed: $dest"
+
