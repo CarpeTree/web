@@ -347,8 +347,8 @@ try {
             'temperature' => 0.2,
             'topK' => 40, 
             'topP' => 0.9, 
-            'maxOutputTokens' => 65536,
             'thinking_level' => 'high'  // Maximum reasoning depth for Gemini 3 Pro
+            // No maxOutputTokens limit - let model use full 65536 capacity
         ]
     ];
     
