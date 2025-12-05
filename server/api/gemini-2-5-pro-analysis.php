@@ -347,7 +347,8 @@ try {
             'temperature' => 0.2,
             'topK' => 40, 
             'topP' => 0.9, 
-            'maxOutputTokens' => 65536
+            'maxOutputTokens' => 65536,
+            'thinking_level' => 'high'  // Maximum reasoning depth for Gemini 3 Pro
         ]
     ];
     
@@ -357,14 +358,31 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request_body));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 120); // 2 minutes for image analysis
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_error = curl_error($ch);
     curl_close($ch);
     
     if ($http_code !== 200) {
-        error_log("Gemini API error: HTTP $http_code - $response");
-        echo json_encode(['success' => false, 'error' => 'Gemini API request failed', 'details' => $response]);
+        error_log("Gemini API error: HTTP $http_code - $response - cURL: $curl_error");
+        echo json_encode([
+            'success' => false, 
+            'error' => 'Gemini API request failed (HTTP ' . $http_code . ')', 
+            'details' => $response,
+            'curl_error' => $curl_error,
+            'quote_id' => $quote_id
+        ]);
+        exit;
+    }
+    
+    if (empty($response)) {
+        error_log("Gemini API returned empty response for quote $quote_id");
+        echo json_encode([
+            'success' => false, 
+            'error' => 'Gemini API returned empty response',
+            'quote_id' => $quote_id
+        ]);
         exit;
     }
     
