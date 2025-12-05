@@ -314,16 +314,36 @@ $analysis_data_to_store = [
     ];
 
     // Save with connection recovery for long processing
+    $json_to_store = json_encode($analysis_data_to_store, JSON_PRETTY_PRINT);
+    error_log("GPT-5.1: Saving analysis for quote #{$quote_id}, JSON length: " . strlen($json_to_store));
+    
     try {
+        // Always get a fresh connection after long API call
+        $pdo = getDatabaseConnection();
+        if (!$pdo) {
+            throw new Exception("Failed to get database connection for saving");
+        }
+        
         $stmt = $pdo->prepare("UPDATE quotes SET ai_o4_mini_analysis = ?, updated_at = NOW() WHERE id = ?");
-        $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
+        $result = $stmt->execute([$json_to_store, $quote_id]);
+        
+        if (!$result) {
+            error_log("GPT-5.1: Save failed for quote #{$quote_id}: " . implode(', ', $stmt->errorInfo()));
+            throw new Exception("Database update failed: " . implode(', ', $stmt->errorInfo()));
+        }
+        
+        $rows_affected = $stmt->rowCount();
+        error_log("GPT-5.1: Save successful for quote #{$quote_id}, rows affected: {$rows_affected}");
+        
     } catch (PDOException $e) {
+        error_log("GPT-5.1: PDO Exception for quote #{$quote_id}: " . $e->getMessage());
+        
         if (strpos($e->getMessage(), 'server has gone away') !== false) {
             // Reconnect and retry
             $pdo = getDatabaseConnection();
             if ($pdo) {
                 $stmt = $pdo->prepare("UPDATE quotes SET ai_o4_mini_analysis = ?, updated_at = NOW() WHERE id = ?");
-                $stmt->execute([json_encode($analysis_data_to_store, JSON_PRETTY_PRINT), $quote_id]);
+                $stmt->execute([$json_to_store, $quote_id]);
             } else {
                 throw new Exception("Database reconnection failed: " . $e->getMessage());
             }
