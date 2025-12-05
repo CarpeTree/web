@@ -237,7 +237,7 @@ require_once __DIR__ . '/../config/config.php';
             'Content-Type: application/json',
             'Authorization: Bearer ' . $API_KEY
         ],
-        CURLOPT_TIMEOUT => 120
+        CURLOPT_TIMEOUT => 300  // 5 minutes for large image processing
     ]);
 
     $start_time = microtime(true);
