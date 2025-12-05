@@ -280,6 +280,16 @@ try {
 		$cost_stmt->execute([$quote['id']]);
 		$cost_data = $cost_stmt->fetch(PDO::FETCH_ASSOC);
 
+		// Parse raw AI analysis columns for direct access
+		$ai_gpt5_raw = null;
+		if (!empty($quote['ai_o4_mini_analysis'])) {
+			$ai_gpt5_raw = json_decode($quote['ai_o4_mini_analysis'], true);
+		}
+		$ai_gemini_raw = null;
+		if (!empty($quote['ai_gemini_analysis'])) {
+			$ai_gemini_raw = json_decode($quote['ai_gemini_analysis'], true);
+		}
+		
 		$formatted_quotes[] = [
 			'id' => $quote['id'],
 			'status' => $quote['quote_status'],
@@ -287,6 +297,7 @@ try {
 			'customer_email' => $quote['customer_email'],
 			'phone' => $quote['customer_phone'],
 			'address' => $quote['address'],
+			'notes' => $quote['notes'] ?? null,
 			'distance_km' => $distance_km,
 			'travel_time' => $travel_time,
 			'distance_source' => $distance_source,
@@ -300,6 +311,11 @@ try {
 			'ai_models' => array_map(function($m){ return $m['model']; }, $ai_models),
 			'gpt_analysis' => (function($models){ foreach ($models as $m){ if (stripos($m['model'],'gpt')!==false) return $m['analysis']; } return ['services'=>[], 'frames'=>[], 'raw'=>'', 'errors'=>[]]; })($ai_models),
 			'gemini_analysis' => (function($models){ foreach ($models as $m){ if (stripos($m['model'],'gemini')!==false) return $m['analysis']; } return ['services'=>[], 'frames'=>[], 'raw'=>'', 'errors'=>[]]; })($ai_models),
+			// Direct access to AI analysis for dashboard
+			'ai_gpt5_analysis' => $ai_gpt5_raw,
+			'ai_gemini_analysis' => $ai_gemini_raw,
+			'ai_o4_mini_analysis_raw' => $quote['ai_o4_mini_analysis'] ?? null,
+			'ai_gemini_analysis_raw' => $quote['ai_gemini_analysis'] ?? null,
 			'ai_summary' => !empty($ai_models) ? formatAISummary($ai_models[0]['analysis'], count($files) > 0) : ($ai_response ? formatAISummary($ai_response, count($files) > 0) : ''),
 			'line_items' => [],
 			'subtotal' => 0,
@@ -315,7 +331,8 @@ try {
 			'exif_locations' => $formatted_exif,
 			'context_assessment' => $formatted_assessment,
 			'total_cost' => $cost_data['total_cost'] ?? 0,
-			'total_tokens' => $cost_data['total_tokens'] ?? 0
+			'total_tokens' => $cost_data['total_tokens'] ?? 0,
+			'created_at' => $quote['quote_created_at'] ?? null
 		];
 	}
 

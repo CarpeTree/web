@@ -2037,16 +2037,26 @@
                     if (type === 'gpt') {
                         this.rawModalTitle = 'GPT-5.1 Raw Output';
                         const data = this.currentQuote?.ai_gpt5_analysis;
-                        if (data?.analysis?.analysis) {
+                        const rawStr = this.currentQuote?.ai_o4_mini_analysis_raw;
+                        
+                        if (!data && !rawStr) {
+                            this.rawModalContent = 'No GPT analysis available yet.\n\nClick the "GPT-5.1" button above to run the analysis.';
+                        } else if (data?.analysis?.analysis) {
                             // Show the main analysis text prominently
                             this.rawModalContent = `=== ANALYSIS ===\n${data.analysis.analysis}\n\n=== DETAILS ===\nSpecies: ${data.analysis.species_identification || 'Unknown'}\nHeight: ${data.analysis.height_estimate || 'Unknown'}\nDBH: ${data.analysis.dbh_estimate || 'Unknown'}\nCrown Spread: ${data.analysis.crown_spread || 'Unknown'}\n\nClimbing Required: ${data.analysis.climbing_required ? 'Yes' : 'No'}\nRigging Required: ${data.analysis.rigging_required ? 'Yes' : 'No'}\nBrush Chipping: ${data.analysis.brush_chipping_required ? 'Yes' : 'No'}\nWood Removal: ${data.analysis.wood_removal_required ? 'Yes' : 'No'}\n\n=== FULL JSON ===\n${JSON.stringify(data, null, 2)}`;
+                        } else if (rawStr) {
+                            this.rawModalContent = `=== RAW DATABASE VALUE ===\n${rawStr}`;
                         } else {
                             this.rawModalContent = JSON.stringify(data, null, 2) || 'No GPT analysis available';
                         }
                     } else {
                         this.rawModalTitle = 'Gemini 3 Pro Raw Output';
                         const data = this.currentQuote?.ai_gemini_analysis;
-                        if (data?.error) {
+                        const rawStr = this.currentQuote?.ai_gemini_analysis_raw;
+                        
+                        if (!data && !rawStr) {
+                            this.rawModalContent = 'No Gemini analysis available yet.\n\nClick the "Gemini 3" button above to run the analysis.';
+                        } else if (data?.error) {
                             this.rawModalContent = `=== ERROR ===\n${data.error}\n\n=== FULL RESPONSE ===\n${JSON.stringify(data, null, 2)}`;
                         } else if (data?.services) {
                             let content = `=== SERVICES ===\n`;
@@ -2060,6 +2070,8 @@
                             }
                             content += `\n=== FULL JSON ===\n${JSON.stringify(data, null, 2)}`;
                             this.rawModalContent = content;
+                        } else if (rawStr) {
+                            this.rawModalContent = `=== RAW DATABASE VALUE ===\n${rawStr}`;
                         } else {
                             this.rawModalContent = JSON.stringify(data, null, 2) || 'No Gemini analysis available';
                         }
