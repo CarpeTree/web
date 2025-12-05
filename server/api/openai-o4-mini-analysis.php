@@ -28,12 +28,16 @@ set_time_limit(600);
 
 try {
     // 1. SETUP & CONFIG
-    $quote_id = $_POST['quote_id'] ?? $_GET['quote_id'] ?? null;
+    // Parse JSON body if present
+    $raw_input = file_get_contents('php://input');
+    $json_body = json_decode($raw_input ?: '[]', true) ?: [];
+    
+    $quote_id = $json_body['quote_id'] ?? $_POST['quote_id'] ?? $_GET['quote_id'] ?? null;
     if (!$quote_id && isset($argv[1])) {
         $quote_id = $argv[1];
     }
     // Optional additional operator context to steer regeneration
-    $extra_context = $_POST['context'] ?? $_GET['context'] ?? null;
+    $extra_context = $json_body['context'] ?? $_POST['context'] ?? $_GET['context'] ?? null;
     if (!$extra_context && isset($argv[2])) { $extra_context = $argv[2]; }
     if (!$quote_id) {
         throw new Exception("Quote ID is required.");
