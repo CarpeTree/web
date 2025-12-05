@@ -1224,6 +1224,42 @@
                                 </div>
                             </template>
                             
+                            <!-- Volume/Weight -->
+                            <template x-if="gptParsedData?.volume_weight">
+                                <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; font-size: 0.75rem;">
+                                    <div style="font-weight: 600; color: #3b82f6; margin-bottom: 4px;">Volume & Weight:</div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                                        <span>Wood: <strong x-text="gptParsedData?.volume_weight?.total_wood_volume_cuft + ' cu ft'"></strong></span>
+                                        <span>Weight: <strong x-text="gptParsedData?.volume_weight?.total_weight_lbs?.toLocaleString() + ' lbs'"></strong></span>
+                                        <span>Brush: <strong x-text="gptParsedData?.volume_weight?.brush_volume_cuft + ' cu ft'"></strong></span>
+                                        <span>Disposal: <strong x-text="gptParsedData?.volume_weight?.disposal_tonnes + ' tonnes'"></strong></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Nearest Hospital -->
+                            <template x-if="gptParsedData?.nearest_hospital?.name">
+                                <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(236, 72, 153, 0.1); border-radius: 6px; font-size: 0.75rem;">
+                                    <strong style="color: #ec4899;">Hospital:</strong> <span x-text="gptParsedData?.nearest_hospital?.name"></span>
+                                    <span x-show="gptParsedData?.nearest_hospital?.distance_km > 0">
+                                        (<span x-text="gptParsedData?.nearest_hospital?.distance_km + ' km'"></span>, 
+                                        <span x-text="gptParsedData?.nearest_hospital?.drive_time_minutes + ' min'"></span>)
+                                    </span>
+                                </div>
+                            </template>
+                            
+                            <!-- Follow-up Questions -->
+                            <template x-if="gptFollowUpQuestions?.length > 0">
+                                <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(245, 158, 11, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #f59e0b; margin-bottom: 4px;">Needs More Info (<span x-text="gptFollowUpQuestions?.length"></span>):</div>
+                                    <ul style="margin: 0; padding-left: 16px; font-size: 0.7rem;">
+                                        <template x-for="q in gptFollowUpQuestions?.slice(0, 4)" :key="q">
+                                            <li x-text="q.length > 100 ? q.substring(0, 100) + '...' : q"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                            
                             <!-- Job Summary fallback -->
                             <template x-if="gptParsedData?.job_summary && !gptParsedData?.estimate_line_items">
                                 <div>
