@@ -118,18 +118,25 @@ if ($fetch_return !== 0) {
     exit;
 }
 
-// Pull latest changes
-exec('git pull origin main 2>&1', $pull_output, $pull_return);
-$output = array_merge($output, ['pull' => $pull_output]);
+// Reset any local changes and force update to match remote
+// This ensures the server always matches the repo exactly
+exec('git reset --hard origin/main 2>&1', $reset_output, $reset_return);
+$output = array_merge($output, ['reset' => $reset_output]);
 
-if ($pull_return !== 0) {
+if ($reset_return !== 0) {
     http_response_code(500);
     echo json_encode([
-        'error' => 'Git pull failed',
-        'output' => $pull_output
+        'error' => 'Git reset failed',
+        'output' => $reset_output
     ]);
     exit;
 }
+
+// Clean untracked files that might conflict
+exec('git clean -fd 2>&1', $clean_output, $clean_return);
+$output = array_merge($output, ['clean' => $clean_output]);
+
+$pull_output = array_merge($reset_output, $clean_output);
 
 // Log successful deployment
 $log_entry = date('Y-m-d H:i:s') . " - Deployment successful\n";
