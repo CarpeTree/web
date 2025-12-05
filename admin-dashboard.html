@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quote Review Dashboard - Carpe Tree'em</title>
     <style>
+        /* LIQUID GLASS THEME - Admin Dashboard */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.18);
+            --glass-border: rgba(255, 255, 255, 0.28);
+            --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.25);
+            --deep-forest-green: #2D5A27;
+            --muted-golden-amber: #D4A373;
+        }
+        
+        .dark {
+            --glass-bg: rgba(15, 23, 42, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --glass-hover: rgba(255, 255, 255, 0.15);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,15 +30,29 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, rgba(44, 95, 45, 0.08) 50%, #f5f7fa 100%);
             color: #333;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .dark body {
+            background: linear-gradient(135deg, #1a1a1a 0%, rgba(44, 95, 45, 0.15) 50%, #1a1a1a 100%);
+            color: #f5f5f5;
         }
 
+        /* LIQUID GLASS HEADER */
         .header {
-            background: linear-gradient(135deg, #2D5A27, #4a7c59);
+            backdrop-filter: saturate(1.2) blur(12px);
+            -webkit-backdrop-filter: saturate(1.2) blur(12px);
+            background: rgba(44, 95, 45, 0.85);
             color: white;
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header h1 {
@@ -40,12 +71,26 @@
             padding: 0 1rem;
         }
 
+        /* LIQUID GLASS QUOTE CARDS */
         .quote-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            backdrop-filter: saturate(1.15) blur(12px);
+            -webkit-backdrop-filter: saturate(1.15) blur(12px);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
             margin-bottom: 2rem;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .quote-card:hover {
+            box-shadow: 0 8px 32px rgba(44, 95, 45, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .dark .quote-card {
+            background: var(--glass-bg);
         }
         
         /* Context Assessment Badge Styles */
@@ -54,10 +99,17 @@
         .bg-danger { background-color: #dc3545 !important; color: white; }
         .bg-secondary { background-color: #6c757d !important; color: white; }
 
+        /* LIQUID GLASS QUOTE HEADER */
         .quote-header {
-            background: #f8f9fa;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: var(--glass-bg);
             padding: 1.5rem;
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .dark .quote-header {
+            background: rgba(15, 23, 42, 0.3);
         }
 
         .quote-info {
@@ -254,28 +306,41 @@
             background: #f8f9fa;
         }
 
+        /* LIQUID GLASS BUTTONS */
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .btn-primary {
-            background: #2D5A27;
+            background: linear-gradient(135deg, #2D5A27, rgba(44, 95, 45, 0.85));
             color: white;
+            box-shadow: 0 4px 15px rgba(44, 95, 45, 0.4);
         }
 
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: var(--glass-bg);
+            color: #333;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .dark .btn-secondary {
+            color: #f5f5f5;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(44, 95, 45, 0.5);
         }
 
         .status-badge {
@@ -314,6 +379,13 @@
     </div>
 
     <div class="container" x-data="quoteDashboard()">
+        <!-- Batch controls -->
+        <div style="display:flex; justify-content: flex-end; gap:10px; margin-bottom: 10px;">
+            <button class="btn btn-secondary" @click="batchRunAI()" :disabled="batchRunning">
+                <span x-show="!batchRunning">🔁 Run AI For All</span>
+                <span x-show="batchRunning">⏳ Running (<span x-text="batchProgress.completed"></span>/<span x-text="batchProgress.total"></span>)</span>
+            </button>
+        </div>
         <!-- Quote Loading -->
         <template x-if="loading">
             <div style="text-align: center; padding: 3rem;">
@@ -341,8 +413,41 @@
                         <div x-show="quote.address || quote.geo_latitude || quote.exif_locations" class="location-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
                             <!-- Location Information -->
                             <div class="location-info">
-                                <div class="info-label">📍 Location Sources & Distance</div>
-                                <div x-text="quote.distance_km ? `${quote.distance_km}km away (best estimate)` : 'Distance calculating...'"></div>
+                                <div class="info-label">📍 Location & Logistics</div>
+                                
+                                <!-- Distance and Travel Time -->
+                                <div style="display: flex; gap: 20px; margin: 10px 0;">
+                                    <div>
+                                        <strong>🚗 Distance:</strong>
+                                        <span x-text="quote.distance_km ? `${quote.distance_km} km` : 'Calculating...'"></span>
+                                    </div>
+                                    <div x-show="quote.driving_time_minutes">
+                                        <strong>⏱️ Drive Time:</strong>
+                                        <span x-text="`${Math.round(quote.driving_time_minutes / 60 * 10) / 10} hours (${quote.driving_time_minutes} min)`"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Transfer Station Info -->
+                                <div x-show="quote.nearest_transfer_station" style="margin: 10px 0;">
+                                    <strong>♻️ Nearest Transfer Station:</strong>
+                                    <span x-text="quote.nearest_transfer_station"></span>
+                                    <span x-show="quote.transfer_station_distance_km" x-text="`(${quote.transfer_station_distance_km} km)`"></span>
+                                </div>
+                                
+                                <!-- Travel Cost Estimate -->
+                                <div style="margin: 10px 0; padding: 8px; background: #e8f5e9; border-radius: 4px;">
+                                    <strong>💰 Travel Costs:</strong>
+                                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 0.9rem;">
+                                        <span>Round Trip: <strong x-text="`${(quote.distance_km * 2).toFixed(1)} km`"></strong></span>
+                                        <span>Truck: <strong x-text="`$${(quote.distance_km * 2).toFixed(2)}`"></strong></span>
+                                        <span>Time: <strong x-text="`$${(quote.driving_time_minutes * 2 / 60 * 85).toFixed(2)}`"></strong></span>
+                                    </div>
+                                </div>
+                                
+                                <button @click="updateDistanceInfo(quote.id)" 
+                                        style="padding: 4px 8px; background: #2D5A27; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    🔄 Recalculate Distance
+                                </button>
                                 
                                 <!-- GPS Coordinates -->
                                 <div x-show="quote.geo_latitude && quote.geo_longitude" style="margin-top: 0.5rem;">
@@ -392,14 +497,27 @@
                                 ></textarea>
                             </div>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <a :href="`/admin-quote.html?quote_id=${quote.id}`"
+                                   style="background: #ffc107; color: #000; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none;">
+                                    🔎 Detailed View
+                                </a>
                                 <button 
                                     @click="regenerateAIAnalysis(quote)" 
                                     :disabled="quote.ai_regenerating"
                                     style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;"
                                     :style="quote.ai_regenerating ? 'background: #6c757d; cursor: not-allowed;' : ''"
                                 >
-                                    <span x-show="!quote.ai_regenerating">🔄 Update Quote Review</span>
+                                    <span x-show="!quote.ai_regenerating">🔄 Regenerate (GPT‑5)</span>
                                     <span x-show="quote.ai_regenerating">⏳ Updating...</span>
+                                </button>
+                                <button 
+                                    @click="runFullAI(quote)"
+                                    :disabled="quote.full_ai_running"
+                                    style="background: #0d6efd; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;"
+                                    :style="quote.full_ai_running ? 'background: #6c757d; cursor: not-allowed;' : ''"
+                                >
+                                    <span x-show="!quote.full_ai_running">🤖 Run Full AI</span>
+                                    <span x-show="quote.full_ai_running">⏳ Queued...</span>
                                 </button>
                                 
                                 <button 
@@ -443,7 +561,7 @@
                             </div>
                             <div>
                                 <label style="font-size: 0.8rem; color: #666;">Travel Cost</label>
-                                <div class="distance-result" x-text="`$${quote.travel_cost.toFixed(2)}`"></div>
+                                <div class="distance-result" x-text="quote.travel_cost != null ? `$${Number(quote.travel_cost).toFixed(2)}` : '—'"></div>
                             </div>
                         </div>
                     </div>
@@ -613,7 +731,7 @@
                         </div>
                         <div class="total-item">
                             <div class="total-label">Travel</div>
-                            <div class="total-value" x-text="`$${quote.travel_cost.toFixed(2)}`"></div>
+                            <div class="total-value" x-text="quote.travel_cost != null ? `$${Number(quote.travel_cost).toFixed(2)}` : '—'"></div>
                         </div>
                         <div class="total-item" x-show="quote.discount_amount > 0">
                             <div class="total-label">Discount</div>
@@ -646,6 +764,8 @@
             return {
                 quotes: [],
                 loading: true,
+                batchRunning: false,
+                batchProgress: { total: 0, completed: 0 },
 
                 async init() {
                     await this.loadQuotes();
@@ -656,18 +776,14 @@
                         // Try regular API first (with AI analysis), fallback to simplified
                         let response;
                         try {
-                            response = await fetch('./server/api/admin-quotes.php');
+                            response = await fetch('/server/api/admin-quotes.php');
                             if (!response.ok) {
                                 throw new Error('Regular API failed');
                             }
                         } catch (e) {
                             console.log('Trying simplified API...', e.message);
                             // Fallback to simplified API
-                            try {
-                                response = await fetch('./server/api/admin-quotes-simple.php');
-                            } catch (e2) {
-                                response = await fetch('/server/api/admin-quotes-simple.php');
-                            }
+                            response = await fetch('/server/api/admin-quotes-simple.php');
                         }
                         
                         if (!response.ok) {
@@ -688,6 +804,21 @@
                             quote.ai_context = quote.ai_context || '';
                             quote.ai_regenerating = quote.ai_regenerating || false;
                             quote.context_assessing = quote.context_assessing || false;
+                            // Ensure numeric defaults to avoid toFixed errors
+                            quote.subtotal = Number(quote.subtotal) || 0;
+                            quote.travel_cost = quote.travel_cost != null ? Number(quote.travel_cost) : null;
+                            quote.discount_amount = Number(quote.discount_amount) || 0;
+                            quote.discount_value = Number(quote.discount_value) || 0;
+                            quote.final_total = Number(quote.final_total) || (quote.subtotal + (quote.travel_cost || 0) - (quote.discount_value || 0));
+                            if (!Array.isArray(quote.line_items)) quote.line_items = [];
+                            quote.line_items = quote.line_items.map(item => ({
+                                ...item,
+                                price: Number(item.price) || 0,
+                                min_price: Number(item.min_price) || 0,
+                                max_price: Number(item.max_price) || 0,
+                                suggested_price: Number(item.suggested_price) || 0,
+                                included: item.included !== false
+                            }));
                         });
                         
                         if (data.message) {
@@ -700,6 +831,31 @@
                         // Show user-friendly error
                         alert('Failed to load quotes: ' + error.message + '\n\nPlease check that the server is running and the database is accessible.');
                     }
+                },
+                async runFullAI(quote) {
+                    try {
+                        quote.full_ai_running = true;
+                        await fetch(`/server/api/trigger-all-analyses.php?quote_id=${quote.id}`, { method: 'GET' });
+                        setTimeout(() => { quote.full_ai_running = false; }, 1500);
+                    } catch (e) {
+                        quote.full_ai_running = false;
+                        alert('Failed to trigger AI: ' + (e?.message || 'unknown'));
+                    }
+                },
+                async batchRunAI() {
+                    if (this.quotes.length === 0) return;
+                    this.batchRunning = true;
+                    this.batchProgress = { total: this.quotes.length, completed: 0 };
+                    const delay = (ms) => new Promise(r => setTimeout(r, ms));
+                    for (const q of this.quotes) {
+                        try {
+                            await fetch(`/server/api/trigger-all-analyses.php?quote_id=${q.id}`, { method: 'GET' });
+                        } catch {}
+                        this.batchProgress.completed++;
+                        await delay(300); // gentle throttle
+                    }
+                    this.batchRunning = false;
+                    alert('All quotes queued for AI. Refresh later to see results.');
                 },
 
                 updateTravelCost(quote) {
@@ -782,59 +938,51 @@
                     }
                 },
 
-                async regenerateAIAnalysis(quote) {
-                    console.log('Updating quote review for quote:', quote.id);
-                    quote.ai_regenerating = true;
-                    
+                async updateDistanceInfo(quoteId) {
                     try {
-                        // Try multiple URL paths for the API
-                        let response;
-                        const payload = { quote_id: quote.id, context: quote.ai_context || '' };
+                        const response = await fetch(`/server/api/simple-distance-calc.php?quote_id=${quoteId}`);
+                        const data = await response.json();
                         
-                        console.log('Sending payload:', payload);
-                        
-                        try {
-                            response = await fetch('./server/api/regenerate-ai-analysis.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
-                        } catch (e) {
-                            console.log('Trying absolute path...', e.message);
-                            response = await fetch('/server/api/regenerate-ai-analysis.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
+                        if (data.error) {
+                            alert('Error calculating distance: ' + data.error);
+                            return;
                         }
                         
-                        console.log('Response status:', response.status);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        
-                        const result = await response.json();
-                        console.log('API result:', result);
-                        
-                        if (result.success) {
-                            // Update the AI summary
-                            quote.ai_summary = result.analysis;
+                        // Update the quote in the list
+                        const quote = this.quotes.find(q => q.id == quoteId);
+                        if (quote) {
+                            quote.distance_km = data.distance.one_way_km;
+                            quote.driving_time_minutes = data.distance.driving_time_minutes;
                             
-                            // Reload the entire quotes list to get updated line items
-                            console.log('Reloading quotes...');
-                            await this.loadQuotes();
-                            
-                            quote.ai_regenerating = false;
-                            alert('✅ Quote review updated successfully! Line items have been updated based on the new review.');
-                        } else {
-                            quote.ai_regenerating = false;
-                            alert('❌ Failed to update quote review: ' + (result.message || 'Unknown error'));
+                            // Show success message
+                            alert(`Distance updated: ${data.distance.one_way_km} km, ${data.distance.driving_time_hours} hours drive time`);
                         }
+                        
+                        // Reload quotes to get all updated data
+                        await this.loadQuotes();
                     } catch (error) {
-                        console.error('Error updating quote review:', error);
+                        console.error('Error updating distance:', error);
+                        alert('Failed to update distance information');
+                    }
+                },
+
+                async regenerateAIAnalysis(quote) {
+                    // Prompt for optional operator context notes
+                    const ctx = prompt('Add optional context to guide GPT‑5 (leave blank to skip):', quote.ai_context || '');
+                    quote.ai_regenerating = true;
+                    try {
+                        // Call GPT‑5 directly with optional context
+                        const url = '/server/api/openai-o4-mini-analysis.php';
+                        const body = new URLSearchParams();
+                        body.append('quote_id', quote.id);
+                        if (ctx && ctx.trim().length > 0) body.append('context', ctx.trim());
+                        await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+                        // Refresh list shortly
+                        setTimeout(async () => { await this.loadQuotes(); quote.ai_regenerating = false; }, 1500);
+                    } catch (error) {
+                        console.error('Error triggering GPT‑5:', error);
                         quote.ai_regenerating = false;
-                        alert('❌ Error updating quote review: ' + error.message);
+                        alert('❌ Failed to trigger GPT‑5: ' + (error?.message || 'Unknown error'));
                     }
                 },
 
@@ -900,7 +1048,7 @@
                     quote.context_assessing = true;
                     
                     try {
-                        const response = await fetch(`./server/api/assess-context.php?quote_id=${quote.id}`, {
+                        const response = await fetch(`/server/api/assess-context.php?quote_id=${quote.id}`, {
                             method: 'GET'
                         });
                         
@@ -932,6 +1080,66 @@
                 }
             }
         }
+    </script>
+    
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        cursor: pointer;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--glass-shadow);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    ">
+        <span id="themeIcon"></span>
+    </button>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            function updateThemeIcon() {
+                themeIcon.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+            }
+            
+            updateThemeIcon();
+            
+            themeToggle.addEventListener('click', function() {
+                const isDarkMode = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                updateThemeIcon();
+            });
+            
+            // Hover effect
+            themeToggle.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            themeToggle.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        })();
     </script>
 </body>
 </html> 

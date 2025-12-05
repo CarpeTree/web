@@ -1,5 +1,6 @@
 <?php
-// OpenAI GPT-5 Analysis Script (replaces prior o4-mini usage)
+// OpenAI GPT-5.1 Analysis Script with HIGH reasoning effort
+// Upgraded from GPT-5 to GPT-5.1 for maximum thinking capability
 
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
@@ -9,7 +10,7 @@ register_shutdown_function(function () {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'model' => 'gpt-5',
+            'model' => 'gpt-5.1',
             'error' => 'A fatal error occurred: ' . $error['message'],
             'file' => $error['file'],
             'line' => $error['line'],
@@ -31,6 +32,9 @@ try {
     if (!$quote_id && isset($argv[1])) {
         $quote_id = $argv[1];
     }
+    // Optional additional operator context to steer regeneration
+    $extra_context = $_POST['context'] ?? $_GET['context'] ?? null;
+    if (!$extra_context && isset($argv[2])) { $extra_context = $argv[2]; }
     if (!$quote_id) {
         throw new Exception("Quote ID is required.");
     }
@@ -38,7 +42,7 @@ try {
     // If running via HTTP, send immediate 200 and continue in background
 if (php_sapi_name() !== 'cli') {
     header('X-Accel-Buffering: no');
-    echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5', 'quote_id' => $quote_id]);
+    echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5.1', 'quote_id' => $quote_id]);
     if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
     }
@@ -76,10 +80,31 @@ require_once __DIR__ . '/../config/config.php';
     $aggregated_context = $preprocessor->preprocessAllMedia();
     
     $context_text = $aggregated_context['context_text'];
+    if (!empty($extra_context)) {
+        $context_text = "Operator notes (higher priority):\n" . trim($extra_context) . "\n\n" . $context_text;
+    }
     $visual_content = $aggregated_context['visual_content'];
 
     // 4. LOAD AI PROMPTS & SCHEMA
-    $system_prompt = file_get_contents(__DIR__ . '/../../ai/system_prompt.txt');
+    // Prefer system_prompts.json for GPT-5.1 prompt, fallback to legacy file
+    $system_prompt = null;
+    $prompts_file = __DIR__ . '/../ai/system_prompts.json';
+    if (file_exists($prompts_file)) {
+        $prompts_data = json_decode(file_get_contents($prompts_file), true);
+        // Try gpt5.1 key first, then gpt5, then gemini as fallback
+        $system_prompt = $prompts_data['gpt5.1']['prompt'] 
+            ?? $prompts_data['gpt5']['prompt'] 
+            ?? $prompts_data['gemini']['prompt'] 
+            ?? null;
+    }
+    // Fallback to legacy system_prompt.txt
+    if (!$system_prompt) {
+        $legacy_prompt = __DIR__ . '/../../ai/system_prompt.txt';
+        if (file_exists($legacy_prompt)) {
+            $system_prompt = file_get_contents($legacy_prompt);
+        }
+    }
+    
     $json_schema_string = file_get_contents(__DIR__ . '/../../ai/schema.json');
     $json_schema = json_decode($json_schema_string, true);
 
@@ -128,12 +153,13 @@ require_once __DIR__ . '/../config/config.php';
     }
 
     $openai_request = [
-        'model' => 'gpt-5',
+        'model' => 'gpt-5.1',
         'messages' => $messages,
         'tools' => [$json_schema],
         'tool_choice' => ['type' => 'function', 'function' => ['name' => $function_name]],
         'max_completion_tokens' => 100000,
-        
+        'reasoning_effort' => 'high',  // Maximum thinking for detailed tree analysis
+        'temperature' => 0.1,  // Low temperature for consistent, accurate estimates
     ];
 
     // Validate API key
@@ -182,7 +208,7 @@ require_once __DIR__ . '/../config/config.php';
     $processing_time = (microtime(true) - $start_time) * 1000;
 
     if ($http_code !== 200) {
-        throw new Exception("OpenAI gpt-5 API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
+        throw new Exception("OpenAI GPT-5.1 API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
     }
 
     // 7. PARSE RESPONSE & CALCULATE COST
@@ -190,7 +216,7 @@ require_once __DIR__ . '/../config/config.php';
     $ai_analysis_json = $ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'] ?? null;
 
     if (!$ai_analysis_json) {
-        throw new Exception("Invalid gpt-5 response format or missing tool call. Full response: " . $response);
+        throw new Exception("Invalid GPT-5.1 response format or missing tool call. Full response: " . $response);
     }
     
     $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
@@ -200,7 +226,7 @@ require_once __DIR__ . '/../config/config.php';
     $cost_tracker = new CostTracker($pdo);
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'gpt-5',
+        'model_name' => 'gpt-5.1',
         'provider' => 'openai',
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
@@ -235,7 +261,8 @@ require_once __DIR__ . '/../config/config.php';
         $ai_response = json_encode($parsed_analysis);
 
 $analysis_data_to_store = [
-        'model' => 'gpt-5',
+        'model' => 'gpt-5.1',
+        'reasoning_effort' => 'high',
         'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
@@ -268,7 +295,8 @@ $analysis_data_to_store = [
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([
         'success' => true,
-        'model' => 'gpt-5',
+        'model' => 'gpt-5.1',
+        'reasoning_effort' => 'high',
         'quote_id' => $quote_id,
         'analysis' => $analysis_data_to_store,
         'cost_tracking' => $cost_data
@@ -278,7 +306,7 @@ $analysis_data_to_store = [
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'model' => 'gpt-5',
+        'model' => 'gpt-5.1',
         'error' => $e->getMessage(),
         'file' => $e->getFile(),
         'line' => $e->getLine(),
@@ -294,7 +322,7 @@ if (isset($analysis_data_to_store)) {
         // Fire-and-forget style; do not block response if it fails
         sendAdminNotification($quote_id);
     } catch (Throwable $notifyError) {
-        error_log('Admin notification after GPT-5 analysis failed: ' . $notifyError->getMessage());
+        error_log('Admin notification after GPT-5.1 analysis failed: ' . $notifyError->getMessage());
     }
 }
 ?>

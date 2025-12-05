@@ -249,7 +249,17 @@ try {
         $base_prompt .= "\n\nCustomer notes: " . $quote['notes'];
     }
     
-    $base_prompt .= "\n\nProvide detailed analysis including specific recommendations, estimated costs, and safety considerations. Focus on what you can see in the images/videos.";
+    $base_prompt .= "\n\nProvide detailed analysis including specific recommendations, estimated costs, and safety considerations. Focus on what you can see in the images/videos.
+
+CRITICAL: Use deep reasoning and analysis. Take time to:
+1. Carefully examine each image/video frame for details
+2. Consider multiple possible interpretations of what you observe
+3. Cross-reference observations with arboricultural best practices
+4. Provide step-by-step reasoning for your conclusions
+5. Justify all cost estimates with detailed breakdowns
+6. Include confidence levels and explain any uncertainties
+
+This analysis will be used for professional tree service quotes - accuracy and thoroughness are essential.";
 
     // Prepare user content with media
     $user_content = [
@@ -257,9 +267,11 @@ try {
     ];
     $user_content = array_merge($user_content, $media_content);
 
-    // OpenAI API request
+    // OpenAI API request - GPT-5.1 with maximum thinking
     $openai_request = [
-        'model' => 'o3',
+        'model' => 'gpt-5.1',
+        'reasoning_effort' => 'high',
+        'temperature' => 0.1,
         'messages' => [
             [
                 'role' => 'system',
@@ -299,6 +311,14 @@ CUSTOMER INTERACTION:
 
 REGENERATION CONTEXT:
 Admin has requested regenerated analysis with additional context. Provide enhanced assessment incorporating any new information while maintaining professional standards and confidence ratings.
+
+REASONING REQUIREMENTS:
+- Take time to thoroughly analyze all visual evidence before drawing conclusions
+- Show your reasoning process for complex assessments
+- Consider multiple hypotheses and explain why you selected your final assessment
+- Provide detailed justification for all recommendations and cost estimates
+- Cross-reference visual observations with industry best practices
+- Question initial assumptions and validate conclusions against available evidence
 
 OUTPUT REQUIREMENTS (Ed Gilman Specification Format):
 Generate detailed quotes following Ed Gilman\'s framework:
