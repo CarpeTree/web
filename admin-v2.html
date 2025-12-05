@@ -670,6 +670,40 @@
             background: rgba(255,255,255,0.05);
         }
         
+        .line-item-card.logistics-item {
+            background: rgba(66, 133, 244, 0.08);
+            border-color: rgba(66, 133, 244, 0.3);
+        }
+        
+        .dark .line-item-card.logistics-item {
+            background: rgba(66, 133, 244, 0.15);
+        }
+        
+        /* Source badges */
+        .source-badge {
+            font-size: 0.55rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .source-badge.gemini {
+            background: rgba(16, 163, 127, 0.15);
+            color: #10a37f;
+        }
+        
+        .source-badge.gpt {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+        
+        .source-badge.calc {
+            background: rgba(66, 133, 244, 0.15);
+            color: #4285f4;
+        }
+        
         /* Station chips */
         .station-chip {
             padding: 3px 8px;
@@ -1115,20 +1149,61 @@
                     </div>
                     <div class="ai-output" x-show="aiPanelExpanded" style="max-height: 600px;">
                         <!-- GPT-5.1 Summary -->
-                        <div x-show="currentQuote?.ai_gpt5_analysis?.analysis?.analysis" style="padding: 14px; background: rgba(16, 163, 127, 0.1); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #10a37f;">
-                            <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">🤖 GPT-5.1 Assessment:</div>
-                            <div style="max-height: 250px; overflow-y: auto; color: var(--text);" x-text="currentQuote?.ai_gpt5_analysis?.analysis?.analysis"></div>
-                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(16, 163, 127, 0.2); font-size: 0.75rem;">
+                        <div x-show="currentQuote?.ai_gpt5_analysis?.analysis?.analysis || gptParsedData?.job_summary" style="padding: 14px; background: rgba(16, 163, 127, 0.1); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #10a37f;">
+                            <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">GPT-5.1 Assessment:</div>
+                            
+                            <!-- New structured format -->
+                            <template x-if="gptParsedData?.job_summary">
+                                <div>
+                                    <div x-show="gptParsedData?.job_summary?.status" style="margin-bottom: 8px; padding: 6px 10px; background: rgba(16, 163, 127, 0.15); border-radius: 6px;">
+                                        <strong>Status:</strong> <span x-text="gptParsedData?.job_summary?.status"></span>
+                                    </div>
+                                    <div x-show="gptParsedData?.job_summary?.description" style="margin-bottom: 8px;" x-text="gptParsedData?.job_summary?.description"></div>
+                                    <div x-show="gptParsedData?.job_summary?.total_estimate" style="font-size: 1.1rem; font-weight: 700; color: var(--forest);">
+                                        Estimate: $<span x-text="gptParsedData?.job_summary?.total_estimate?.toLocaleString()"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Trees breakdown -->
+                            <template x-if="gptParsedData?.trees?.length > 0">
+                                <div style="margin-top: 10px;">
+                                    <div style="font-weight: 600; margin-bottom: 6px;">Trees:</div>
+                                    <template x-for="tree in gptParsedData?.trees" :key="tree.id">
+                                        <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem;">
+                                            <strong x-text="tree.id || tree.species"></strong>: <span x-text="tree.species"></span>
+                                            <span x-show="tree.dbh">, DBH: <span x-text="tree.dbh?.imperial || tree.dbh"></span></span>
+                                            <span x-show="tree.height">, H: <span x-text="tree.height?.imperial || tree.height"></span></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            
+                            <!-- Hazards -->
+                            <template x-if="gptHazards?.length > 0">
+                                <div style="margin-top: 10px; padding: 8px 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #ef4444; margin-bottom: 4px;">Hazards:</div>
+                                    <ul style="margin: 0; padding-left: 16px; font-size: 0.75rem;">
+                                        <template x-for="hazard in gptHazards?.slice(0, 5)" :key="hazard">
+                                            <li x-text="typeof hazard === 'string' ? hazard : hazard.description"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                            
+                            <!-- Old format fallback -->
+                            <div x-show="!gptParsedData && currentQuote?.ai_gpt5_analysis?.analysis?.analysis" style="max-height: 250px; overflow-y: auto; color: var(--text);" x-text="currentQuote?.ai_gpt5_analysis?.analysis?.analysis"></div>
+                            <div x-show="!gptParsedData && currentQuote?.ai_gpt5_analysis?.analysis" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(16, 163, 127, 0.2); font-size: 0.75rem;">
                                 <strong>Species:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.species_identification || 'Unknown'"></span><br>
                                 <strong>Height:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.height_estimate || 'Unknown'"></span><br>
                                 <strong>DBH:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.dbh_estimate || 'Unknown'"></span><br>
                                 <strong>Crown:</strong> <span x-text="currentQuote?.ai_gpt5_analysis?.analysis?.crown_spread || 'Unknown'"></span>
                             </div>
-                            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
-                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.climbing_required" class="ai-service-pill">🧗 Climbing Required</span>
-                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.rigging_required" class="ai-service-pill">🔗 Rigging Required</span>
-                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_chipping_required" class="ai-service-pill">🪵 Chipping</span>
-                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_hauling_required" class="ai-service-pill">🚛 Hauling</span>
+                            <div x-show="!gptParsedData" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.climbing_required" class="ai-service-pill">Climbing Required</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.rigging_required" class="ai-service-pill">Rigging Required</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_chipping_required" class="ai-service-pill">Chipping</span>
+                                <span x-show="currentQuote?.ai_gpt5_analysis?.analysis?.brush_hauling_required" class="ai-service-pill">Hauling</span>
                             </div>
                         </div>
                         
@@ -1166,6 +1241,35 @@
                                     <div x-show="geminiParsedData?.job_summary?.status" style="margin-top: 10px; padding: 8px 10px; background: rgba(66, 133, 244, 0.15); border-radius: 6px;">
                                         <strong>Status:</strong> <span x-text="geminiParsedData?.job_summary?.status"></span>
                                         <div x-show="geminiParsedData?.job_summary?.description" style="font-size: 0.8rem; margin-top: 4px;" x-text="geminiParsedData?.job_summary?.description"></div>
+                                    </div>
+                                    
+                                    <!-- Time Estimate from Technical Report -->
+                                    <div x-show="geminiTechnicalReport?.time_modeling" style="margin-top: 10px; padding: 8px 10px; background: rgba(16, 163, 127, 0.1); border-radius: 6px; border-left: 3px solid #10a37f;">
+                                        <div style="font-weight: 600; color: #10a37f; margin-bottom: 6px;">Time Estimate:</div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.75rem;">
+                                            <span x-show="geminiTechnicalReport?.time_modeling?.total_man_hours">Total: <strong x-text="geminiTechnicalReport?.time_modeling?.total_man_hours"></strong></span>
+                                            <span x-show="geminiTechnicalReport?.time_modeling?.crew_composition">Crew: <strong x-text="geminiTechnicalReport?.time_modeling?.crew_composition"></strong></span>
+                                            <span x-show="geminiTechnicalReport?.time_modeling?.setup_teardown">Setup: <strong x-text="geminiTechnicalReport?.time_modeling?.setup_teardown"></strong></span>
+                                            <span x-show="geminiTechnicalReport?.time_modeling?.rigging_time">Rigging: <strong x-text="geminiTechnicalReport?.time_modeling?.rigging_time"></strong></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Rigging Plan -->
+                                    <div x-show="geminiTechnicalReport?.rigging_plan" style="margin-top: 10px; padding: 8px 10px; background: rgba(139, 92, 246, 0.1); border-radius: 6px; border-left: 3px solid #8b5cf6;">
+                                        <div style="font-weight: 600; color: #8b5cf6; margin-bottom: 6px;">Rigging Plan:</div>
+                                        <div style="font-size: 0.75rem;">
+                                            <div x-show="geminiTechnicalReport?.rigging_plan?.method"><strong>Method:</strong> <span x-text="geminiTechnicalReport?.rigging_plan?.method"></span></div>
+                                            <div x-show="geminiTechnicalReport?.rigging_plan?.setup_time"><strong>Setup:</strong> <span x-text="geminiTechnicalReport?.rigging_plan?.setup_time"></span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Estimate Total from Gemini -->
+                                    <div x-show="geminiParsedData?.estimate?.total_estimate" style="margin-top: 10px; padding: 10px; background: var(--forest); color: white; border-radius: 6px; text-align: center;">
+                                        <div style="font-size: 0.75rem; opacity: 0.9;">Gemini Estimate</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700;" x-text="'$' + geminiParsedData?.estimate?.total_estimate?.toLocaleString()"></div>
+                                        <div x-show="geminiParsedData?.estimate?.subtotal" style="font-size: 0.7rem; opacity: 0.8;">
+                                            Subtotal: $<span x-text="geminiParsedData?.estimate?.subtotal?.toLocaleString()"></span> + GST
+                                        </div>
                                     </div>
                                     
                                     <!-- Fallback to old site_data format -->
@@ -1229,7 +1333,7 @@
             <!-- Quick Add Bar -->
             <div class="card" style="margin-bottom: 12px;">
                 <div class="card-body" style="padding: 10px;">
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
                         <button class="quick-add-btn" @click="quickAddService('Tree Removal')">+ Removal</button>
                         <button class="quick-add-btn" @click="quickAddService('Pruning')">+ Pruning</button>
                         <button class="quick-add-btn" @click="quickAddService('Rigging')">+ Rigging</button>
@@ -1238,6 +1342,24 @@
                         <button class="quick-add-btn" @click="quickAddService('Hauling')">+ Hauling</button>
                         <button class="quick-add-btn" @click="quickAddService('Stump Grinding')">+ Stump</button>
                         <button class="quick-add-btn" @click="addCustomItem()">+ Custom</button>
+                    </div>
+                    <!-- Auto-populate from AI -->
+                    <div style="display: flex; gap: 6px; border-top: 1px solid var(--border); padding-top: 8px;">
+                        <button class="quick-add-btn" style="background: rgba(16, 163, 127, 0.15); border-color: #10a37f;" 
+                                @click="importFromGemini()" 
+                                x-show="geminiParsedData?.estimate?.line_items?.length > 0 || geminiServices?.length > 0">
+                            Import Gemini Estimate
+                        </button>
+                        <button class="quick-add-btn" style="background: rgba(139, 92, 246, 0.15); border-color: #8b5cf6;" 
+                                @click="importFromGPT()" 
+                                x-show="gptParsedData?.trees?.length > 0 || gptServices?.length > 0">
+                            Import GPT Estimate
+                        </button>
+                        <button class="quick-add-btn" style="background: rgba(66, 133, 244, 0.15); border-color: #4285f4;" 
+                                @click="addTravelLineItem()"
+                                x-show="currentQuote?.distance_km > 0">
+                            + Travel ($<span x-text="Math.round((currentQuote?.distance_km || 0) * 2 * rates.truck_per_km)"></span>)
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1257,13 +1379,18 @@
                     </template>
                     
                     <template x-for="(item, idx) in estimateItems" :key="idx">
-                        <div class="line-item-card">
-                            <!-- Editable Service Name -->
+                        <div class="line-item-card" :class="{ 'logistics-item': item.isLogistics }">
+                            <!-- Header row with name and source badge -->
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
-                                <input type="text" x-model="item.name" 
-                                       style="flex: 1; font-weight: 600; font-size: 0.9rem; border: none; background: transparent; padding: 0;"
-                                       placeholder="Service name">
-                                <button @click="removeItemByIndex(idx)" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 0 4px;">×</button>
+                                <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
+                                    <input type="text" x-model="item.name" 
+                                           style="flex: 1; font-weight: 600; font-size: 0.9rem; border: none; background: transparent; padding: 0;"
+                                           placeholder="Service name">
+                                    <span x-show="item.source" 
+                                          :class="{'source-badge': true, 'gemini': item.source?.includes('Gemini'), 'gpt': item.source?.includes('GPT'), 'calc': item.source === 'Calculated'}"
+                                          x-text="item.source?.split(' ')[0]"></span>
+                                </div>
+                                <button @click="removeItemByIndex(idx)" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; padding: 0 4px;">x</button>
                             </div>
                             
                             <!-- Tree Label (editable) -->
@@ -1274,11 +1401,15 @@
                                        placeholder="e.g., Douglas Fir A">
                             </div>
                             
-                            <!-- Price -->
+                            <!-- Price row -->
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <span style="font-size: 0.7rem; color: var(--muted);">Price: $</span>
                                 <input type="number" x-model.number="item.price" @change="updateTotals()"
                                        style="width: 80px; font-size: 0.9rem; font-weight: 600; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; text-align: right;">
+                                <!-- Show original AI price if different -->
+                                <span x-show="item.aiOriginal && item.price !== parseFloat(item.aiOriginal?.total || item.aiOriginal?.price)" 
+                                      style="font-size: 0.65rem; color: var(--muted); text-decoration: line-through;"
+                                      x-text="'AI: $' + (item.aiOriginal?.total || item.aiOriginal?.price)"></span>
                             </div>
                             
                             <!-- Internal Note (only in internal view) -->
@@ -1399,6 +1530,23 @@
                 aiPanelExpanded: true,
                 geminiParsedData: null,
                 geminiMissingInfo: [],
+                geminiTechnicalReport: null,
+                geminiTimeEstimate: null,
+                geminiJobSummary: null,
+                gptParsedData: null,
+                gptJobSummary: null,
+                gptHazards: null,
+                
+                // Pricing constants from system_prompts.json
+                rates: {
+                    climber: 150,
+                    ground: 50,
+                    truck_per_km: 2.15,
+                    truck_chipper_per_km: 2.65,
+                    min_mobilization: 95,
+                    first_km_included: 30,
+                    tipping_fee_per_tonne: 60.50
+                },
                 
                 // UI State
                 notesExpanded: false,
@@ -1536,6 +1684,16 @@
                     this.selectedServices = { gpt: new Set(), gemini: new Set() };
                     this.estimateItems = [];
                     this.notesExpanded = false;
+                    // Reset AI parsed data
+                    this.geminiParsedData = null;
+                    this.geminiMissingInfo = [];
+                    this.geminiTechnicalReport = null;
+                    this.geminiTimeEstimate = null;
+                    this.geminiJobSummary = null;
+                    this.gptParsedData = null;
+                    this.gptJobSummary = null;
+                    this.gptHazards = null;
+                    // Parse and calculate
                     this.parseAIResults();
                     this.calculateLogistics();
                     this.aiContext = this.currentQuote?.context || '';
@@ -1565,6 +1723,57 @@
                     try {
                         let data = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
                         let services = [];
+                        
+                        // Check for new JSON output format from prompt (job_summary, trees, global_line_items)
+                        if (data.trees && Array.isArray(data.trees)) {
+                            // Store metadata for display
+                            this.gptParsedData = data;
+                            
+                            // Extract services from each tree
+                            data.trees.forEach((tree, idx) => {
+                                const label = tree.id || `Tree ${String.fromCharCode(65 + idx)}`;
+                                
+                                if (tree.services?.length > 0) {
+                                    tree.services.forEach(svc => {
+                                        services.push({
+                                            name: svc.name || svc.service || 'Service',
+                                            tree: label,
+                                            price_low: svc.price || svc.cost || 0,
+                                            price_high: svc.price || svc.cost || 0,
+                                            details: svc.description || '',
+                                            hours: svc.hours,
+                                            rate: svc.rate
+                                        });
+                                    });
+                                }
+                            });
+                            
+                            // Extract global line items (travel, mobilization)
+                            if (data.global_line_items?.length > 0) {
+                                data.global_line_items.forEach(item => {
+                                    services.push({
+                                        name: item.item || item.name || 'Logistics',
+                                        tree: 'Logistics',
+                                        price_low: item.total || item.cost || 0,
+                                        price_high: item.total || item.cost || 0,
+                                        details: item.description || item.cost_calculation || '',
+                                        isLogistics: true
+                                    });
+                                });
+                            }
+                            
+                            // Store job summary
+                            if (data.job_summary) {
+                                this.gptJobSummary = data.job_summary;
+                            }
+                            
+                            // Store hazards
+                            if (data.hazards_tailboard) {
+                                this.gptHazards = data.hazards_tailboard;
+                            }
+                            
+                            return services;
+                        }
                         
                         // GPT-5.1 format: { model, analysis: { analysis, species_identification, ... } }
                         if (data.analysis && typeof data.analysis === 'object') {
@@ -1685,7 +1894,22 @@
                                 // Store parsed data for display
                                 this.geminiParsedData = parsed;
                                 
-                                // Extract from financial_estimate.line_items
+                                // Extract estimate line items from Gemini's format
+                                if (parsed.estimate?.line_items?.length > 0) {
+                                    services = parsed.estimate.line_items.map(item => ({
+                                        name: item.item || item.service || item.name,
+                                        tree: 'General',
+                                        price_low: parseFloat(item.total) || parseFloat(item.price) || 0,
+                                        price_high: parseFloat(item.total) || parseFloat(item.price) || 0,
+                                        details: item.description || '',
+                                        qty: item.qty,
+                                        unit: item.unit,
+                                        rate: item.rate,
+                                        hours: item.hours
+                                    }));
+                                }
+                                
+                                // Also check financial_estimate format
                                 if (parsed.financial_estimate?.line_items?.length > 0) {
                                     services = parsed.financial_estimate.line_items.map(item => ({
                                         name: item.service || item.name,
@@ -1696,21 +1920,75 @@
                                     }));
                                 }
                                 
-                                // Extract from tree_inventory if present
-                                if (parsed.tree_inventory?.length > 0) {
-                                    parsed.tree_inventory.forEach(tree => {
+                                // Extract global_line_items (travel, mobilization)
+                                if (parsed.global_line_items?.length > 0) {
+                                    parsed.global_line_items.forEach(item => {
+                                        // Parse cost from calculation string if no direct total
+                                        let cost = 0;
+                                        if (item.cost_calculation) {
+                                            const match = item.cost_calculation.match(/\$?([\d,.]+)/);
+                                            if (match) cost = parseFloat(match[1].replace(',', ''));
+                                        }
                                         services.push({
-                                            name: `${tree.species || 'Tree'} - Assessment`,
-                                            tree: tree.label || tree.species || 'Tree',
-                                            price_low: 0,
-                                            price_high: 0,
-                                            details: `DBH: ${tree.dbh || 'Unknown'}, Height: ${tree.height || 'Unknown'}`
+                                            name: item.item || 'Travel/Logistics',
+                                            tree: 'Logistics',
+                                            price_low: cost,
+                                            price_high: cost,
+                                            details: item.description || item.cost_calculation || '',
+                                            isLogistics: true
                                         });
                                     });
                                 }
                                 
-                                // Show missing info requests
-                                if (parsed.missing_information_request?.length > 0) {
+                                // Extract tree data from trees array
+                                if (parsed.trees?.length > 0) {
+                                    parsed.trees.forEach((tree, idx) => {
+                                        const label = tree.id || `Tree ${String.fromCharCode(65 + idx)}`;
+                                        services.push({
+                                            name: `${tree.species || 'Tree'} - ${tree.service_type || 'Assessment'}`,
+                                            tree: label,
+                                            price_low: 0,
+                                            price_high: 0,
+                                            details: `DBH: ${tree.dbh?.imperial || tree.dbh || 'Unknown'}, Height: ${tree.height?.imperial || tree.height || 'Unknown'}, Condition: ${tree.crown_condition || 'Unknown'}`
+                                        });
+                                    });
+                                }
+                                
+                                // Extract from crm_data.trees if present
+                                if (parsed.crm_data?.trees?.length > 0) {
+                                    parsed.crm_data.trees.forEach((tree, idx) => {
+                                        const label = tree.id || `Tree ${String.fromCharCode(65 + idx)}`;
+                                        services.push({
+                                            name: `${tree.species || 'Tree'} - Analysis`,
+                                            tree: label,
+                                            price_low: 0,
+                                            price_high: 0,
+                                            details: `DBH: ${tree.dbh?.imperial || tree.dbh || 'Unknown'}, Height: ${tree.height?.imperial || tree.height || 'Unknown'}`
+                                        });
+                                    });
+                                }
+                                
+                                // Store technical report data
+                                if (parsed.technical_report) {
+                                    this.geminiTechnicalReport = parsed.technical_report;
+                                }
+                                
+                                // Store time modeling
+                                if (parsed.technical_report?.time_modeling) {
+                                    this.geminiTimeEstimate = parsed.technical_report.time_modeling;
+                                }
+                                
+                                // Store job summary
+                                if (parsed.job_summary) {
+                                    this.geminiJobSummary = parsed.job_summary;
+                                }
+                                
+                                // Show missing info requests / follow-up questions
+                                if (parsed.missing_info_requests?.length > 0) {
+                                    this.geminiMissingInfo = parsed.missing_info_requests;
+                                } else if (parsed.follow_up_questions?.length > 0) {
+                                    this.geminiMissingInfo = parsed.follow_up_questions;
+                                } else if (parsed.missing_information_request?.length > 0) {
                                     this.geminiMissingInfo = parsed.missing_information_request;
                                 }
                                 
@@ -1818,6 +2096,215 @@
                         internalNote: '',
                         addedAt: new Date().toISOString()
                     });
+                    this.updateTotals();
+                },
+                
+                // Import all line items from Gemini estimate
+                importFromGemini() {
+                    let hasLineItems = this.geminiParsedData?.estimate?.line_items?.length > 0;
+                    let hasServices = this.geminiServices?.length > 0;
+                    
+                    if (!hasLineItems && !hasServices) {
+                        alert('No Gemini estimate data available');
+                        return;
+                    }
+                    
+                    // Clear existing items
+                    if (this.estimateItems.length > 0) {
+                        if (!confirm('This will replace existing line items. Continue?')) return;
+                        this.estimateItems = [];
+                    }
+                    
+                    // Import from structured estimate if available
+                    if (hasLineItems) {
+                        this.geminiParsedData.estimate.line_items.forEach(item => {
+                            this.estimateItems.push({
+                                name: item.item || item.service || item.name,
+                                tree: item.tree || 'General',
+                                price: parseFloat(item.total) || parseFloat(item.price) || 0,
+                                source: 'Gemini 3',
+                                internalNote: this.formatGeminiLineItemDetails(item),
+                                addedAt: new Date().toISOString(),
+                                // Store original Gemini data for learning
+                                aiOriginal: item
+                            });
+                        });
+                    } else if (hasServices) {
+                        // Fallback to parsed services
+                        this.geminiServices.forEach(svc => {
+                            if (svc.price_low > 0 || svc.price_high > 0) {
+                                this.estimateItems.push({
+                                    name: svc.name,
+                                    tree: svc.tree || 'General',
+                                    price: Math.round((svc.price_low + svc.price_high) / 2),
+                                    source: 'Gemini 3',
+                                    internalNote: svc.details || '',
+                                    addedAt: new Date().toISOString()
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Also add global line items (travel, mobilization)
+                    if (this.geminiParsedData?.global_line_items?.length > 0) {
+                        this.geminiParsedData.global_line_items.forEach(item => {
+                            let cost = 0;
+                            if (item.cost_calculation) {
+                                const match = item.cost_calculation.match(/\$?([\d,.]+)/);
+                                if (match) cost = parseFloat(match[1].replace(',', ''));
+                            }
+                            if (cost > 0) {
+                                this.estimateItems.push({
+                                    name: item.item || 'Logistics',
+                                    tree: 'Logistics',
+                                    price: cost,
+                                    source: 'Gemini 3',
+                                    internalNote: item.description || item.cost_calculation || '',
+                                    addedAt: new Date().toISOString(),
+                                    isLogistics: true
+                                });
+                            }
+                        });
+                    }
+                    
+                    this.updateTotals();
+                },
+                
+                formatGeminiLineItemDetails(item) {
+                    let details = [];
+                    if (item.qty && item.unit) details.push(`${item.qty} ${item.unit}`);
+                    if (item.rate) details.push(`@ $${item.rate}`);
+                    if (item.hours) details.push(`${item.hours} hrs`);
+                    if (item.description) details.push(item.description);
+                    return details.join(' | ');
+                },
+                
+                // Import all line items from GPT estimate
+                importFromGPT() {
+                    let services = [];
+                    
+                    // Check for structured data first
+                    if (this.gptParsedData?.trees?.length > 0) {
+                        this.gptParsedData.trees.forEach((tree, idx) => {
+                            const label = tree.id || `Tree ${String.fromCharCode(65 + idx)}`;
+                            if (tree.services?.length > 0) {
+                                tree.services.forEach(svc => {
+                                    services.push({
+                                        name: svc.name || svc.service || 'Service',
+                                        tree: label,
+                                        price: svc.price || svc.cost || 0,
+                                        details: svc.description || '',
+                                        hours: svc.hours,
+                                        rate: svc.rate
+                                    });
+                                });
+                            }
+                        });
+                        
+                        // Add global line items
+                        if (this.gptParsedData.global_line_items?.length > 0) {
+                            this.gptParsedData.global_line_items.forEach(item => {
+                                services.push({
+                                    name: item.item || item.name || 'Logistics',
+                                    tree: 'Logistics',
+                                    price: item.total || item.cost || 0,
+                                    details: item.description || item.cost_calculation || '',
+                                    isLogistics: true
+                                });
+                            });
+                        }
+                    } else if (this.gptServices?.length > 0) {
+                        // Fallback to parsed services
+                        services = this.gptServices.map(s => ({
+                            name: s.name,
+                            tree: s.tree,
+                            price: Math.round((s.price_low + s.price_high) / 2),
+                            details: s.details
+                        }));
+                    }
+                    
+                    if (services.length === 0) {
+                        alert('No GPT estimate data available');
+                        return;
+                    }
+                    
+                    // Clear existing items
+                    if (this.estimateItems.length > 0) {
+                        if (!confirm('This will replace existing line items. Continue?')) return;
+                        this.estimateItems = [];
+                    }
+                    
+                    // Import each line item
+                    services.forEach(svc => {
+                        this.estimateItems.push({
+                            name: svc.name,
+                            tree: svc.tree || 'General',
+                            price: svc.price || 0,
+                            source: 'GPT-5.1',
+                            internalNote: this.formatGPTLineItemDetails(svc),
+                            addedAt: new Date().toISOString(),
+                            isLogistics: svc.isLogistics || false,
+                            aiOriginal: svc
+                        });
+                    });
+                    
+                    this.updateTotals();
+                },
+                
+                formatGPTLineItemDetails(item) {
+                    let details = [];
+                    if (item.hours) details.push(`${item.hours} hrs`);
+                    if (item.rate) details.push(`@ $${item.rate}/hr`);
+                    if (item.details) details.push(item.details);
+                    return details.join(' | ');
+                },
+                
+                // Add travel line item based on distance
+                addTravelLineItem() {
+                    const distanceKm = this.currentQuote?.distance_km || 0;
+                    if (distanceKm <= 0) {
+                        alert('No distance data available for this quote');
+                        return;
+                    }
+                    
+                    // Round trip calculation
+                    const roundTripKm = distanceKm * 2;
+                    const billableKm = Math.max(0, roundTripKm - this.rates.first_km_included);
+                    const travelCost = Math.max(this.rates.min_mobilization, billableKm * this.rates.truck_per_km);
+                    
+                    // Check if travel already added
+                    const hasTravel = this.estimateItems.some(i => i.name.toLowerCase().includes('travel') || i.name.toLowerCase().includes('mobilization'));
+                    if (hasTravel && !confirm('Travel line item already exists. Add another?')) return;
+                    
+                    this.estimateItems.push({
+                        name: 'Travel & Mobilization',
+                        tree: 'Logistics',
+                        price: Math.round(travelCost),
+                        source: 'Calculated',
+                        internalNote: `${roundTripKm.toFixed(1)} km round trip @ $${this.rates.truck_per_km}/km (first ${this.rates.first_km_included} km included)`,
+                        addedAt: new Date().toISOString(),
+                        isLogistics: true
+                    });
+                    
+                    this.updateTotals();
+                },
+                
+                // Add disposal line item based on estimated weight
+                addDisposalLineItem(tonnes = 1) {
+                    const trips = Math.ceil(tonnes / 3.0);
+                    const tippingCost = tonnes * this.rates.tipping_fee_per_tonne;
+                    const stationName = this.logistics.nearestStation?.name || 'Transfer Station';
+                    
+                    this.estimateItems.push({
+                        name: 'Disposal & Tipping Fees',
+                        tree: 'Logistics',
+                        price: Math.round(tippingCost),
+                        source: 'Calculated',
+                        internalNote: `${tonnes.toFixed(1)} tonnes @ $${this.rates.tipping_fee_per_tonne}/t at ${stationName} (${trips} trip${trips > 1 ? 's' : ''})`,
+                        addedAt: new Date().toISOString(),
+                        isLogistics: true
+                    });
+                    
                     this.updateTotals();
                 },
                 
