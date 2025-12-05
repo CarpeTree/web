@@ -1162,8 +1162,70 @@
                         <div x-show="currentQuote?.ai_gpt5_analysis?.analysis?.analysis || gptParsedData?.job_summary" style="padding: 14px; background: rgba(16, 163, 127, 0.1); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #10a37f;">
                             <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">GPT-5.1 Assessment:</div>
                             
-                            <!-- New structured format -->
-                            <template x-if="gptParsedData?.job_summary">
+                            <!-- Pricing Summary -->
+                            <template x-if="gptParsedData?.pricing_summary?.total_cad">
+                                <div style="margin-bottom: 10px; padding: 10px; background: #10a37f; color: white; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 0.75rem; opacity: 0.9;">GPT Estimate</div>
+                                    <div style="font-size: 1.3rem; font-weight: 700;">$<span x-text="gptParsedData?.pricing_summary?.total_cad?.toLocaleString()"></span></div>
+                                    <div x-show="gptParsedData?.pricing_summary?.subtotal" style="font-size: 0.7rem; opacity: 0.8;">
+                                        Subtotal: $<span x-text="gptParsedData?.pricing_summary?.subtotal?.toLocaleString()"></span> + GST
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Estimate Line Items -->
+                            <template x-if="gptParsedData?.estimate_line_items?.length > 0">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-weight: 600; margin-bottom: 6px;">Line Items:</div>
+                                    <template x-for="item in gptParsedData?.estimate_line_items?.slice(0, 5)" :key="item.service">
+                                        <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; font-size: 0.75rem;">
+                                            <span>
+                                                <strong x-text="item.tree_id || ''"></strong>
+                                                <span x-text="item.service"></span>
+                                            </span>
+                                            <strong x-text="'$' + (item.total || 0).toLocaleString()"></strong>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            
+                            <!-- Trees breakdown -->
+                            <template x-if="gptParsedData?.trees?.length > 0">
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-weight: 600; margin-bottom: 6px;">Trees (<span x-text="gptParsedData?.trees?.length"></span>):</div>
+                                    <template x-for="tree in gptParsedData?.trees?.slice(0, 4)" :key="tree.id">
+                                        <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem;">
+                                            <strong x-text="tree.id"></strong>: <span x-text="tree.species"></span>
+                                            <span x-show="tree.dbh_inches">, DBH: <span x-text="tree.dbh_inches + '\"'"></span></span>
+                                            <span x-show="tree.height_feet">, H: <span x-text="tree.height_feet + ' ft'"></span></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            
+                            <!-- Time Estimate -->
+                            <template x-if="gptParsedData?.time_estimate">
+                                <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(139, 92, 246, 0.1); border-radius: 6px; font-size: 0.75rem;">
+                                    <strong>Time:</strong> <span x-text="gptParsedData?.time_estimate?.total_man_hours + ' man-hours'"></span>
+                                    <span x-show="gptParsedData?.rigging_plan?.estimated_days">, <span x-text="gptParsedData?.rigging_plan?.estimated_days + ' days'"></span></span>
+                                    <span x-show="gptParsedData?.rigging_plan?.crew_size">, <span x-text="gptParsedData?.rigging_plan?.crew_size + '-person crew'"></span></span>
+                                </div>
+                            </template>
+                            
+                            <!-- Hazards -->
+                            <template x-if="gptHazards?.length > 0">
+                                <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #ef4444; margin-bottom: 4px;">Hazards (<span x-text="gptHazards?.length"></span>):</div>
+                                    <ul style="margin: 0; padding-left: 16px; font-size: 0.75rem;">
+                                        <template x-for="hazard in gptHazards?.slice(0, 5)" :key="hazard">
+                                            <li x-text="typeof hazard === 'string' ? hazard : hazard.description"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                            
+                            <!-- Job Summary fallback -->
+                            <template x-if="gptParsedData?.job_summary && !gptParsedData?.estimate_line_items">
                                 <div>
                                     <div x-show="gptParsedData?.job_summary?.status" style="margin-bottom: 8px; padding: 6px 10px; background: rgba(16, 163, 127, 0.15); border-radius: 6px;">
                                         <strong>Status:</strong> <span x-text="gptParsedData?.job_summary?.status"></span>
@@ -1172,32 +1234,6 @@
                                     <div x-show="gptParsedData?.job_summary?.total_estimate" style="font-size: 1.1rem; font-weight: 700; color: var(--forest);">
                                         Estimate: $<span x-text="gptParsedData?.job_summary?.total_estimate?.toLocaleString()"></span>
                                     </div>
-                                </div>
-                            </template>
-                            
-                            <!-- Trees breakdown -->
-                            <template x-if="gptParsedData?.trees?.length > 0">
-                                <div style="margin-top: 10px;">
-                                    <div style="font-weight: 600; margin-bottom: 6px;">Trees:</div>
-                                    <template x-for="tree in gptParsedData?.trees" :key="tree.id">
-                                        <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem;">
-                                            <strong x-text="tree.id || tree.species"></strong>: <span x-text="tree.species"></span>
-                                            <span x-show="tree.dbh">, DBH: <span x-text="tree.dbh?.imperial || tree.dbh"></span></span>
-                                            <span x-show="tree.height">, H: <span x-text="tree.height?.imperial || tree.height"></span></span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-                            
-                            <!-- Hazards -->
-                            <template x-if="gptHazards?.length > 0">
-                                <div style="margin-top: 10px; padding: 8px 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
-                                    <div style="font-weight: 600; color: #ef4444; margin-bottom: 4px;">Hazards:</div>
-                                    <ul style="margin: 0; padding-left: 16px; font-size: 0.75rem;">
-                                        <template x-for="hazard in gptHazards?.slice(0, 5)" :key="hazard">
-                                            <li x-text="typeof hazard === 'string' ? hazard : hazard.description"></li>
-                                        </template>
-                                    </ul>
                                 </div>
                             </template>
                             
@@ -1942,7 +1978,51 @@
                         let data = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
                         let services = [];
                         
-                        // Check for new JSON output format from prompt (job_summary, trees, global_line_items)
+                        // NEW SCHEMA: { model, analysis: { trees, estimate_line_items, pricing_summary, ... } }
+                        if (data.analysis?.estimate_line_items?.length > 0) {
+                            const a = data.analysis;
+                            
+                            // Store full parsed data for display
+                            this.gptParsedData = a;
+                            
+                            // Extract estimate line items directly
+                            a.estimate_line_items.forEach(item => {
+                                services.push({
+                                    name: item.service || item.name || 'Service',
+                                    tree: item.tree_id || 'General',
+                                    price_low: item.total || item.unit_price || 0,
+                                    price_high: item.total || item.unit_price || 0,
+                                    details: item.description || '',
+                                    internal_notes: item.internal_notes || '',
+                                    quantity: item.quantity,
+                                    unit: item.unit
+                                });
+                            });
+                            
+                            // Store trees for display
+                            if (a.trees?.length > 0) {
+                                // Trees are already in gptParsedData
+                            }
+                            
+                            // Store site hazards
+                            if (a.site_assessment?.hazards) {
+                                this.gptHazards = a.site_assessment.hazards;
+                            }
+                            
+                            // Store time estimate
+                            if (a.time_estimate) {
+                                this.gptTimeEstimate = a.time_estimate;
+                            }
+                            
+                            // Store follow-up questions
+                            if (a.follow_up_questions?.length > 0) {
+                                this.gptFollowUpQuestions = a.follow_up_questions;
+                            }
+                            
+                            return services;
+                        }
+                        
+                        // Check for older format with trees at top level (job_summary, trees, global_line_items)
                         if (data.trees && Array.isArray(data.trees)) {
                             // Store metadata for display
                             this.gptParsedData = data;
@@ -1993,7 +2073,7 @@
                             return services;
                         }
                         
-                        // GPT-5.1 format: { model, analysis: { analysis, species_identification, ... } }
+                        // OLD GPT-5.1 format: { model, analysis: { analysis, species_identification, ... } }
                         if (data.analysis && typeof data.analysis === 'object') {
                             const a = data.analysis;
                             
