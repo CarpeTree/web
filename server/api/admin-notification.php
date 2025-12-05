@@ -168,42 +168,11 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
                         <p style="color: #856404; margin: 0 0 0.5rem 0;">This customer has submitted quotes before. Check their history for context and pricing reference.</p>
                         <p style="color: #856404; margin: 0; font-size: 0.9em;"><strong>Detected by:</strong> ' . ($duplicate_match_info ?: 'customer record match') . '</p>
                     </div>' : '') . '
-                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="color: #1976D2; margin-bottom: 15px;">🤖 AI Model Comparison - Choose Best Analysis</h3>
-                    <p><strong>Compare 3 AI models side-by-side to pick the best estimate:</strong></p>
-                    
-                    <div style="text-align: center; margin: 15px 0;">
-                        <a href="https://carpetree.com/o4-mini-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #4CAF50; margin: 5px; padding: 15px 20px;">
-                            🚀 o4-mini-2025-04-16<br><small>Fast & Cost-Effective</small>
-                        </a>
-                        
-                        <a href="https://carpetree.com/o3-pro-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #2196F3; margin: 5px; padding: 15px 20px;">
-                            🧠 o3-pro-2025-06-10<br><small>Premium Reasoning</small>
-                        </a>
-                        
-                        <a href="https://carpetree.com/gemini-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #FF9800; margin: 5px; padding: 15px 20px;">
-                            🔮 Gemini 2.5 Pro<br><small>Advanced Multimodal</small>
-                        </a>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 15px;">
-                        <a href="https://carpetree.com/model-comparison-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #9C27B0; padding: 15px 25px;">
-                            📊 View All 3 Models Side-by-Side
-                        </a>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn" style="background: #2D5A27; font-size: 16px; padding: 15px 25px;">
-                        📊 Review Quote & View Media Gallery
-                    </a>
-                    <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545; font-size: 14px;">
-                        👥 Customer History & CRM
+                <div class="action-buttons" style="text-align: center; margin: 20px 0;">
+                    <a href="https://carpetree.com/admin-v2.html?quote_id=' . $quote['id'] . '" class="btn" style="display: inline-block; background: #2D5A27; color: white; font-size: 16px; padding: 15px 30px; text-decoration: none; border-radius: 25px;">
+                        View Quote in Dashboard
                     </a>
                 </div>
-                <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 10px;">
-                    💡 Use the dashboard to view media files in organized gallery format, adjust pricing, and send quotes to customers.
-                </p>
             </div>
             
             <div class="section">
@@ -360,7 +329,7 @@ function generateAdminEmailHTML($quote, $files, $ai_response, $services, $distan
             </div>
             
             <div class="action-buttons">
-                <a href="https://carpetree.com/admin-dashboard.html?quote_id=' . $quote['id'] . '" class="btn">📊 Review & Edit Quote</a>
+                <a href="https://carpetree.com/admin-v2.html?quote_id=' . $quote['id'] . '" class="btn">Review & Edit Quote</a>
                 <a href="https://carpetree.com/customer-crm-dashboard.html?customer_id=' . $quote['customer_id'] . '" class="btn" style="background: #dc3545;">👥 Customer History</a>
                 <a href="mailto:' . htmlspecialchars($quote['email']) . '" class="btn">📧 Contact Customer</a>
             </div>

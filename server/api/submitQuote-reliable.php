@@ -371,7 +371,7 @@ try {
                 
                 <h2>Quick Actions</h2>
                 <p>
-                    <a href='https://carpetree.com/admin-dashboard.html?quote_id={$quote_id}' style='display:inline-block; background:#2D5A27; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Quote in Dashboard</a>
+                    <a href='https://carpetree.com/admin-v2.html?quote_id={$quote_id}' style='display:inline-block; background:#2D5A27; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Quote in Dashboard</a>
                     <a href='https://carpetree.com/customer-crm-dashboard.html?customer_id={$customer_id}' style='display:inline-block; background:#4a7c59; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>View Customer Profile</a>
                     <a href='tel:" . htmlspecialchars($customer_phone) . "' style='display:inline-block; background:#1976d2; color:white; padding:12px 24px; text-decoration:none; border-radius:25px; margin:5px; font-weight:bold;'>Call Customer</a>
                 </p>
