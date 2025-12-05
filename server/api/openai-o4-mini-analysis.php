@@ -84,6 +84,37 @@ require_once __DIR__ . '/../config/config.php';
     $aggregated_context = $preprocessor->preprocessAllMedia();
     
     $context_text = $aggregated_context['context_text'];
+    
+    // 3a. PREFETCH LOGISTICS DATA FROM MAPS API
+    // This provides verified location data so the AI doesn't need to guess
+    $logistics_context = '';
+    try {
+        // Build URL for internal API call
+        $logistics_url = 'http://localhost/server/api/prefetch-logistics.php?quote_id=' . urlencode($quote_id);
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $logistics_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        $logistics_response = curl_exec($ch);
+        curl_close($ch);
+        
+        if ($logistics_response) {
+            $logistics_data = json_decode($logistics_response, true);
+            if (!isset($logistics_data['error']) && isset($logistics_data['ai_context'])) {
+                $logistics_context = $logistics_data['ai_context'];
+                error_log("Injected logistics context for quote #{$quote_id}");
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Failed to fetch logistics data: " . $e->getMessage());
+    }
+    
+    // Build full context with logistics data first (highest priority)
+    if (!empty($logistics_context)) {
+        $context_text = $logistics_context . "\n\n" . $context_text;
+    }
+    
     if (!empty($extra_context)) {
         $context_text = "Operator notes (higher priority):\n" . trim($extra_context) . "\n\n" . $context_text;
     }

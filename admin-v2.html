@@ -1039,12 +1039,22 @@
                         <div class="distance-item">
                             <div class="label">On-Route Station</div>
                             <div class="value" x-text="logistics.onRouteStation?.name || 'Castlegar'"></div>
-                            <div class="sub" x-text="logistics.onRouteStation?.note || 'Check route'"></div>
+                            <div class="sub" x-text="logistics.onRouteStation?.detour_km ? `+${logistics.onRouteStation.detour_km} km detour` : 'Check route'"></div>
                         </div>
                         <div class="distance-item" style="background: rgba(44, 95, 45, 0.1);">
                             <div class="label">Est. Travel Cost</div>
                             <div class="value" x-text="`$${logistics.travelCost || 0}`"></div>
                             <div class="sub">Round trip @ $2.15/km</div>
+                        </div>
+                        <div class="distance-item" x-show="logistics.nearestHospital" style="background: rgba(239, 68, 68, 0.08);">
+                            <div class="label">Nearest Hospital</div>
+                            <div class="value" x-text="logistics.nearestHospital?.name || '-'"></div>
+                            <div class="sub" x-text="logistics.nearestHospital ? `${logistics.nearestHospital.distance_km} km, ${logistics.nearestHospital.drive_time_minutes} min` : ''"></div>
+                        </div>
+                        <div class="distance-item" x-show="logistics.municipality?.municipality">
+                            <div class="label">Jurisdiction</div>
+                            <div class="value" x-text="logistics.municipality?.municipality || '-'"></div>
+                            <div class="sub" x-text="logistics.municipality?.regional_district || ''"></div>
                         </div>
                     </div>
                     <!-- Transfer Station Options -->
@@ -1360,6 +1370,10 @@
                                 x-show="currentQuote?.distance_km > 0">
                             + Travel ($<span x-text="Math.round((currentQuote?.distance_km || 0) * 2 * rates.truck_per_km)"></span>)
                         </button>
+                        <button class="quick-add-btn" style="background: rgba(245, 158, 11, 0.15); border-color: #f59e0b;" 
+                                @click="showDisposalCalculator = true">
+                            + Disposal
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1499,6 +1513,76 @@
         </div>
     </div>
     
+    <!-- DISPOSAL CALCULATOR MODAL -->
+    <div class="modal-overlay" x-show="showDisposalCalculator" @click.self="showDisposalCalculator = false" style="display: none;" x-cloak>
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Calculate Disposal Costs</h2>
+                <button class="modal-close" @click="showDisposalCalculator = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- AI Estimate Reference -->
+                <div x-show="geminiTechnicalReport?.volumetrics" style="margin-bottom: 16px; padding: 12px; background: rgba(16, 163, 127, 0.1); border-radius: 8px;">
+                    <div style="font-weight: 600; color: #10a37f; margin-bottom: 8px;">AI Estimated Volumes:</div>
+                    <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div x-show="geminiTechnicalReport?.volumetrics?.brush_volume">
+                            Brush: <strong x-text="geminiTechnicalReport?.volumetrics?.brush_volume"></strong>
+                        </div>
+                        <div x-show="geminiTechnicalReport?.volumetrics?.wood_volume">
+                            Wood: <strong x-text="geminiTechnicalReport?.volumetrics?.wood_volume"></strong>
+                        </div>
+                        <div x-show="geminiTechnicalReport?.volumetrics?.total_weight">
+                            Weight: <strong x-text="geminiTechnicalReport?.volumetrics?.total_weight"></strong>
+                        </div>
+                        <div x-show="geminiTechnicalReport?.volumetrics?.chip_loads">
+                            Chip loads: <strong x-text="geminiTechnicalReport?.volumetrics?.chip_loads"></strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Manual Input -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 6px;">Estimated Weight (tonnes)</label>
+                    <input type="number" x-model.number="disposalInput.tonnes" step="0.5" min="0.5" max="20"
+                           style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;">
+                    <div style="font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
+                        Truck capacity: 3 tonnes max per trip
+                    </div>
+                </div>
+                
+                <!-- Trips Calculation -->
+                <div style="margin-bottom: 16px; padding: 12px; background: var(--bg); border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Trips required:</span>
+                        <strong x-text="Math.ceil(disposalInput.tonnes / 3)"></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Tipping fee @ $<span x-text="rates.tipping_fee_per_tonne"></span>/tonne:</span>
+                        <strong>$<span x-text="(disposalInput.tonnes * rates.tipping_fee_per_tonne).toFixed(2)"></span></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Wait time (<span x-text="Math.ceil(disposalInput.tonnes / 3) * 30"></span> min @ $<span x-text="rates.climber_rate"></span>/hr):</span>
+                        <strong>$<span x-text="(Math.ceil(disposalInput.tonnes / 3) * 0.5 * rates.climber_rate).toFixed(2)"></span></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 8px; font-size: 1.1rem;">
+                        <span>Total Disposal:</span>
+                        <strong style="color: var(--forest);">$<span x-text="((disposalInput.tonnes * rates.tipping_fee_per_tonne) + (Math.ceil(disposalInput.tonnes / 3) * 0.5 * rates.climber_rate)).toFixed(2)"></span></strong>
+                    </div>
+                </div>
+                
+                <!-- Transfer Station Info -->
+                <div x-show="logistics.nearestStation" style="font-size: 0.8rem; color: var(--muted);">
+                    Nearest station: <span x-text="logistics.nearestStation?.name"></span>
+                    (<span x-text="logistics.nearestStation?.from_job_km || logistics.nearestStation?.distance_km"></span> km from job)
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" @click="showDisposalCalculator = false">Cancel</button>
+                <button class="action-btn primary" @click="addDisposalFromCalculator()">Add to Estimate</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- LIGHTBOX -->
     <div class="lightbox" x-show="lightboxFile" @click="lightboxFile = null" style="display: none;" x-cloak>
         <button class="lightbox-close">&times;</button>
@@ -1550,6 +1634,12 @@
                 
                 // UI State
                 notesExpanded: false,
+                showDisposalCalculator: false,
+                disposalInput: {
+                    tonnes: 2,
+                    trips: 1,
+                    station: null
+                },
                 
                 // Estimate State
                 estimateView: 'customer',
@@ -1560,7 +1650,11 @@
                 // Logistics
                 logistics: {
                     travelCost: 0,
-                    onRouteStation: null
+                    driveTime: null,
+                    nearestStation: null,
+                    onRouteStation: null,
+                    nearestHospital: null,
+                    municipality: null
                 },
                 
                 // Modals
@@ -1693,11 +1787,48 @@
                     this.gptParsedData = null;
                     this.gptJobSummary = null;
                     this.gptHazards = null;
+                    // Reset disposal input
+                    this.disposalInput = { tonnes: 2, trips: 1, station: null };
                     // Parse and calculate
                     this.parseAIResults();
                     this.calculateLogistics();
+                    this.prefetchLogistics();
                     this.aiContext = this.currentQuote?.context || '';
                     this.updateTotals();
+                },
+                
+                // Prefetch logistics data from Maps API
+                async prefetchLogistics() {
+                    if (!this.currentQuote?.id) return;
+                    
+                    try {
+                        const res = await fetch(`/server/api/prefetch-logistics.php?quote_id=${this.currentQuote.id}`);
+                        const data = await res.json();
+                        
+                        if (!data.error) {
+                            // Update logistics with prefetched data
+                            if (data.travel) {
+                                this.logistics.travelCost = data.travel.costs?.travel_cost || this.logistics.travelCost;
+                                this.logistics.driveTime = data.travel.duration_text || this.logistics.driveTime;
+                            }
+                            if (data.hospital) {
+                                this.logistics.nearestHospital = data.hospital;
+                            }
+                            if (data.transfer_stations?.nearest) {
+                                this.logistics.nearestStation = data.transfer_stations.nearest;
+                            }
+                            if (data.transfer_stations?.on_route) {
+                                this.logistics.onRouteStation = data.transfer_stations.on_route;
+                            }
+                            if (data.municipality) {
+                                this.logistics.municipality = data.municipality;
+                            }
+                            
+                            console.log('Prefetched logistics data:', data);
+                        }
+                    } catch (e) {
+                        console.log('Could not prefetch logistics:', e);
+                    }
                 },
                 
                 // Parse AI results into selectable services
@@ -2305,6 +2436,36 @@
                         isLogistics: true
                     });
                     
+                    this.updateTotals();
+                },
+                
+                // Add disposal from calculator modal
+                addDisposalFromCalculator() {
+                    const tonnes = this.disposalInput.tonnes || 2;
+                    const trips = Math.ceil(tonnes / 3.0);
+                    const tippingCost = tonnes * this.rates.tipping_fee_per_tonne;
+                    const waitCost = trips * 0.5 * this.rates.climber_rate; // 30 min per trip
+                    const totalCost = tippingCost + waitCost;
+                    const stationName = this.logistics.nearestStation?.name || 'Transfer Station';
+                    
+                    this.estimateItems.push({
+                        name: 'Disposal & Tipping Fees',
+                        tree: 'Logistics',
+                        price: Math.round(totalCost),
+                        source: 'Calculated',
+                        internalNote: `${tonnes.toFixed(1)} tonnes @ $${this.rates.tipping_fee_per_tonne}/t = $${tippingCost.toFixed(2)} + ${trips} trip(s) wait time ($${waitCost.toFixed(2)}) at ${stationName}`,
+                        addedAt: new Date().toISOString(),
+                        isLogistics: true,
+                        breakdown: {
+                            tonnes: tonnes,
+                            trips: trips,
+                            tipping_cost: tippingCost,
+                            wait_cost: waitCost,
+                            station: stationName
+                        }
+                    });
+                    
+                    this.showDisposalCalculator = false;
                     this.updateTotals();
                 },
                 

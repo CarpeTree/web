@@ -97,10 +97,36 @@ try {
         }
     } catch (Throwable $e) { /* ignore and keep default */ }
     
+    // Prefetch logistics data from Maps API for verified location info
+    $logistics_context = '';
+    try {
+        $logistics_url = 'http://localhost/server/api/prefetch-logistics.php?quote_id=' . urlencode($quote_id);
+        $lch = curl_init();
+        curl_setopt($lch, CURLOPT_URL, $logistics_url);
+        curl_setopt($lch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($lch, CURLOPT_TIMEOUT, 15);
+        $logistics_response = curl_exec($lch);
+        curl_close($lch);
+        
+        if ($logistics_response) {
+            $logistics_data = json_decode($logistics_response, true);
+            if (!isset($logistics_data['error']) && isset($logistics_data['ai_context'])) {
+                $logistics_context = $logistics_data['ai_context'];
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Failed to fetch logistics data for Gemini: " . $e->getMessage());
+    }
+    
     $user_prompt = "Analyze this tree service request:\n";
     $user_prompt .= "Customer: {$quote['customer_name']}\n";
     $user_prompt .= "Location: {$quote['address']}\n";
     if (!empty($context)) { $user_prompt .= "Additional context: {$context}\n"; }
+    
+    // Inject verified logistics data
+    if (!empty($logistics_context)) {
+        $user_prompt .= "\n" . $logistics_context . "\n";
+    }
     
     // Try to include stored transcription early
     $transcript_text = '';
