@@ -1482,8 +1482,10 @@
                             nearest_transfer_station: q.nearest_transfer_station || null,
                             transfer_station_distance_km: q.transfer_station_distance_km || null,
                             ai_transcription: q.ai_transcription || null,
-                            ai_gpt5_analysis: q.ai_o4_mini_analysis || null,
+                            ai_gpt5_analysis: q.ai_gpt5_analysis || null,
                             ai_gemini_analysis: q.ai_gemini_analysis || null,
+                            ai_o4_mini_analysis_raw: q.ai_o4_mini_analysis_raw || null,
+                            ai_gemini_analysis_raw: q.ai_gemini_analysis_raw || null,
                             context: q.context || '',
                             files: (q.files || []).map(f => {
                                 // Fix the path - API returns /uploads/9/ but files are in /uploads/quote_9/
@@ -1938,22 +1940,32 @@
                 async runGPT() {
                     if (!this.currentQuote || this.aiRunning.gpt) return;
                     this.aiRunning.gpt = true;
+                    const quoteId = this.currentQuote.id;
                     try {
                         const res = await fetch('/server/api/openai-o4-mini-analysis.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
-                                quote_id: this.currentQuote.id,
+                                quote_id: quoteId,
                                 context: this.aiContext
                             })
                         });
                         const data = await res.json();
-                        if (data.success) {
+                        
+                        // If queued, poll for completion
+                        if (data.queued) {
+                            console.log('GPT analysis queued, polling for completion...');
+                            await this.pollForAnalysis(quoteId, 'gpt', 120); // Poll for up to 2 minutes
+                        } else if (data.success && data.analysis) {
                             this.currentQuote.ai_gpt5_analysis = data.analysis;
                             this.parseAIResults();
+                        } else if (data.error) {
+                            console.error('GPT error:', data.error);
+                            alert('GPT Analysis Error: ' + data.error);
                         }
                     } catch (e) {
                         console.error('GPT failed:', e);
+                        alert('GPT request failed: ' + e.message);
                     }
                     this.aiRunning.gpt = false;
                 },
@@ -1961,24 +1973,74 @@
                 async runGemini() {
                     if (!this.currentQuote || this.aiRunning.gemini) return;
                     this.aiRunning.gemini = true;
+                    const quoteId = this.currentQuote.id;
                     try {
                         const res = await fetch('/server/api/gemini-2-5-pro-analysis.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
-                                quote_id: this.currentQuote.id,
+                                quote_id: quoteId,
                                 context: this.aiContext
                             })
                         });
                         const data = await res.json();
-                        if (data.success) {
+                        
+                        // If queued, poll for completion
+                        if (data.queued) {
+                            console.log('Gemini analysis queued, polling for completion...');
+                            await this.pollForAnalysis(quoteId, 'gemini', 120); // Poll for up to 2 minutes
+                        } else if (data.success && data.analysis) {
                             this.currentQuote.ai_gemini_analysis = data.analysis;
                             this.parseAIResults();
+                        } else if (data.error) {
+                            console.error('Gemini error:', data.error);
+                            alert('Gemini Analysis Error: ' + data.error);
                         }
                     } catch (e) {
                         console.error('Gemini failed:', e);
+                        alert('Gemini request failed: ' + e.message);
                     }
                     this.aiRunning.gemini = false;
+                },
+                
+                async pollForAnalysis(quoteId, type, maxSeconds) {
+                    const startTime = Date.now();
+                    const pollInterval = 5000; // 5 seconds
+                    
+                    while ((Date.now() - startTime) < maxSeconds * 1000) {
+                        await new Promise(resolve => setTimeout(resolve, pollInterval));
+                        
+                        try {
+                            // Fetch the quote data to check if analysis is complete
+                            const res = await fetch(`/server/api/admin-quotes.php?quote_id=${quoteId}`);
+                            const data = await res.json();
+                            
+                            if (data.success && data.quotes && data.quotes.length > 0) {
+                                const quote = data.quotes[0];
+                                
+                                if (type === 'gpt' && quote.ai_gpt5_analysis) {
+                                    console.log('GPT analysis complete!');
+                                    this.currentQuote.ai_gpt5_analysis = quote.ai_gpt5_analysis;
+                                    this.currentQuote.ai_o4_mini_analysis_raw = quote.ai_o4_mini_analysis_raw;
+                                    this.parseAIResults();
+                                    return;
+                                } else if (type === 'gemini' && quote.ai_gemini_analysis) {
+                                    console.log('Gemini analysis complete!');
+                                    this.currentQuote.ai_gemini_analysis = quote.ai_gemini_analysis;
+                                    this.currentQuote.ai_gemini_analysis_raw = quote.ai_gemini_analysis_raw;
+                                    this.parseAIResults();
+                                    return;
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Poll error:', e);
+                        }
+                        
+                        console.log(`Still waiting for ${type} analysis... (${Math.round((Date.now() - startTime) / 1000)}s)`);
+                    }
+                    
+                    console.warn(`${type} analysis timed out after ${maxSeconds}s`);
+                    alert(`${type.toUpperCase()} analysis is taking longer than expected. Click Refresh to check for results.`);
                 },
                 
                 async runAllAI() {
