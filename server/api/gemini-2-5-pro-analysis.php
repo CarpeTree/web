@@ -436,8 +436,29 @@ try {
     
     if (is_array($parsed)) {
         $services = [];
+        
+        // Try multiple paths to find services/line items
         if (isset($parsed['services']) && is_array($parsed['services'])) {
             $services = $parsed['services'];
+        } elseif (isset($parsed['customer_estimate']['line_items']) && is_array($parsed['customer_estimate']['line_items'])) {
+            // Extract from customer_estimate.line_items
+            foreach ($parsed['customer_estimate']['line_items'] as $item) {
+                $services[] = [
+                    'name' => $item['service'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $item['total'] ?? $item['unit_price'] ?? 0,
+                    'method' => $item['method'] ?? null,
+                    'volume' => $item['volume'] ?? null
+                ];
+            }
+        } elseif (isset($parsed['estimate']['line_items']) && is_array($parsed['estimate']['line_items'])) {
+            foreach ($parsed['estimate']['line_items'] as $item) {
+                $services[] = [
+                    'name' => $item['service'] ?? $item['item'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $item['total'] ?? $item['price'] ?? 0
+                ];
+            }
         } elseif (isset($parsed['trees']) && is_array($parsed['trees'])) {
             foreach ($parsed['trees'] as $t) {
                 if (isset($t['services']) && is_array($t['services'])) {
@@ -445,10 +466,28 @@ try {
                 }
             }
         }
+        
+        // Extract tree data for CRM
+        $tree_data = $parsed['crm_data']['tree_data'] ?? $parsed['tree_data'] ?? $parsed['trees'] ?? [];
+        
+        // Extract technical report
+        $technical_report = $parsed['technical_report'] ?? null;
+        
+        // Extract pricing summary
+        $pricing = $parsed['customer_estimate']['pricing_summary'] ?? $parsed['pricing_summary'] ?? null;
+        
+        // Extract missing info requests
+        $missing_info = $parsed['missing_information_request'] ?? $parsed['follow_up_questions'] ?? [];
+        
         $normalized = [
             'model' => 'gemini-3-pro-preview',
             'thinking_budget' => 32768,
             'services' => $services,
+            'tree_data' => $tree_data,
+            'technical_report' => $technical_report,
+            'pricing_summary' => $pricing,
+            'missing_info' => $missing_info,
+            'crm_data' => $parsed['crm_data'] ?? null,
             'frames' => !empty($parsed['frames']) ? $parsed['frames'] : array_map(function($f){ return ['filename' => $f]; }, (count($attached_frames) ? $attached_frames : array_map('basename', $image_candidates))),
             'raw' => $original_text,
             'errors' => []

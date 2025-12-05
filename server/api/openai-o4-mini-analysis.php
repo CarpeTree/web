@@ -190,12 +190,15 @@ require_once __DIR__ . '/../config/config.php';
     $openai_request = [
         'model' => 'gpt-5.1',
         'messages' => $messages,
-        'tools' => [$json_schema],
-        'tool_choice' => ['type' => 'function', 'function' => ['name' => $function_name]],
         'max_completion_tokens' => 100000,
         'reasoning_effort' => 'high',  // Maximum thinking for detailed tree analysis
-        'temperature' => 0.1,  // Low temperature for consistent, accurate estimates
     ];
+    
+    // Only add tools if schema is valid
+    if ($json_schema && is_array($json_schema)) {
+        $openai_request['tools'] = [$json_schema];
+        $openai_request['tool_choice'] = ['type' => 'function', 'function' => ['name' => $function_name]];
+    }
 
     // Validate API key
     if (empty($OPENAI_API_KEY)) {

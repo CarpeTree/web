@@ -1219,29 +1219,89 @@
                         
                         <!-- Gemini Summary -->
                         <div x-show="currentQuote?.ai_gemini_analysis" style="padding: 14px; background: rgba(66, 133, 244, 0.1); border-radius: 8px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #4285f4;">
-                            <div style="font-weight: 700; color: #4285f4; margin-bottom: 8px; font-size: 0.9rem;">💎 Gemini 3 Pro Data:</div>
+                            <div style="font-weight: 700; color: #4285f4; margin-bottom: 8px; font-size: 0.9rem;">Gemini 3 Pro Data:</div>
                             
                             <!-- Show parsed data if available -->
                             <template x-if="geminiParsedData">
                                 <div>
-                                    <!-- Location Context from metadata -->
-                                    <div x-show="geminiParsedData?.metadata?.location_context?.municipality" style="margin-bottom: 8px;">
-                                        <strong>🏛️ Municipality:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.municipality"></span>
+                                    <!-- Services/Line Items from Gemini -->
+                                    <template x-if="geminiParsedData?.services?.length > 0">
+                                        <div style="margin-bottom: 10px;">
+                                            <div style="font-weight: 600; margin-bottom: 6px;">Services:</div>
+                                            <template x-for="svc in geminiParsedData?.services?.slice(0, 5)" :key="svc.name">
+                                                <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                                                    <span x-text="svc.name"></span>
+                                                    <strong x-show="svc.cost" x-text="'$' + svc.cost"></strong>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Pricing Summary -->
+                                    <div x-show="geminiParsedData?.pricing_summary?.total_cad" style="margin-bottom: 10px; padding: 10px; background: var(--forest); color: white; border-radius: 6px; text-align: center;">
+                                        <div style="font-size: 0.75rem; opacity: 0.9;">Gemini Estimate</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700;">$<span x-text="geminiParsedData?.pricing_summary?.total_cad?.toLocaleString()"></span></div>
+                                        <div x-show="geminiParsedData?.pricing_summary?.subtotal" style="font-size: 0.7rem; opacity: 0.8;">
+                                            Subtotal: $<span x-text="geminiParsedData?.pricing_summary?.subtotal?.toLocaleString()"></span> + GST
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tree Data -->
+                                    <template x-if="geminiParsedData?.tree_data?.length > 0">
+                                        <div style="margin-bottom: 10px;">
+                                            <div style="font-weight: 600; margin-bottom: 6px;">Trees:</div>
+                                            <template x-for="tree in geminiParsedData?.tree_data" :key="tree.id">
+                                                <div style="padding: 6px 10px; background: rgba(255,255,255,0.5); border-radius: 4px; margin-bottom: 4px; font-size: 0.75rem;">
+                                                    <strong x-text="tree.id || 'Tree'"></strong>: <span x-text="tree.species"></span>
+                                                    <span x-show="tree.dbh">, DBH: <span x-text="tree.dbh"></span></span>
+                                                    <span x-show="tree.height">, H: <span x-text="tree.height"></span></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Technical Report Summary -->
+                                    <template x-if="geminiParsedData?.technical_report">
+                                        <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(139, 92, 246, 0.1); border-radius: 6px;">
+                                            <div style="font-weight: 600; color: #8b5cf6; margin-bottom: 4px;">Technical Report:</div>
+                                            <div x-show="geminiParsedData?.technical_report?.contractor_notes?.rigging_class" style="font-size: 0.75rem;">
+                                                Rigging: <strong x-text="geminiParsedData?.technical_report?.contractor_notes?.rigging_class"></strong>
+                                            </div>
+                                            <div x-show="geminiParsedData?.technical_report?.contractor_notes?.crew_configuration" style="font-size: 0.75rem;">
+                                                Crew: <strong x-text="geminiParsedData?.technical_report?.contractor_notes?.crew_configuration"></strong>
+                                            </div>
+                                            <div x-show="geminiParsedData?.technical_report?.time_modeling?.total_man_hours" style="font-size: 0.75rem;">
+                                                Time: <strong x-text="geminiParsedData?.technical_report?.time_modeling?.total_man_hours"></strong>
+                                            </div>
+                                            <div x-show="geminiParsedData?.technical_report?.cut_logic?.est_total_weight" style="font-size: 0.75rem;">
+                                                Weight: <strong x-text="geminiParsedData?.technical_report?.cut_logic?.est_total_weight"></strong>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- CRM Data - Hospital -->
+                                    <div x-show="geminiParsedData?.crm_data?.site_conditions?.municipal_hoa" style="margin-bottom: 8px; font-size: 0.75rem;">
+                                        <strong>Jurisdiction:</strong> <span x-text="geminiParsedData?.crm_data?.site_conditions?.municipal_hoa"></span>
+                                    </div>
+                                    
+                                    <!-- Location Context from metadata (fallback) -->
+                                    <div x-show="geminiParsedData?.metadata?.location_context?.municipality && !geminiParsedData?.crm_data" style="margin-bottom: 8px;">
+                                        <strong>Municipality:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.municipality"></span>
                                     </div>
                                     <div x-show="geminiParsedData?.metadata?.location_context?.nearest_hospital" style="margin-bottom: 8px;">
-                                        <strong>🏥 Nearest Hospital:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.name"></span>
+                                        <strong>Nearest Hospital:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.name"></span>
                                         (<span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.distance?.km + ' km'"></span>, <span x-text="geminiParsedData?.metadata?.location_context?.nearest_hospital?.drive_time_minutes + ' min'"></span>)
                                     </div>
                                     <div x-show="geminiParsedData?.metadata?.location_context?.riparian_check" style="margin-bottom: 8px; padding: 6px 10px; background: rgba(245, 158, 11, 0.15); border-radius: 6px;">
-                                        <strong>🌊 Riparian:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.riparian_check"></span>
+                                        <strong>Riparian:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.riparian_check"></span>
                                     </div>
                                     <div x-show="geminiParsedData?.metadata?.location_context?.zoning_check" style="margin-bottom: 8px;">
-                                        <strong>📋 Zoning:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.zoning_check"></span>
+                                        <strong>Zoning:</strong> <span x-text="geminiParsedData?.metadata?.location_context?.zoning_check"></span>
                                     </div>
                                     
                                     <!-- Disposal Sites -->
                                     <div x-show="geminiParsedData?.metadata?.disposal_sites?.length > 0" style="margin-bottom: 8px;">
-                                        <strong>🗑️ Disposal:</strong> 
+                                        <strong>Disposal:</strong> 
                                         <template x-for="site in geminiParsedData?.metadata?.disposal_sites" :key="site.name">
                                             <span x-text="site.name + ' ($' + site.rate_per_tonne + '/t)'"></span>
                                         </template>
@@ -2043,6 +2103,32 @@
                             return [];
                         }
                         
+                        // First check if services are already extracted at top level (from PHP)
+                        if (data.services && Array.isArray(data.services) && data.services.length > 0) {
+                            services = data.services.map(s => ({
+                                name: s.name || s.service || 'Service',
+                                tree: 'General',
+                                price_low: parseFloat(s.cost) || 0,
+                                price_high: parseFloat(s.cost) || 0,
+                                details: s.description || s.method || ''
+                            }));
+                            
+                            // Store the full data for display
+                            this.geminiParsedData = data;
+                            
+                            // Store technical report
+                            if (data.technical_report) {
+                                this.geminiTechnicalReport = data.technical_report;
+                            }
+                            
+                            // Store missing info
+                            if (data.missing_info?.length > 0) {
+                                this.geminiMissingInfo = data.missing_info;
+                            }
+                            
+                            return services;
+                        }
+                        
                         // New Gemini format has data in 'raw' field as JSON string
                         if (data.raw && typeof data.raw === 'string') {
                             // Extract JSON from markdown code block
@@ -2052,8 +2138,25 @@
                                 // Store parsed data for display
                                 this.geminiParsedData = parsed;
                                 
+                                // Extract from customer_estimate.line_items (common format)
+                                if (parsed.customer_estimate?.line_items?.length > 0) {
+                                    services = parsed.customer_estimate.line_items.map(item => ({
+                                        name: item.service || item.name,
+                                        tree: 'General',
+                                        price_low: parseFloat(item.total) || parseFloat(item.unit_price) || 0,
+                                        price_high: parseFloat(item.total) || parseFloat(item.unit_price) || 0,
+                                        details: item.description || item.method || '',
+                                        volume: item.volume
+                                    }));
+                                    
+                                    // Store pricing summary
+                                    if (parsed.customer_estimate?.pricing_summary) {
+                                        this.geminiParsedData.pricing_summary = parsed.customer_estimate.pricing_summary;
+                                    }
+                                }
+                                
                                 // Extract estimate line items from Gemini's format
-                                if (parsed.estimate?.line_items?.length > 0) {
+                                if (services.length === 0 && parsed.estimate?.line_items?.length > 0) {
                                     services = parsed.estimate.line_items.map(item => ({
                                         name: item.item || item.service || item.name,
                                         tree: 'General',
@@ -2068,7 +2171,7 @@
                                 }
                                 
                                 // Also check financial_estimate format
-                                if (parsed.financial_estimate?.line_items?.length > 0) {
+                                if (services.length === 0 && parsed.financial_estimate?.line_items?.length > 0) {
                                     services = parsed.financial_estimate.line_items.map(item => ({
                                         name: item.service || item.name,
                                         tree: 'General',
