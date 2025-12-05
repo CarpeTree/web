@@ -449,8 +449,20 @@ try {
         };
         
         // Try multiple paths to find services/line items
-        if (isset($parsed['customer_estimate']['services']) && is_array($parsed['customer_estimate']['services'])) {
-            // Extract from customer_estimate.services (common Gemini format)
+        if (isset($parsed['estimates']['customer_facing']['line_items']) && is_array($parsed['estimates']['customer_facing']['line_items'])) {
+            // Extract from estimates.customer_facing.line_items (Gemini format)
+            foreach ($parsed['estimates']['customer_facing']['line_items'] as $item) {
+                $services[] = [
+                    'name' => $item['service'] ?? $item['item'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $parseCost($item['total'] ?? $item['rate'] ?? 0),
+                    'quantity' => $item['quantity'] ?? 1,
+                    'unit' => $item['unit'] ?? null,
+                    'rate' => $parseCost($item['rate'] ?? 0)
+                ];
+            }
+        } elseif (isset($parsed['customer_estimate']['services']) && is_array($parsed['customer_estimate']['services'])) {
+            // Extract from customer_estimate.services (alternate Gemini format)
             foreach ($parsed['customer_estimate']['services'] as $item) {
                 $services[] = [
                     'name' => $item['item'] ?? $item['service'] ?? $item['name'] ?? 'Service',
@@ -522,14 +534,22 @@ try {
         $tree_data = $parsed['crm_data']['trees'] ?? $parsed['crm_data']['tree_data'] ?? $parsed['tree_data'] ?? $parsed['trees'] ?? [];
         
         // Extract technical report - try multiple paths
-        $technical_report = $parsed['estimation']['contractor_facing']['technical_report'] 
+        $technical_report = $parsed['estimates']['contractor_technical_report']
+            ?? $parsed['estimation']['contractor_facing']['technical_report'] 
             ?? $parsed['technical_report'] 
             ?? $parsed['contractor_facing']['technical_report'] 
             ?? null;
         
         // Extract pricing summary - try multiple paths
         $pricing = null;
-        if (isset($parsed['customer_estimate']['pricing_breakdown'])) {
+        if (isset($parsed['estimates']['customer_facing'])) {
+            $cf = $parsed['estimates']['customer_facing'];
+            $pricing = [
+                'subtotal' => $cf['subtotal'] ?? 0,
+                'tax_gst' => $cf['tax_gst'] ?? 0,
+                'total_cad' => $cf['total_estimate_cad'] ?? $cf['total_estimate'] ?? $cf['total'] ?? 0
+            ];
+        } elseif (isset($parsed['customer_estimate']['pricing_breakdown'])) {
             $pb = $parsed['customer_estimate']['pricing_breakdown'];
             $pricing = [
                 'subtotal' => $pb['subtotal'] ?? 0,
