@@ -1,73 +1,119 @@
 {
   "type": "function",
   "function": {
-    "name": "draft_tree_quote_simple",
-    "description": "Generate a structured tree care quote from an analysis of images, videos, and audio. Focus on identifying specific services required.",
+    "name": "draft_tree_quote",
+    "description": "Generate a comprehensive tree care quote with detailed analysis, tree inventory, and itemized estimate.",
     "parameters": {
       "type": "object",
       "properties": {
         "analysis": {
           "type": "string",
-          "description": "A detailed, multi-paragraph analysis of the tree(s), site conditions, access, and any potential hazards or special considerations. This should be a comprehensive text block."
+          "description": "A detailed, multi-paragraph analysis of the tree(s), site conditions, access, hazards, and special considerations."
         },
-        "species_identification": {
-          "type": "string",
-          "description": "The common name of the primary tree species identified. e.g., 'Douglas Fir', 'Western Red Cedar', 'Unknown'."
+        "trees": {
+          "type": "array",
+          "description": "Array of trees identified on the property requiring work.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Tree identifier (e.g., T1, T2)" },
+              "species": { "type": "string", "description": "Common and scientific name" },
+              "dbh_inches": { "type": "number", "description": "Diameter at Breast Height in inches" },
+              "height_feet": { "type": "number", "description": "Estimated height in feet" },
+              "crown_spread_feet": { "type": "number", "description": "Crown spread in feet" },
+              "condition": { "type": "string", "description": "Overall condition assessment" },
+              "lean_direction": { "type": "string", "description": "Direction and degree of lean if any" },
+              "defects": { "type": "string", "description": "Any structural defects, decay, or hazards" },
+              "location": { "type": "string", "description": "Location on property relative to structures" }
+            },
+            "required": ["id", "species", "dbh_inches", "height_feet"]
+          }
         },
-        "height_estimate": {
-          "type": "string",
-          "description": "The estimated height of the tree in feet or meters. e.g., 'approx. 80-90 feet'."
+        "site_assessment": {
+          "type": "object",
+          "properties": {
+            "access_type": { "type": "string", "description": "Road, boat, steep terrain, etc." },
+            "hazards": { "type": "array", "items": { "type": "string" }, "description": "List of site hazards" },
+            "targets": { "type": "array", "items": { "type": "string" }, "description": "Structures/items at risk" },
+            "drop_zone": { "type": "string", "description": "Available drop zone description" },
+            "terrain": { "type": "string", "description": "Terrain conditions" }
+          }
         },
-        "crown_spread": {
-            "type": "string",
-            "description": "The estimated crown spread of the tree in feet or meters. e.g., '40-foot spread'."
+        "rigging_plan": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string", "description": "Primary rigging method (negative, positive, speedline, etc.)" },
+            "equipment_needed": { "type": "array", "items": { "type": "string" }, "description": "Equipment list" },
+            "crew_size": { "type": "number", "description": "Recommended crew size" },
+            "estimated_days": { "type": "number", "description": "Estimated days to complete" }
+          }
         },
-        "dbh_estimate": {
-          "type": "string",
-          "description": "The estimated Diameter at Breast Height (DBH) in inches or cm. e.g., 'around 24 inches'."
+        "volume_weight": {
+          "type": "object",
+          "properties": {
+            "total_wood_volume_cuft": { "type": "number", "description": "Total wood volume in cubic feet" },
+            "total_weight_lbs": { "type": "number", "description": "Total estimated green weight in pounds" },
+            "brush_volume_cuft": { "type": "number", "description": "Brush/chippable material volume" },
+            "disposal_tonnes": { "type": "number", "description": "Estimated disposal weight in tonnes" }
+          }
         },
-        "climbing_required": {
-          "type": "boolean",
-          "description": "Is it necessary for an arborist to climb the tree to perform the work? True or false."
+        "time_estimate": {
+          "type": "object",
+          "properties": {
+            "setup_hours": { "type": "number" },
+            "climbing_rigging_hours": { "type": "number" },
+            "cleanup_hours": { "type": "number" },
+            "total_man_hours": { "type": "number" },
+            "notes": { "type": "string" }
+          }
         },
-        "rigging_required": {
-          "type": "boolean",
-          "description": "Will specialized rigging equipment be needed to safely lower limbs or sections of the tree? True or false."
+        "estimate_line_items": {
+          "type": "array",
+          "description": "Itemized estimate for customer. Each line item should be a distinct service.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "description": "Service name (e.g., Tree Removal, Pruning, Travel)" },
+              "tree_id": { "type": "string", "description": "Which tree this applies to (T1, T2, or 'All')" },
+              "description": { "type": "string", "description": "Detailed description of work" },
+              "quantity": { "type": "number", "description": "Quantity (usually 1)" },
+              "unit": { "type": "string", "description": "Unit (Tree, Hour, Trip, Tonne, etc.)" },
+              "unit_price": { "type": "number", "description": "Price per unit in CAD" },
+              "total": { "type": "number", "description": "Line total in CAD" },
+              "internal_notes": { "type": "string", "description": "Notes for contractor only (not shown to customer)" }
+            },
+            "required": ["service", "description", "total"]
+          }
         },
-        "brush_chipping_required": {
-          "type": "boolean",
-          "description": "Will a wood chipper be needed on-site to process brush? True or false."
+        "pricing_summary": {
+          "type": "object",
+          "properties": {
+            "subtotal": { "type": "number", "description": "Subtotal before tax" },
+            "gst": { "type": "number", "description": "5% GST" },
+            "total_cad": { "type": "number", "description": "Total including tax" }
+          },
+          "required": ["subtotal", "gst", "total_cad"]
         },
-        "wood_removal_required": {
-            "type": "boolean",
-            "description": "Does the large-diameter wood need to be hauled away from the site? True or false."
+        "follow_up_questions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Questions to ask customer for clarification"
         },
-        "firewood_processing": {
-            "type": "boolean",
-            "description": "Does the client want the wood processed into firewood and left on site? True or false."
-        },
-        "brush_hauling_required": {
-            "type": "boolean",
-            "description": "Do the wood chips or brush need to be hauled away? True or false."
-        },
-        "waste_disposal": {
-            "type": "string",
-            "description": "Describe the plan for waste disposal, including estimated volume and type of debris."
+        "nearest_hospital": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "address": { "type": "string" },
+            "distance_km": { "type": "number" },
+            "drive_time_minutes": { "type": "number" }
+          }
         }
       },
       "required": [
         "analysis",
-        "species_identification",
-        "height_estimate",
-        "crown_spread",
-        "dbh_estimate",
-        "climbing_required",
-        "rigging_required",
-        "brush_chipping_required",
-        "wood_removal_required",
-        "firewood_processing",
-        "brush_hauling_required",
-        "waste_disposal"
+        "trees",
+        "estimate_line_items",
+        "pricing_summary"
       ]
     }
   }
