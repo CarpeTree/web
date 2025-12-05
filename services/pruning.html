@@ -101,6 +101,12 @@
     </style>
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </button>
+    
     <div class="contact-header">
         <a href="tel:7786553741">778-655-3741</a> |
         <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
@@ -225,5 +231,19 @@
             <p>&copy; 2025 Carpe Tree'em. All rights reserved.</p>
         </div>
     </footer>
+    
+    <script>
+      // Theme Toggle
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      if (isDark) document.documentElement.classList.add('dark');
+      
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', function() {
+        const isDarkMode = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      });
+    </script>
 </body>
 </html> 
