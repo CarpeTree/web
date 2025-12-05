@@ -449,7 +449,17 @@ try {
         };
         
         // Try multiple paths to find services/line items
-        if (isset($parsed['services']) && is_array($parsed['services'])) {
+        if (isset($parsed['customer_estimate']['services']) && is_array($parsed['customer_estimate']['services'])) {
+            // Extract from customer_estimate.services (common Gemini format)
+            foreach ($parsed['customer_estimate']['services'] as $item) {
+                $services[] = [
+                    'name' => $item['item'] ?? $item['service'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $parseCost($item['price'] ?? $item['total'] ?? 0),
+                    'method' => $item['method'] ?? null
+                ];
+            }
+        } elseif (isset($parsed['services']) && is_array($parsed['services'])) {
             // Clean up services with cost strings
             foreach ($parsed['services'] as &$svc) {
                 if (isset($svc['cost'])) {
@@ -519,7 +529,14 @@ try {
         
         // Extract pricing summary - try multiple paths
         $pricing = null;
-        if (isset($parsed['estimation']['grand_total'])) {
+        if (isset($parsed['customer_estimate']['pricing_breakdown'])) {
+            $pb = $parsed['customer_estimate']['pricing_breakdown'];
+            $pricing = [
+                'subtotal' => $pb['subtotal'] ?? 0,
+                'tax_gst' => $pb['tax_gst'] ?? 0,
+                'total_cad' => $pb['total_estimate'] ?? $pb['total'] ?? 0
+            ];
+        } elseif (isset($parsed['estimation']['grand_total'])) {
             $pricing = [
                 'subtotal' => $parsed['estimation']['subtotal'] ?? 0,
                 'tax_gst' => $parsed['estimation']['tax_amount'] ?? 0,
