@@ -448,26 +448,31 @@ try {
             return 0;
         };
         
-        // Try multiple paths to find services/line items
-        if (isset($parsed['estimates']['customer_facing']['line_items']) && is_array($parsed['estimates']['customer_facing']['line_items'])) {
-            // Extract from estimates.customer_facing.line_items (Gemini format)
-            foreach ($parsed['estimates']['customer_facing']['line_items'] as $item) {
+        // Try multiple paths to find services/line items (Gemini output varies)
+        $line_items = null;
+        
+        // Check all possible paths for line items
+        if (isset($parsed['customer_estimate']['line_items']) && is_array($parsed['customer_estimate']['line_items'])) {
+            $line_items = $parsed['customer_estimate']['line_items'];
+        } elseif (isset($parsed['estimates']['customer_facing']['line_items']) && is_array($parsed['estimates']['customer_facing']['line_items'])) {
+            $line_items = $parsed['estimates']['customer_facing']['line_items'];
+        } elseif (isset($parsed['customer_estimate']['services']) && is_array($parsed['customer_estimate']['services'])) {
+            $line_items = $parsed['customer_estimate']['services'];
+        } elseif (isset($parsed['estimation']['items']) && is_array($parsed['estimation']['items'])) {
+            $line_items = $parsed['estimation']['items'];
+        } elseif (isset($parsed['estimation']['customer_facing']['line_items']) && is_array($parsed['estimation']['customer_facing']['line_items'])) {
+            $line_items = $parsed['estimation']['customer_facing']['line_items'];
+        }
+        
+        if ($line_items) {
+            foreach ($line_items as $item) {
                 $services[] = [
                     'name' => $item['service'] ?? $item['item'] ?? $item['name'] ?? 'Service',
                     'description' => $item['description'] ?? '',
-                    'cost' => $parseCost($item['total'] ?? $item['rate'] ?? 0),
+                    'cost' => $parseCost($item['total'] ?? $item['price'] ?? $item['rate'] ?? 0),
                     'quantity' => $item['quantity'] ?? 1,
                     'unit' => $item['unit'] ?? null,
-                    'rate' => $parseCost($item['rate'] ?? 0)
-                ];
-            }
-        } elseif (isset($parsed['customer_estimate']['services']) && is_array($parsed['customer_estimate']['services'])) {
-            // Extract from customer_estimate.services (alternate Gemini format)
-            foreach ($parsed['customer_estimate']['services'] as $item) {
-                $services[] = [
-                    'name' => $item['item'] ?? $item['service'] ?? $item['name'] ?? 'Service',
-                    'description' => $item['description'] ?? '',
-                    'cost' => $parseCost($item['price'] ?? $item['total'] ?? 0),
+                    'rate' => $parseCost($item['rate'] ?? 0),
                     'method' => $item['method'] ?? null
                 ];
             }
@@ -540,27 +545,38 @@ try {
             ?? $parsed['contractor_facing']['technical_report'] 
             ?? null;
         
-        // Extract pricing summary - try multiple paths
+        // Extract pricing summary - try multiple paths (Gemini output varies)
         $pricing = null;
-        if (isset($parsed['estimates']['customer_facing'])) {
+        
+        // Check customer_estimate for subtotal/total
+        if (isset($parsed['customer_estimate']['subtotal'])) {
+            $ce = $parsed['customer_estimate'];
+            $subtotal = $parseCost($ce['subtotal'] ?? 0);
+            $gst = $subtotal * 0.05; // Calculate GST if not provided
+            $pricing = [
+                'subtotal' => $subtotal,
+                'tax_gst' => $parseCost($ce['tax_gst'] ?? $ce['gst'] ?? $gst),
+                'total_cad' => $parseCost($ce['total_estimate_cad'] ?? $ce['total_estimate'] ?? $ce['total'] ?? ($subtotal * 1.05))
+            ];
+        } elseif (isset($parsed['estimates']['customer_facing'])) {
             $cf = $parsed['estimates']['customer_facing'];
             $pricing = [
-                'subtotal' => $cf['subtotal'] ?? 0,
-                'tax_gst' => $cf['tax_gst'] ?? 0,
-                'total_cad' => $cf['total_estimate_cad'] ?? $cf['total_estimate'] ?? $cf['total'] ?? 0
+                'subtotal' => $parseCost($cf['subtotal'] ?? 0),
+                'tax_gst' => $parseCost($cf['tax_gst'] ?? 0),
+                'total_cad' => $parseCost($cf['total_estimate_cad'] ?? $cf['total_estimate'] ?? $cf['total'] ?? 0)
             ];
         } elseif (isset($parsed['customer_estimate']['pricing_breakdown'])) {
             $pb = $parsed['customer_estimate']['pricing_breakdown'];
             $pricing = [
-                'subtotal' => $pb['subtotal'] ?? 0,
-                'tax_gst' => $pb['tax_gst'] ?? 0,
-                'total_cad' => $pb['total_estimate'] ?? $pb['total'] ?? 0
+                'subtotal' => $parseCost($pb['subtotal'] ?? 0),
+                'tax_gst' => $parseCost($pb['tax_gst'] ?? 0),
+                'total_cad' => $parseCost($pb['total_estimate'] ?? $pb['total'] ?? 0)
             ];
         } elseif (isset($parsed['estimation']['grand_total'])) {
             $pricing = [
-                'subtotal' => $parsed['estimation']['subtotal'] ?? 0,
-                'tax_gst' => $parsed['estimation']['tax_amount'] ?? 0,
-                'total_cad' => $parsed['estimation']['grand_total'] ?? 0
+                'subtotal' => $parseCost($parsed['estimation']['subtotal'] ?? 0),
+                'tax_gst' => $parseCost($parsed['estimation']['tax_amount'] ?? 0),
+                'total_cad' => $parseCost($parsed['estimation']['grand_total'] ?? 0)
             ];
         } elseif (isset($parsed['estimation']['customer_facing'])) {
             $pricing = $parsed['estimation']['customer_facing'];
