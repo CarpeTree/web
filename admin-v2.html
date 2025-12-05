@@ -1320,14 +1320,36 @@
             
             <!-- Context Input -->
             <div class="card">
-                <div class="card-header">Additional Context for AI</div>
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Additional Context for AI</span>
+                    <span x-show="contextSaved" x-transition style="font-size: 0.7rem; color: #10a37f; font-weight: 600;">Saved to CRM</span>
+                </div>
                 <div class="card-body">
                     <textarea 
                         x-model="aiContext" 
-                        @change="saveContext()"
-                        placeholder="Add context for AI analysis (e.g., 'Customer mentioned the oak is dropping branches', 'Budget is around $2000')"
-                        style="width: 100%; height: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; resize: vertical;"
+                        @input="contextSaved = false"
+                        placeholder="Add notes for AI analysis (e.g., 'Customer budget is $2000', 'Oak is dropping branches on driveway', 'Access via back gate only')"
+                        style="width: 100%; height: 70px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; resize: vertical;"
                     ></textarea>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button 
+                            class="action-btn primary" 
+                            style="flex: 1; padding: 8px 12px; font-size: 0.8rem;"
+                            @click="saveContextToCRM()"
+                            :disabled="contextSaving"
+                            x-text="contextSaving ? 'Saving...' : 'Save to CRM'">
+                        </button>
+                        <button 
+                            class="action-btn secondary" 
+                            style="padding: 8px 12px; font-size: 0.8rem;"
+                            @click="appendLogisticsToContext()"
+                            title="Add prefetched logistics data to context">
+                            + Logistics
+                        </button>
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--muted); margin-top: 6px;">
+                        This context is saved to the CRM and included when running AI analysis.
+                    </div>
                 </div>
             </div>
         </section>
@@ -1640,6 +1662,8 @@
                     trips: 1,
                     station: null
                 },
+                contextSaving: false,
+                contextSaved: false,
                 
                 // Estimate State
                 estimateView: 'customer',
@@ -1789,6 +1813,9 @@
                     this.gptHazards = null;
                     // Reset disposal input
                     this.disposalInput = { tonnes: 2, trips: 1, station: null };
+                    // Reset context state
+                    this.contextSaved = false;
+                    this.contextSaving = false;
                     // Parse and calculate
                     this.parseAIResults();
                     this.calculateLogistics();
@@ -2710,6 +2737,89 @@
                     } catch (e) {
                         console.error('Failed to save context:', e);
                     }
+                },
+                
+                // Save context to CRM with visual feedback
+                async saveContextToCRM() {
+                    if (!this.currentQuote) return;
+                    
+                    this.contextSaving = true;
+                    this.contextSaved = false;
+                    
+                    try {
+                        const res = await fetch('/server/api/save-quote-context.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                quote_id: this.currentQuote.id,
+                                context: this.aiContext
+                            })
+                        });
+                        
+                        const data = await res.json();
+                        
+                        if (data.success) {
+                            this.contextSaved = true;
+                            // Also update the local quote object
+                            this.currentQuote.context = this.aiContext;
+                            
+                            // Auto-hide the "Saved" message after 3 seconds
+                            setTimeout(() => {
+                                this.contextSaved = false;
+                            }, 3000);
+                        } else {
+                            alert('Failed to save context: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (e) {
+                        console.error('Failed to save context:', e);
+                        alert('Failed to save context. Please try again.');
+                    } finally {
+                        this.contextSaving = false;
+                    }
+                },
+                
+                // Append logistics data to context
+                appendLogisticsToContext() {
+                    let additions = [];
+                    
+                    if (this.logistics.nearestHospital) {
+                        additions.push(`Nearest Hospital: ${this.logistics.nearestHospital.name} (${this.logistics.nearestHospital.distance_km} km, ${this.logistics.nearestHospital.drive_time_minutes} min)`);
+                    }
+                    
+                    if (this.logistics.municipality?.municipality) {
+                        additions.push(`Jurisdiction: ${this.logistics.municipality.municipality}, ${this.logistics.municipality.regional_district || ''}`);
+                    }
+                    
+                    if (this.logistics.nearestStation) {
+                        additions.push(`Nearest Transfer Station: ${this.logistics.nearestStation.name} (${this.logistics.nearestStation.from_job_km || this.logistics.nearestStation.distance_km} km from job, $${this.logistics.nearestStation.cost_per_tonne}/tonne)`);
+                    }
+                    
+                    if (this.logistics.onRouteStation && this.logistics.onRouteStation.name !== this.logistics.nearestStation?.name) {
+                        additions.push(`On-Route Station: ${this.logistics.onRouteStation.name} (+${this.logistics.onRouteStation.detour_km} km detour)`);
+                    }
+                    
+                    if (this.currentQuote?.distance_km) {
+                        additions.push(`Travel: ${this.currentQuote.distance_km} km from home base, Est. cost: $${this.logistics.travelCost || Math.round(this.currentQuote.distance_km * 2 * this.rates.truck_per_km)}`);
+                    }
+                    
+                    if (additions.length === 0) {
+                        alert('No logistics data available. Try refreshing the quote or ensure the address is set.');
+                        return;
+                    }
+                    
+                    const logisticsText = '\n\n--- LOGISTICS (auto-added) ---\n' + additions.join('\n');
+                    
+                    // Append to existing context
+                    if (this.aiContext && !this.aiContext.includes('--- LOGISTICS')) {
+                        this.aiContext += logisticsText;
+                    } else if (!this.aiContext) {
+                        this.aiContext = logisticsText.trim();
+                    } else {
+                        // Replace existing logistics section
+                        this.aiContext = this.aiContext.replace(/\n\n--- LOGISTICS[\s\S]*$/, logisticsText);
+                    }
+                    
+                    this.contextSaved = false;
                 },
                 
                 // Prompts
