@@ -440,8 +440,19 @@ try {
         // Try multiple paths to find services/line items
         if (isset($parsed['services']) && is_array($parsed['services'])) {
             $services = $parsed['services'];
+        } elseif (isset($parsed['estimation']['items']) && is_array($parsed['estimation']['items'])) {
+            // Extract from estimation.items (common Gemini format)
+            foreach ($parsed['estimation']['items'] as $item) {
+                $services[] = [
+                    'name' => $item['service'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $item['total'] ?? $item['price'] ?? 0,
+                    'quantity' => $item['quantity'] ?? 1,
+                    'unit' => $item['unit'] ?? null
+                ];
+            }
         } elseif (isset($parsed['estimation']['customer_facing']['line_items']) && is_array($parsed['estimation']['customer_facing']['line_items'])) {
-            // Extract from estimation.customer_facing.line_items (common Gemini format)
+            // Extract from estimation.customer_facing.line_items
             foreach ($parsed['estimation']['customer_facing']['line_items'] as $item) {
                 $services[] = [
                     'name' => $item['service'] ?? $item['name'] ?? 'Service',
@@ -487,10 +498,20 @@ try {
             ?? null;
         
         // Extract pricing summary - try multiple paths
-        $pricing = $parsed['estimation']['customer_facing'] 
-            ?? $parsed['customer_estimate']['pricing_summary'] 
-            ?? $parsed['pricing_summary'] 
-            ?? null;
+        $pricing = null;
+        if (isset($parsed['estimation']['grand_total'])) {
+            $pricing = [
+                'subtotal' => $parsed['estimation']['subtotal'] ?? 0,
+                'tax_gst' => $parsed['estimation']['tax_amount'] ?? 0,
+                'total_cad' => $parsed['estimation']['grand_total'] ?? 0
+            ];
+        } elseif (isset($parsed['estimation']['customer_facing'])) {
+            $pricing = $parsed['estimation']['customer_facing'];
+        } elseif (isset($parsed['customer_estimate']['pricing_summary'])) {
+            $pricing = $parsed['customer_estimate']['pricing_summary'];
+        } elseif (isset($parsed['pricing_summary'])) {
+            $pricing = $parsed['pricing_summary'];
+        }
         
         // Extract missing info requests - try multiple paths
         $missing_info = $parsed['follow_up_questions'] 
