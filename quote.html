@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Get Your Tree Service Quote - Carpe Tree'em</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
-  <link rel="stylesheet" href="style.css?v=20250130">
+  <link rel="stylesheet" href="style.css?v=20250131">
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
@@ -1101,6 +1101,50 @@
         }
       }
     }
+  </script>
+  
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+  </button>
+  
+  <!-- Theme Toggle Script -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      }
+      
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      
+      function updateThemeIcon() {
+        themeIcon.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+      }
+      
+      updateThemeIcon();
+      
+      themeToggle.addEventListener('click', function() {
+        const isDarkMode = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        updateThemeIcon();
+      });
+      
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('theme')) {
+          if (e.matches) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          updateThemeIcon();
+        }
+      });
+    })();
   </script>
 </body>
 </html> 

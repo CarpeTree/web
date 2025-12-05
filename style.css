@@ -2,15 +2,16 @@
 .glass{
   backdrop-filter: saturate(1.15) blur(12px);
   -webkit-backdrop-filter: saturate(1.15) blur(12px);
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.28);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  box-shadow: var(--glass-shadow);
   transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 .glass:hover{
-  background: rgba(255,255,255,0.12);
+  background: var(--glass-bg);
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
 }
 .glass-header{ padding: 8px 12px; }
 /* Dark glass utility for green header bars */
@@ -20,6 +21,43 @@
   background: rgba(44,95,45,0.85);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.2);
+}
+.dark .glass-dark{
+  background: rgba(44,95,45,0.95);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 2000;
+  padding: 10px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--glass-shadow);
+  color: var(--text-color);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+  .theme-toggle {
+    top: 50px;
+    right: 10px;
+    padding: 8px 12px;
+    font-size: 1.1rem;
+  }
 }
 /* Carpe Tree'em Website Styling */
 
@@ -32,6 +70,32 @@
     --text-color: #333333;
     --background-color: #F5F5F5;
     --accent-color: var(--muted-golden-amber);
+    /* Liquid Glass Theme Variables - Light Mode */
+    --glass-bg: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.28);
+    --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    --bg-pattern-start: rgba(44, 95, 45, 0.08);
+    --bg-pattern-end: rgba(212, 163, 115, 0.08);
+  }
+  
+  /* Dark Mode Variables */
+  .dark {
+    --text-color: #F5F5F5;
+    --background-color: #1a1a1a;
+    --glass-bg: rgba(15, 23, 42, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --bg-pattern-start: rgba(44, 95, 45, 0.15);
+    --bg-pattern-end: rgba(212, 163, 115, 0.15);
+  }
+  
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: var(--muted-golden-amber);
+  }
+  
+  .dark .glass-dark {
+    background: rgba(44, 95, 45, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
   
   body {
@@ -40,6 +104,7 @@
     color: var(--text-color);
     margin: 0;
     padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   /* Subtle page backdrop so glass blur is visible */
   body::before {
@@ -49,9 +114,10 @@
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(1200px 600px at 20% 0%, rgba(44,95,45,0.08), transparent 60%),
-      radial-gradient(1200px 600px at 80% 100%, rgba(212,163,115,0.08), transparent 60%);
+      radial-gradient(1200px 600px at 20% 0%, var(--bg-pattern-start), transparent 60%),
+      radial-gradient(1200px 600px at 80% 100%, var(--bg-pattern-end), transparent 60%);
     background-attachment: fixed;
+    transition: background 0.3s ease;
   }
   
   h1, h2, h3, h4, h5, h6 {
