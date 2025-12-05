@@ -10,6 +10,7 @@ class CostTracker {
         // All costs are in USD per 1,000,000 tokens
         $this->cost_rates = [
             'openai' => [
+                'gpt-5.1' => ['input' => 10.00, 'output' => 30.00],
                 'gpt-5' => ['input' => 10.00, 'output' => 30.00],
                 // Keep legacy mapping for historical rows still labeled as o4-mini
                 'o4-mini' => ['input' => 0.15, 'output' => 0.60],
@@ -17,6 +18,7 @@ class CostTracker {
                 'whisper-1' => ['input' => 0.006, 'output' => 0] // Priced per minute, approx this per 1M tokens
             ],
             'google' => [
+                'gemini-3-pro-preview' => ['input' => 3.50, 'output' => 10.50],
                 'gemini-2.5-pro' => ['input' => 3.50, 'output' => 10.50]
             ]
         ];
