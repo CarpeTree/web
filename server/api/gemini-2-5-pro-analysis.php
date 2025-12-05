@@ -440,6 +440,16 @@ try {
         // Try multiple paths to find services/line items
         if (isset($parsed['services']) && is_array($parsed['services'])) {
             $services = $parsed['services'];
+        } elseif (isset($parsed['estimation']['customer_facing']['line_items']) && is_array($parsed['estimation']['customer_facing']['line_items'])) {
+            // Extract from estimation.customer_facing.line_items (common Gemini format)
+            foreach ($parsed['estimation']['customer_facing']['line_items'] as $item) {
+                $services[] = [
+                    'name' => $item['service'] ?? $item['name'] ?? 'Service',
+                    'description' => $item['description'] ?? '',
+                    'cost' => $item['total'] ?? $item['rate'] ?? 0,
+                    'quantity' => $item['quantity'] ?? 1
+                ];
+            }
         } elseif (isset($parsed['customer_estimate']['line_items']) && is_array($parsed['customer_estimate']['line_items'])) {
             // Extract from customer_estimate.line_items
             foreach ($parsed['customer_estimate']['line_items'] as $item) {
@@ -467,17 +477,26 @@ try {
             }
         }
         
-        // Extract tree data for CRM
-        $tree_data = $parsed['crm_data']['tree_data'] ?? $parsed['tree_data'] ?? $parsed['trees'] ?? [];
+        // Extract tree data for CRM - try multiple paths
+        $tree_data = $parsed['crm_data']['trees'] ?? $parsed['crm_data']['tree_data'] ?? $parsed['tree_data'] ?? $parsed['trees'] ?? [];
         
-        // Extract technical report
-        $technical_report = $parsed['technical_report'] ?? null;
+        // Extract technical report - try multiple paths
+        $technical_report = $parsed['estimation']['contractor_facing']['technical_report'] 
+            ?? $parsed['technical_report'] 
+            ?? $parsed['contractor_facing']['technical_report'] 
+            ?? null;
         
-        // Extract pricing summary
-        $pricing = $parsed['customer_estimate']['pricing_summary'] ?? $parsed['pricing_summary'] ?? null;
+        // Extract pricing summary - try multiple paths
+        $pricing = $parsed['estimation']['customer_facing'] 
+            ?? $parsed['customer_estimate']['pricing_summary'] 
+            ?? $parsed['pricing_summary'] 
+            ?? null;
         
-        // Extract missing info requests
-        $missing_info = $parsed['missing_information_request'] ?? $parsed['follow_up_questions'] ?? [];
+        // Extract missing info requests - try multiple paths
+        $missing_info = $parsed['follow_up_questions'] 
+            ?? $parsed['missing_information_request'] 
+            ?? $parsed['missing_info_requests'] 
+            ?? [];
         
         $normalized = [
             'model' => 'gemini-3-pro-preview',

@@ -2138,8 +2138,32 @@
                                 // Store parsed data for display
                                 this.geminiParsedData = parsed;
                                 
-                                // Extract from customer_estimate.line_items (common format)
-                                if (parsed.customer_estimate?.line_items?.length > 0) {
+                                // Extract from estimation.customer_facing.line_items (common Gemini format)
+                                if (parsed.estimation?.customer_facing?.line_items?.length > 0) {
+                                    services = parsed.estimation.customer_facing.line_items.map(item => ({
+                                        name: item.service || item.name,
+                                        tree: 'General',
+                                        price_low: parseFloat(item.total) || parseFloat(item.rate) || 0,
+                                        price_high: parseFloat(item.total) || parseFloat(item.rate) || 0,
+                                        details: item.description || '',
+                                        quantity: item.quantity
+                                    }));
+                                    
+                                    // Store pricing summary
+                                    this.geminiParsedData.pricing_summary = {
+                                        subtotal: parsed.estimation.customer_facing.subtotal,
+                                        total_cad: parsed.estimation.customer_facing.total_estimate,
+                                        tax_gst: parsed.estimation.customer_facing.tax_gst
+                                    };
+                                    
+                                    // Store technical report
+                                    if (parsed.estimation?.contractor_facing?.technical_report) {
+                                        this.geminiTechnicalReport = parsed.estimation.contractor_facing.technical_report;
+                                    }
+                                }
+                                
+                                // Extract from customer_estimate.line_items (alternate format)
+                                if (services.length === 0 && parsed.customer_estimate?.line_items?.length > 0) {
                                     services = parsed.customer_estimate.line_items.map(item => ({
                                         name: item.service || item.name,
                                         tree: 'General',
