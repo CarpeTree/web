@@ -90,6 +90,14 @@ if (!is_dir($web_root)) {
     exit;
 }
 
+// Ensure git safe.directory is configured for www-data user
+// This fixes "dubious ownership" errors when .git is owned by root
+$gitconfig_path = '/var/www/.gitconfig';
+$safe_dir_entry = "[safe]\n\tdirectory = /var/www/carpetree.com\n";
+if (!file_exists($gitconfig_path) || strpos(file_get_contents($gitconfig_path), '/var/www/carpetree.com') === false) {
+    @file_put_contents($gitconfig_path, $safe_dir_entry, FILE_APPEND);
+}
+
 // Change directory and pull latest changes
 chdir($web_root);
 
