@@ -44,13 +44,15 @@ try {
     }
 
     // If running via HTTP, send immediate 200 and continue in background
-if (php_sapi_name() !== 'cli') {
-    header('X-Accel-Buffering: no');
-    echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5.1', 'quote_id' => $quote_id]);
-    if (function_exists('fastcgi_finish_request')) {
-        fastcgi_finish_request();
+    // Unless sync=1 is passed for debugging
+    $run_sync = $json_body['sync'] ?? $_GET['sync'] ?? false;
+    if (php_sapi_name() !== 'cli' && !$run_sync) {
+        header('X-Accel-Buffering: no');
+        echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5.1', 'quote_id' => $quote_id]);
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
     }
-}
 
 require_once __DIR__ . '/../config/config.php';
     
