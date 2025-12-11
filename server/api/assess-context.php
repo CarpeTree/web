@@ -1,15 +1,22 @@
 <?php
 // Manual Context Assessment Trigger for Testing
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
+// No permissive CORS; only same-origin callers should use this
 
 require_once __DIR__ . '/../utils/context-assessor.php';
+
+// Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
+function require_admin_key() {
+    $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
+    if (!$expected) return;
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$provided || !hash_equals($expected, $provided)) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+}
+require_admin_key();
 
 try {
     $quote_id = $_GET['quote_id'] ?? $_POST['quote_id'] ?? null;

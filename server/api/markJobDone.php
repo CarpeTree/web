@@ -1,9 +1,7 @@
 <?php
 // START NEW - Mark job done and generate invoice
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
+// CORS narrowed; only same-origin callers expected
 
 // Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
 function require_admin_key() {

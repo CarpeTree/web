@@ -5,14 +5,7 @@
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// CORS not needed beyond same-origin; remove permissive wildcard
 
 // Admin API key guard (optional; only enforced if ADMIN_API_KEY is set)
 function require_admin_key() {

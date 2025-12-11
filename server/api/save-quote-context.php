@@ -5,16 +5,22 @@
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// CORS not needed beyond same-origin; remove permissive wildcard
 
 require_once __DIR__ . '/../config/database-simple.php';
+
+// Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
+function require_admin_key() {
+    $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
+    if (!$expected) return;
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$provided || !hash_equals($expected, $provided)) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+}
+require_admin_key();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
