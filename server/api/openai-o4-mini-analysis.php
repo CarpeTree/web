@@ -26,6 +26,19 @@ header('Content-Type: application/json');
 ignore_user_abort(true);
 set_time_limit(600);
 
+// Admin API key guard (optional; only enforced if ADMIN_API_KEY is set)
+function require_admin_key() {
+    $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
+    if (!$expected) return;
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$provided || !hash_equals($expected, $provided)) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+}
+require_admin_key();
+
 // Simple per-session/IP rate limit: 3 requests per 10 minutes
 if (php_sapi_name() !== 'cli') {
     session_start();

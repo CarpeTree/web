@@ -14,6 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Admin API key guard (optional; only enforced if ADMIN_API_KEY is set)
+function require_admin_key() {
+    $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
+    if (!$expected) return; // no key configured, allow
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$provided || !hash_equals($expected, $provided)) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+}
+require_admin_key();
+
 // Simple per-session/IP rate limit: 5 requests per 5 minutes
 if (php_sapi_name() !== 'cli') {
     session_start();

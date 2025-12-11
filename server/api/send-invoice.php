@@ -1,6 +1,19 @@
 <?php
 header('Content-Type: application/json');
 
+// Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
+function require_admin_key() {
+    $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
+    if (!$expected) return;
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$provided || !hash_equals($expected, $provided)) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+}
+require_admin_key();
+
 require_once __DIR__ . '/../utils/invoice-utils.php';
 require_once __DIR__ . '/../utils/mailer.php';
 
