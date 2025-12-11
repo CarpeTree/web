@@ -166,6 +166,63 @@ a:hover {
 }
 
 /* ============================================
+   SERVICE PAGES
+   Ensures dark mode affects backgrounds, not just text
+   ============================================ */
+.service-header {
+  max-width: 1200px;
+  margin: 120px auto 30px auto;
+  padding: 28px 22px;
+  background: var(--bg-secondary);
+  color: var(--text);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+}
+
+.service-content {
+  max-width: 1100px;
+  margin: 0 auto 60px auto;
+  padding: 24px 22px 32px 22px;
+  background: var(--glass-bg);
+  color: var(--text);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.service-content h2 {
+  color: var(--forest);
+  margin-top: 22px;
+  margin-bottom: 10px;
+}
+
+.dark .service-content h2 {
+  color: var(--amber);
+}
+
+.service-content ul {
+  margin: 10px 0 18px 18px;
+  color: var(--text);
+}
+
+.service-content li strong {
+  color: var(--text);
+}
+
+.dark .service-header {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+}
+
+.dark .service-content {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+}
+
+/* ============================================
    NAVIGATION
    ============================================ */
 nav {
