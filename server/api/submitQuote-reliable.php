@@ -22,6 +22,36 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+// Lightweight rate-limit: require captcha after 3 attempts
+session_start();
+if (!isset($_SESSION['quote_attempts'])) {
+    $_SESSION['quote_attempts'] = 0;
+}
+$_SESSION['quote_attempts'] = (int)$_SESSION['quote_attempts'] + 1;
+
+function issueCaptchaChallenge($message = 'Please solve the captcha to continue') {
+    $a = rand(2, 9);
+    $b = rand(2, 9);
+    $_SESSION['quote_captcha_answer'] = $a + $b;
+    http_response_code(429);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'error' => $message,
+        'captcha_required' => true,
+        'captcha_question' => "What is {$a} + {$b}?"
+    ]);
+    exit();
+}
+
+if ($_SESSION['quote_attempts'] > 3) {
+    $captcha_answer = $_POST['captcha_answer'] ?? $_POST['captchaAnswer'] ?? null;
+    $expected = $_SESSION['quote_captcha_answer'] ?? null;
+    if (!$captcha_answer || $expected === null || (int)$captcha_answer !== (int)$expected) {
+        issueCaptchaChallenge();
+    }
+}
+
 // Error logging function
 function logError($message, $context = []) {
     $log = date('Y-m-d H:i:s') . " [ERROR] " . $message;
@@ -436,6 +466,10 @@ try {
     }
     
     // Success response
+    // Reset captcha attempts on success
+    $_SESSION['quote_attempts'] = 0;
+    unset($_SESSION['quote_captcha_answer']);
+
     echo json_encode([
         'success' => true,
         'quote_id' => $quote_id,

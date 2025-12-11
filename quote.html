@@ -606,6 +606,12 @@
             <span x-show="submitting">Submitting...</span>
           </button>
         </div>
+        <div x-show="captchaRequired" style="margin-top: 14px; padding: 12px; background: #fff7ed; border: 1px solid #f59e0b; border-radius: 6px;">
+          <div style="font-weight: 700; color: #c2410c; margin-bottom: 6px;">Quick check</div>
+          <div style="margin-bottom: 6px;" x-text="captchaQuestion || 'Please answer to continue.'"></div>
+          <input type="text" placeholder="Your answer" x-model="captchaAnswer" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+          <div style="margin-top: 6px; font-size: 12px; color: #9a3412;">Captcha only appears after multiple attempts.</div>
+        </div>
         <div id="submitProgress" style="display:none; margin-top:12px;">
           <div style="height:8px;background:#e9ecef;border-radius:4px;overflow:hidden;">
             <div id="submitProgressBar" style="height:8px;width:0%;background:var(--deep-forest-green);transition:width .2s;"></div>
@@ -748,6 +754,9 @@
         exifCoords: null,
         exifByFileId: {},
         selectedServices: [],
+        captchaRequired: false,
+        captchaQuestion: '',
+        captchaAnswer: '',
         formData: {
           email: '',
           name: '',
@@ -1108,6 +1117,11 @@
               formData.append('exifLng', this.exifCoords.lng);
             }
             
+            // Include captcha answer if requested
+            if (this.captchaAnswer) {
+              formData.append('captcha_answer', this.captchaAnswer);
+            }
+            
             // Add uploaded files
             // Upload with progress using XHR
             const xhr = new XMLHttpRequest();
@@ -1171,6 +1185,12 @@
               throw new Error('Invalid response from server: ' + String(responseText).substring(0, 120));
             }
             if (!result || result.success !== true) {
+              if (result && result.captcha_required) {
+                this.captchaRequired = true;
+                this.captchaQuestion = result.captcha_question || 'Please answer the captcha to continue';
+                this.captchaAnswer = '';
+                throw new Error('Captcha required');
+              }
               throw new Error((result && result.error) || 'Submission failed');
             }
 
@@ -1190,6 +1210,9 @@
               
               this.submitted = true;
               this.currentStep = 4; // Show success/feedback screen
+              this.captchaRequired = false;
+              this.captchaAnswer = '';
+              this.captchaQuestion = '';
             } else {
               const errorMsg = result.error || 'Submission failed';
               console.error('Quote submission error:', errorMsg);
