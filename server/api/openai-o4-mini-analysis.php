@@ -26,6 +26,30 @@ header('Content-Type: application/json');
 ignore_user_abort(true);
 set_time_limit(600);
 
+// Simple per-session/IP rate limit: 3 requests per 10 minutes
+if (php_sapi_name() !== 'cli') {
+    session_start();
+    $now = time();
+    $window = 600; // 10 minutes
+    $limit = 3;
+    $key = 'rl_gpt_analysis';
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = [];
+    }
+    $_SESSION[$key] = array_values(array_filter($_SESSION[$key], function ($ts) use ($now, $window) {
+        return ($now - $ts) < $window;
+    }));
+    if (count($_SESSION[$key]) >= $limit) {
+        http_response_code(429);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Rate limit exceeded. Please wait before retrying.'
+        ]);
+        exit;
+    }
+    $_SESSION[$key][] = $now;
+}
+
 try {
     // 1. SETUP & CONFIG
     // Parse JSON body if present

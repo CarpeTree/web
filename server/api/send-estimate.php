@@ -14,6 +14,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Simple per-session/IP rate limit: 5 requests per 5 minutes
+if (php_sapi_name() !== 'cli') {
+    session_start();
+    $now = time();
+    $window = 300; // 5 minutes
+    $limit = 5;
+    $key = 'rl_send_estimate';
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = [];
+    }
+    // Drop old entries
+    $_SESSION[$key] = array_values(array_filter($_SESSION[$key], function ($ts) use ($now, $window) {
+        return ($now - $ts) < $window;
+    }));
+    if (count($_SESSION[$key]) >= $limit) {
+        http_response_code(429);
+        echo json_encode([
+            'error' => 'Rate limit exceeded. Please wait a few minutes and try again.'
+        ]);
+        exit;
+    }
+    $_SESSION[$key][] = $now;
+}
+
 require_once __DIR__ . '/../config/database-simple.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../utils/mailer.php';
