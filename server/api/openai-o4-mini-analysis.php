@@ -338,6 +338,25 @@ require_once __DIR__ . '/../config/config.php';
         
         $ai_response = json_encode($parsed_analysis);
 
+$previous_history = [];
+// Preserve prior runs so regenerated analyses do not wipe history
+if (!empty($quote_data['ai_o4_mini_analysis'])) {
+    $prev = json_decode($quote_data['ai_o4_mini_analysis'], true);
+    if (is_array($prev)) {
+        // Pull forward older history entries first
+        if (isset($prev['history']) && is_array($prev['history'])) {
+            $previous_history = array_values($prev['history']);
+        }
+        // Store the immediate previous snapshot (without nested history)
+        $prev_snapshot = $prev;
+        unset($prev_snapshot['history']);
+        $previous_history[] = [
+            'saved_at' => $prev_snapshot['timestamp'] ?? ($quote_data['updated_at'] ?? date('Y-m-d H:i:s')),
+            'data' => $prev_snapshot
+        ];
+    }
+}
+
 $analysis_data_to_store = [
         'model' => 'gpt-5.2',
         'reasoning_effort' => 'xhigh',
@@ -348,7 +367,8 @@ $analysis_data_to_store = [
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
         'processing_time_ms' => $processing_time,
-        'media_summary' => $aggregated_context['media_summary']
+        'media_summary' => $aggregated_context['media_summary'],
+        'history' => $previous_history
     ];
 
     // Save with connection recovery for long processing

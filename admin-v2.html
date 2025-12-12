@@ -351,6 +351,7 @@
         .ai-comparison {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            align-items: start;
             gap: 12px;
             flex: 1;
         }
@@ -1493,6 +1494,20 @@
                     <span x-show="contextSaved" x-transition style="font-size: 0.7rem; color: #10a37f; font-weight: 600;">Saved to CRM</span>
                 </div>
                 <div class="card-body">
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                        <input 
+                            type="text" 
+                            x-model="followUpQuestion"
+                            placeholder="Ask about the last AI response (e.g., 'Why do the hemlocks cost more than the cedar by the house?')"
+                            style="flex: 1; min-width: 260px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;"
+                        />
+                        <button 
+                            class="action-btn primary" 
+                            style="padding: 8px 12px; font-size: 0.8rem;"
+                            @click="askQuestionAboutAI()">
+                            Ask AI
+                        </button>
+                    </div>
                     <textarea 
                         x-model="aiContext" 
                         @input="contextSaved = false"
@@ -1810,6 +1825,7 @@
                 gptParsedData: null,
                 gptJobSummary: null,
                 gptHazards: null,
+                followUpQuestion: '',
                 
                 // Pricing constants from system_prompts.json
                 rates: {
@@ -2913,7 +2929,7 @@
                     this.aiRunning.whisper = false;
                 },
                 
-                async runGPT() {
+                async runGPT(contextOverride = null) {
                     if (!this.currentQuote || this.aiRunning.gpt) return;
                     this.aiRunning.gpt = true;
                     const quoteId = this.currentQuote.id;
@@ -2923,7 +2939,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
                                 quote_id: quoteId,
-                                context: this.aiContext
+                                context: contextOverride ?? this.aiContext
                             })
                         });
                         const data = await res.json();
@@ -2977,6 +2993,22 @@
                         alert('Gemini request failed: ' + e.message);
                     }
                     this.aiRunning.gemini = false;
+                },
+
+                // Ask a follow-up about the last AI response
+                async askQuestionAboutAI() {
+                    if (!this.currentQuote) {
+                        alert('Select a quote first.');
+                        return;
+                    }
+                    const q = (this.followUpQuestion || '').trim();
+                    if (!q) {
+                        alert('Enter a follow-up question first.');
+                        return;
+                    }
+                    // Build a lightweight context that tells the model to reference the last analysis
+                    const context = `FOLLOW-UP QUESTION: ${q}\nUse the most recent AI analysis for this quote. Respond using the same JSON contract and update follow_up_questions if anything is still unclear.`;
+                    await this.runGPT(context);
                 },
                 
                 async pollForAnalysis(quoteId, type, maxSeconds) {
