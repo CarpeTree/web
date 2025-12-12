@@ -1,7 +1,9 @@
 <?php
 // Ultra-reliable quote submission with comprehensive error handling
 header('Content-Type: application/json');
-// CORS not needed beyond same-origin; remove permissive wildcard
+require_once __DIR__ . '/../utils/security.php';
+sec_enforce_cors(['POST', 'OPTIONS']);
+sec_require_public_token();
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -22,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Lightweight rate-limit: require a simple captcha after 3 attempts
 session_start();
+sec_rate_limit_ip('submit_quote', (int)cfg_env('RATE_LIMIT_SUBMIT_PER_10MIN', '40'), 600);
 if (!isset($_SESSION['quote_attempts'])) {
     $_SESSION['quote_attempts'] = 0;
 }

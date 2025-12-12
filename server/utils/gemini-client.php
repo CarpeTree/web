@@ -13,7 +13,7 @@ class GeminiClient {
     /**
      * Main method to analyze the full context object from the MediaPreprocessor.
      */
-    public function analyzeAggregatedContextWithModel($aggregated_context, $model = 'gemini-1.5-pro-latest') {
+    public function analyzeAggregatedContextWithModel($aggregated_context, $model = 'gemini-3.0-pro') {
         $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
         
         list($requestBody, $system_instruction) = $this->buildRequestPayload($aggregated_context);
@@ -70,7 +70,7 @@ class GeminiClient {
             ],
             'generationConfig' => [
                 'temperature' => 0.2,
-                'maxOutputTokens' => 8192,
+                'maxOutputTokens' => 32768,
             ]
         ];
 

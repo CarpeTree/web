@@ -16,26 +16,36 @@ class OpenAIClient {
     }
     
     /**
-     * Analyze tree images/videos for quote generation
+     * Analyze tree images/videos for quote generation using GPT-5.2 with xhigh reasoning
      */
     public function analyzeTreeMedia($files, $services_requested, $customer_notes = '') {
         try {
+            [$promptText, $imageParts] = $this->buildUserPrompt($services_requested, $customer_notes, $files);
+
             $messages = [
                 [
                     'role' => 'system',
-                    'content' => $this->getTreeAnalysisPrompt()
+                    'content' => [
+                        ['type' => 'text', 'text' => $this->getTreeAnalysisPrompt()]
+                    ]
                 ],
                 [
-                    'role' => 'user', 
-                    'content' => $this->buildUserPrompt($services_requested, $customer_notes, $files)
+                    'role' => 'user',
+                    'content' => array_merge(
+                        [
+                            ['type' => 'text', 'text' => $promptText]
+                        ],
+                        $imageParts
+                    )
                 ]
             ];
             
             $response = $this->makeAPICall('chat/completions', [
-                'model' => 'o3', // Using o3 vision model
+                'model' => 'gpt-5.2',
                 'messages' => $messages,
-                'max_completion_tokens' => 4000,
-                
+                'max_output_tokens' => 8000,
+                'temperature' => 0.2,
+                'reasoning_effort' => 'xhigh'
             ]);
             
             return $this->parseTreeAnalysisResponse($response);
@@ -86,22 +96,20 @@ OUTPUT FORMAT: Respond with a JSON object containing detailed analysis, recommen
         $prompt .= "5. Timeline and scheduling considerations\n\n";
         
         // Add file content for analysis
-        $content = [];
+        $imageParts = [];
         foreach ($files as $file) {
             if ($this->isImageFile($file['mime_type'])) {
-                $content[] = [
+                $imageParts[] = [
                     'type' => 'image_url',
                     'image_url' => [
-                        'url' => $this->encodeImageAsBase64($file['file_path'])
+                        'url' => $this->encodeImageAsBase64($file['file_path']),
+                        'detail' => 'high'
                     ]
                 ];
             }
         }
         
-        return [
-            'type' => 'text',
-            'text' => $prompt
-        ] + $content;
+        return [$prompt, $imageParts];
     }
     
     private function isImageFile($mime_type) {

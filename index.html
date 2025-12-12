@@ -14,121 +14,8 @@
   
   <!-- Internal styles for specific page components -->
   <style>
-    /* Reset default browser styles and set base typography */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      color: var(--text-color);
-      background-color: var(--background-color);
-      line-height: 1.6;
-    }
-
-    /* Base link styles */
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    /* Contact header - TOP BAR - LIQUID GLASS */
-    .contact-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1010;
-      backdrop-filter: saturate(1.5) blur(20px);
-      -webkit-backdrop-filter: saturate(1.5) blur(20px);
-      background: linear-gradient(180deg, rgba(44, 95, 45, 0.94) 0%, rgba(44, 95, 45, 0.88) 100%);
-      padding: 8px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .contact-header a {
-      color: white;
-      text-decoration: none;
-      padding: 7px 18px;
-      border: 1.5px solid rgba(255, 255, 255, 0.5);
-      border-radius: 50px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      font-weight: 600;
-      font-size: 0.82em;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-    
-    .contact-header a:hover {
-      background: rgba(255, 255, 255, 0.95);
-      color: var(--deep-forest-green);
-      border-color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Navigation bar styling - BELOW contact header - LIQUID GLASS */
-    nav {
-      position: fixed;
-      width: 100%;
-      top: 44px;
-      z-index: 1005;
-      padding: 10px 0;
-      backdrop-filter: saturate(1.5) blur(20px);
-      -webkit-backdrop-filter: saturate(1.5) blur(20px);
-      background: linear-gradient(180deg, rgba(44, 95, 45, 0.90) 0%, rgba(44, 95, 45, 0.82) 100%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Container for nav elements */
-    .nav-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* Navigation links container */
-    .nav-links {
-      display: flex;
-      height: auto;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* Navigation link styling - LIQUID GLASS PILL BUTTONS */
-    .nav-links a {
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      padding: 9px 20px;
-      border: 1.5px solid rgba(255, 255, 255, 0.45);
-      border-radius: 50px;
-      font-size: 0.8em;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-
-    .nav-links a:hover {
-      background: rgba(255, 255, 255, 0.95);
-      color: var(--deep-forest-green);
-      border-color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1);
-    }
+    /* Base layout (body), navigation, and pill styles are defined in style.css.
+       Keep only index-specific overrides here (hero video overlay, etc). */
 
     /* Hero section - TIGHT spacing */
     .hero {
@@ -199,37 +86,7 @@
       font-weight: 300;
     }
 
-    /* CTA BUTTONS - LIQUID GLASS PILL STYLE */
-    .cta-button, 
-    .service-button,
-    button[type="submit"] {
-        backdrop-filter: blur(12px) saturate(1.4);
-        -webkit-backdrop-filter: blur(12px) saturate(1.4);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.78) 100%);
-        color: var(--deep-forest-green);
-        padding: 12px 28px;
-        border: 2px solid rgba(255, 255, 255, 0.6);
-        border-radius: 50px;
-        font-size: 0.88em;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        display: inline-block;
-        margin: 6px 8px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    }
-
-    .cta-button:hover, 
-    .service-button:hover,
-    button[type="submit"]:hover {
-        background: linear-gradient(180deg, var(--deep-forest-green) 0%, #1a4d1a 100%);
-        color: white;
-        border-color: var(--deep-forest-green);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(44, 95, 45, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
+    /* CTA buttons use unified styles from style.css */
 
     /* Content section styling */
     .content {
@@ -826,8 +683,8 @@
             <img src="images/hero.png" alt="Hero Logo" class="hero-logo-secondary">
         </div>
         <p>Modern arboriculture focused on preservation, longevity, and environmental stewardship.</p>
-        <a href="quote.html" class="cta-button">Get Video Quote</a>
-        <a href="quote.html" class="cta-button">Schedule a Consultation</a>
+        <a href="quote.html" class="glass-pill cta-pill">Get Video Quote</a>
+        <a href="quote.html" class="glass-pill cta-pill">Schedule a Consultation</a>
     </div>
   </section>
 
@@ -866,7 +723,7 @@
     <!-- Leave a Review CTA -->
     <div style="text-align: center; padding: 30px 20px; background: rgba(44, 95, 45, 0.08); border-radius: 12px; margin-top: 30px;">
       <p style="font-size: 1.1rem; margin-bottom: 16px; color: var(--text, #1a1a1a);">Had a great experience with us? We'd appreciate your feedback!</p>
-      <a href="https://maps.app.goo.gl/eUyERXrrzMp8ZmCL8" target="_blank" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #2D5A27, #4a7c59); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s; border: none; box-shadow: 0 4px 15px rgba(44, 95, 45, 0.3);">⭐ Leave a Review on Google</a>
+      <a href="https://maps.app.goo.gl/eUyERXrrzMp8ZmCL8" target="_blank" class="glass-pill cta-pill">Leave a Review on Google</a>
     </div>
   </section>
 
@@ -915,7 +772,7 @@
                     <li>You've noticed changes in your tree and want expert insight before proceeding with an on-site visit</li>
                 </ul>
                 <p class="eco-note">🌱 This option reduces our carbon footprint while still providing expert guidance.</p>
-                <a href="quote.html" class="cta-button">Request Video Assessment</a>
+                <a href="quote.html" class="glass-pill cta-pill">Request Video Assessment</a>
             </div>
 
             <div class="quote-option">
@@ -928,7 +785,7 @@
                     <li>You prefer direct, hands-on collaboration in developing your tree care plan</li>
                 </ul>
                 <p class="eco-note">🌳 Includes soil assessment and detailed site-specific recommendations.</p>
-                <a href="quote.html" class="cta-button">Schedule On-Site Visit</a>
+                <a href="quote.html" class="glass-pill cta-pill">Schedule On-Site Visit</a>
             </div>
         </div>
 

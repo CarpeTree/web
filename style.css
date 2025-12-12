@@ -38,6 +38,14 @@
   /* Background patterns */
   --bg-pattern-start: rgba(44, 95, 45, 0.08);
   --bg-pattern-end: rgba(212, 163, 115, 0.08);
+
+  /* Legacy variable aliases (used by older inline page CSS) */
+  --background-color: var(--bg);
+  --background-color-secondary: var(--bg-secondary);
+  --text-color: var(--text);
+  --text-muted-color: var(--text-muted);
+  --deep-forest-green: var(--forest);
+  --muted-golden-amber: var(--amber);
 }
 
 /* Dark Mode (keep brand, reduce harsh contrast) */
@@ -461,6 +469,33 @@ button:hover, .btn:hover {
   border-color: white;
   transform: translateY(-2px);
   text-decoration: none;
+}
+
+/* Larger CTA pill variant (same family as glass pills) */
+.cta-pill {
+  padding: 12px 26px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--forest);
+  border-color: rgba(44, 95, 45, 0.35);
+}
+
+.cta-pill:hover {
+  background: var(--forest);
+  color: white;
+  border-color: var(--forest);
+}
+
+.dark .cta-pill {
+  background: rgba(255, 255, 255, 0.10);
+  color: #f0f0e8;
+  border-color: var(--pill-border);
+}
+
+.dark .cta-pill:hover {
+  background: rgba(240, 240, 232, 0.12);
+  color: #f7f2e5;
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 /* ============================================

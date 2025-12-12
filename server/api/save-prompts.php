@@ -1,7 +1,7 @@
 <?php
 /**
  * Save System Prompts API
- * Saves GPT-5.1 and Gemini 3 Pro prompts to system_prompts.json
+ * Saves GPT-5.2 and Gemini 3 Pro prompts to system_prompts.json
  */
 
 header('Content-Type: application/json');

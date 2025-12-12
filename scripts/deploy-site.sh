@@ -23,6 +23,8 @@ ssh $SSH_OPTS "$HOST" "rm -rf $REMOTE_TMP && mkdir -p $REMOTE_TMP/site $REMOTE_T
 # Sync the entire server folder to preserve paths used by require/include
 rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times \
   --exclude "uploads/**" \
+  --exclude "cache/**" \
+  --exclude "logs/**" \
   -e "ssh $SSH_OPTS" "$ROOT/server/" "$HOST:$REMOTE_TMP/server/"
 rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times -e "ssh $SSH_OPTS" "$ROOT/ai/"               "$HOST:$REMOTE_TMP/ai/"
 
@@ -32,13 +34,15 @@ rsync -r -e "ssh $SSH_OPTS" "$ROOT/services.html"   "$HOST:$REMOTE_TMP/site/" ||
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/quote.html"      "$HOST:$REMOTE_TMP/site/" || true
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/lets-talk.html"  "$HOST:$REMOTE_TMP/site/" || true
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/style.css"       "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/admin-v2.html"   "$HOST:$REMOTE_TMP/site/" || true
+rsync -r -e "ssh $SSH_OPTS" "$ROOT/admin/"          "$HOST:$REMOTE_TMP/site/admin/" || true
 rsync -r -e "ssh $SSH_OPTS" "$ROOT/images/"         "$HOST:$REMOTE_TMP/site/images/" || true
 
-# Move into place with sudo and fix ownership
-ssh $SSH_OPTS "$HOST" "mkdir -p $WEB_ROOT/server $WEB_ROOT/ai && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
-  rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ $WEB_ROOT/ai/ && \
-  rsync -r --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' --exclude 'server/uploads/**' $REMOTE_TMP/site/ $WEB_ROOT/ && \
+# Move into place (requires passwordless sudo on remote)
+ssh $SSH_OPTS "$HOST" "sudo mkdir -p $WEB_ROOT/server $WEB_ROOT/ai && \
+  sudo rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' --exclude 'cache/**' --exclude 'logs/**' $REMOTE_TMP/server/ $WEB_ROOT/server/ && \
+  sudo rsync -r --delete --no-perms --no-owner --no-group --omit-dir-times $REMOTE_TMP/ai/ $WEB_ROOT/ai/ && \
+  sudo rsync -r --no-perms --no-owner --no-group --omit-dir-times --exclude 'uploads/**' --exclude 'server/uploads/**' $REMOTE_TMP/site/ $WEB_ROOT/ && \
   rm -rf $REMOTE_TMP"
 
 echo deploy_ok

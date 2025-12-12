@@ -380,7 +380,9 @@
             flex: 1;
             padding: 12px;
             overflow-y: auto;
-            max-height: 600px;
+            max-height: none;
+            min-height: 400px;
+            height: 100%;
             font-size: 0.85rem;
             line-height: 1.5;
         }
@@ -1123,7 +1125,7 @@
                 </button>
                 <button class="ai-btn" :class="{ running: aiRunning.gpt }" @click="runGPT()">
                     <div class="icon">🤖</div>
-                    <div class="name">GPT-5.1</div>
+                    <div class="name">GPT-5.2</div>
                     <div class="status" x-text="aiRunning.gpt ? 'Processing...' : (currentQuote?.ai_gpt5_analysis ? 'Complete' : 'Ready')"></div>
                 </button>
                 <button class="ai-btn" :class="{ running: aiRunning.gemini }" @click="runGemini()">
@@ -1158,9 +1160,9 @@
                         </div>
                     </div>
                     <div class="ai-output" x-show="aiPanelExpanded" style="max-height: 600px;">
-                        <!-- GPT-5.1 Summary -->
+                        <!-- GPT-5.2 Summary -->
                         <div x-show="currentQuote?.ai_gpt5_analysis?.analysis?.analysis || gptParsedData?.job_summary" style="padding: 14px; background: rgba(16, 163, 127, 0.1); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; line-height: 1.6; border-left: 4px solid #10a37f;">
-                            <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">GPT-5.1 Assessment:</div>
+                            <div style="font-weight: 700; color: #10a37f; margin-bottom: 8px; font-size: 0.9rem;">GPT-5.2 Assessment:</div>
                             
                             <!-- Pricing Summary -->
                             <template x-if="gptParsedData?.pricing_summary?.total_cad">
@@ -1441,6 +1443,40 @@
                                     Species: <span x-text="currentQuote?.ai_gemini_analysis?.tree_species || 'Unknown'"></span>
                                 </div>
                             </div>
+
+                            <!-- Interactive service selection (click to add to estimate) -->
+                            <div class="card" style="margin-top: 12px;" x-show="(gptServices?.length || geminiServices?.length)">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>AI Suggested Services</span>
+                                    <span style="font-size: 0.75rem; opacity: 0.7;">Click to add / remove</span>
+                                </div>
+                                <div class="card-body" style="display: grid; gap: 10px;">
+                                    <!-- GPT services -->
+                                    <div x-show="gptServices?.length">
+                                        <div style="font-weight: 700; color: #10a37f; margin-bottom: 6px;">GPT-5.2</div>
+                                        <template x-for="(svc, idx) in gptServices" :key="'gpt-'+idx">
+                                            <div class="ai-service-item" :class="{ selected: isServiceSelected('gpt', idx) }" @click="toggleService('gpt', idx, svc)">
+                                                <div class="tree-label" x-text="svc.tree || 'General'"></div>
+                                                <div class="service-name" x-text="svc.name || 'Service'"></div>
+                                                <div class="price-range" x-text="svc.price_low || svc.price_high ? ('$' + Math.round((svc.price_low + svc.price_high) / 2)) : 'Click to set price'"></div>
+                                                <div class="details" x-text="svc.details || svc.internal_notes || ''" style="display:block;"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <!-- Gemini services -->
+                                    <div x-show="geminiServices?.length">
+                                        <div style="font-weight: 700; color: #4285f4; margin-bottom: 6px;">Gemini 3 Pro</div>
+                                        <template x-for="(svc, idx) in geminiServices" :key="'gem-'+idx">
+                                            <div class="ai-service-item" :class="{ selected: isServiceSelected('gemini', idx) }" @click="toggleService('gemini', idx, svc)">
+                                                <div class="tree-label" x-text="svc.tree || 'General'"></div>
+                                                <div class="service-name" x-text="svc.name || 'Service'"></div>
+                                                <div class="price-range" x-text="svc.price_low || svc.price_high ? ('$' + Math.round((svc.price_low + svc.price_high) / 2)) : 'Click to set price'"></div>
+                                                <div class="details" x-text="svc.details || ''" style="display:block;"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <div x-show="!currentQuote?.ai_gpt5_analysis && !currentQuote?.ai_gemini_analysis" class="empty-state" style="padding: 20px;">
@@ -1641,7 +1677,7 @@
             </div>
             <div class="modal-body">
                 <div class="prompt-tabs">
-                    <button class="prompt-tab" :class="{ active: promptTab === 'gpt' }" @click="promptTab = 'gpt'">GPT-5.1</button>
+                    <button class="prompt-tab" :class="{ active: promptTab === 'gpt' }" @click="promptTab = 'gpt'">GPT-5.2</button>
                     <button class="prompt-tab" :class="{ active: promptTab === 'gemini' }" @click="promptTab = 'gemini'">Gemini 3 Pro</button>
                 </div>
                 <textarea class="prompt-textarea" x-model="prompts[promptTab]" x-show="promptTab === 'gpt'"></textarea>
@@ -1995,7 +2031,7 @@
                     this.gptServices = [];
                     this.geminiServices = [];
                     
-                    // GPT-5.1 analysis (stored as ai_o4_mini_analysis in API)
+                    // GPT-5.2 analysis (stored as ai_o4_mini_analysis in API)
                     if (this.currentQuote?.ai_gpt5_analysis) {
                         this.gptServices = this.parseGPTAnalysis(this.currentQuote.ai_gpt5_analysis);
                     }
@@ -2109,7 +2145,7 @@
                             return services;
                         }
                         
-                        // OLD GPT-5.1 format: { model, analysis: { analysis, species_identification, ... } }
+                        // OLD GPT-5.x format: { model, analysis: { analysis, species_identification, ... } }
                         if (data.analysis && typeof data.analysis === 'object') {
                             const a = data.analysis;
                             
@@ -2468,7 +2504,7 @@
                             name: service.name,
                             tree: service.tree || 'General',
                             price: Math.round((service.price_low + service.price_high) / 2) || 0,
-                            source: source === 'gpt' ? 'GPT-5.1' : 'Gemini 3',
+                            source: source === 'gpt' ? 'GPT-5.2' : 'Gemini 3',
                             sourceType: source,
                             sourceIdx: idx,
                             internalNote: service.details || ''
@@ -2663,7 +2699,7 @@
                             name: svc.name,
                             tree: svc.tree || 'General',
                             price: svc.price || 0,
-                            source: 'GPT-5.1',
+                                source: 'GPT-5.2',
                             internalNote: this.formatGPTLineItemDetails(svc),
                             addedAt: new Date().toISOString(),
                             isLogistics: svc.isLogistics || false,
@@ -3092,7 +3128,7 @@
                     try {
                         const res = await fetch('/server/ai/system_prompts.json');
                         const data = await res.json();
-                        this.prompts.gpt = data['gpt5.1']?.prompt || '';
+                        this.prompts.gpt = data['gpt5.2']?.prompt || data['gpt5.1']?.prompt || '';
                         this.prompts.gemini = data['gemini3']?.prompt || '';
                     } catch (e) {
                         console.error('Failed to load prompts:', e);
@@ -3105,7 +3141,7 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                'gpt5.1': { prompt: this.prompts.gpt },
+                                'gpt5.2': { prompt: this.prompts.gpt },
                                 'gemini3': { prompt: this.prompts.gemini }
                             })
                         });
@@ -3120,12 +3156,12 @@
                 // Raw output
                 showRawAI(type) {
                     if (type === 'gpt') {
-                        this.rawModalTitle = 'GPT-5.1 Raw Output';
+                        this.rawModalTitle = 'GPT-5.2 Raw Output';
                         const data = this.currentQuote?.ai_gpt5_analysis;
                         const rawStr = this.currentQuote?.ai_o4_mini_analysis_raw;
                         
                         if (!data && !rawStr) {
-                            this.rawModalContent = 'No GPT analysis available yet.\n\nClick the "GPT-5.1" button above to run the analysis.';
+                            this.rawModalContent = 'No GPT analysis available yet.\n\nClick the "GPT-5.2" button above to run the analysis.';
                         } else if (data?.analysis?.analysis) {
                             // Show the main analysis text prominently
                             this.rawModalContent = `=== ANALYSIS ===\n${data.analysis.analysis}\n\n=== DETAILS ===\nSpecies: ${data.analysis.species_identification || 'Unknown'}\nHeight: ${data.analysis.height_estimate || 'Unknown'}\nDBH: ${data.analysis.dbh_estimate || 'Unknown'}\nCrown Spread: ${data.analysis.crown_spread || 'Unknown'}\n\nClimbing Required: ${data.analysis.climbing_required ? 'Yes' : 'No'}\nRigging Required: ${data.analysis.rigging_required ? 'Yes' : 'No'}\nBrush Chipping: ${data.analysis.brush_chipping_required ? 'Yes' : 'No'}\nWood Removal: ${data.analysis.wood_removal_required ? 'Yes' : 'No'}\n\n=== FULL JSON ===\n${JSON.stringify(data, null, 2)}`;

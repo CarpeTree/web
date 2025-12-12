@@ -10,6 +10,7 @@ class CostTracker {
         // All costs are in USD per 1,000,000 tokens
         $this->cost_rates = [
             'openai' => [
+                    'gpt-5.2' => ['input' => 1.75, 'output' => 14.00],
                 'gpt-5.1' => ['input' => 10.00, 'output' => 30.00],
                 'gpt-5' => ['input' => 10.00, 'output' => 30.00],
                 // Keep legacy mapping for historical rows still labeled as o4-mini

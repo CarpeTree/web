@@ -279,10 +279,10 @@ This analysis will be used for professional tree service quotes - accuracy and t
     ];
     $user_content = array_merge($user_content, $media_content);
 
-    // OpenAI API request - GPT-5.1 with maximum thinking
+    // OpenAI API request - GPT-5.2 with maximum thinking
     $openai_request = [
-        'model' => 'gpt-5.1',
-        'reasoning_effort' => 'high',
+        'model' => 'gpt-5.2',
+        'reasoning_effort' => 'xhigh',
         'temperature' => 0.1,
         'messages' => [
             [

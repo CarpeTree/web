@@ -1,15 +1,16 @@
 <?php
 // Chunked file upload handler with progress tracking
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+require_once __DIR__ . '/../utils/security.php';
+sec_enforce_cors(['POST', 'OPTIONS']);
+sec_require_public_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
 require_once __DIR__ . '/../config/database-simple.php';
+sec_rate_limit_ip('upload_chunk', (int)cfg_env('RATE_LIMIT_UPLOAD_PER_10MIN', '60'), 600);
 
 try {
     if (!isset($_FILES['file']) || !isset($_POST['file_id'])) {

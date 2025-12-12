@@ -1,6 +1,6 @@
 <?php
-// OpenAI GPT-5.1 Analysis Script with HIGH reasoning effort
-// Upgraded from GPT-5 to GPT-5.1 for maximum thinking capability
+// OpenAI GPT-5.2 Analysis Script with XHIGH reasoning effort
+// Upgraded from GPT-5.1 to GPT-5.2 for maximum thinking capability
 
 // Custom shutdown function to catch fatal errors
 register_shutdown_function(function () {
@@ -10,7 +10,7 @@ register_shutdown_function(function () {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'model' => 'gpt-5.1',
+            'model' => 'gpt-5.2',
             'error' => 'A fatal error occurred: ' . $error['message'],
             'file' => $error['file'],
             'line' => $error['line'],
@@ -85,7 +85,7 @@ try {
     $run_sync = $json_body['sync'] ?? $_GET['sync'] ?? false;
     if (php_sapi_name() !== 'cli' && !$run_sync) {
         header('X-Accel-Buffering: no');
-        echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5.1', 'quote_id' => $quote_id]);
+        echo json_encode(['success' => true, 'queued' => true, 'model' => 'gpt-5.2', 'quote_id' => $quote_id]);
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
@@ -160,13 +160,14 @@ require_once __DIR__ . '/../config/config.php';
     $visual_content = $aggregated_context['visual_content'];
 
     // 4. LOAD AI PROMPTS & SCHEMA
-    // Prefer system_prompts.json for GPT-5.1 prompt, fallback to legacy file
+    // Prefer system_prompts.json for GPT-5.2 prompt, fallback to legacy file
     $system_prompt = null;
     $prompts_file = __DIR__ . '/../ai/system_prompts.json';
     if (file_exists($prompts_file)) {
         $prompts_data = json_decode(file_get_contents($prompts_file), true);
-        // Try gpt5.1 key first, then gpt5, then gemini as fallback
-        $system_prompt = $prompts_data['gpt5.1']['prompt'] 
+        // Try gpt5.2 key first, then gpt5.1, then gpt5, then gemini as fallback
+        $system_prompt = $prompts_data['gpt5.2']['prompt'] 
+            ?? $prompts_data['gpt5.1']['prompt'] 
             ?? $prompts_data['gpt5']['prompt'] 
             ?? $prompts_data['gemini']['prompt'] 
             ?? null;
@@ -227,10 +228,10 @@ require_once __DIR__ . '/../config/config.php';
     }
 
     $openai_request = [
-        'model' => 'gpt-5.1',
+        'model' => 'gpt-5.2',
         'messages' => $messages,
         'max_completion_tokens' => 100000,
-        'reasoning_effort' => 'high',  // Maximum thinking for detailed tree analysis
+        'reasoning_effort' => 'xhigh',  // Maximum thinking for detailed tree analysis
     ];
     
     // Only add tools if schema is valid
@@ -285,7 +286,7 @@ require_once __DIR__ . '/../config/config.php';
     $processing_time = (microtime(true) - $start_time) * 1000;
 
     if ($http_code !== 200) {
-        throw new Exception("OpenAI GPT-5.1 API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
+        throw new Exception("OpenAI GPT-5.2 API error. HTTP Code: {$http_code}. Response: {$response}. cURL Error: {$curl_error}");
     }
 
     // 7. PARSE RESPONSE & CALCULATE COST
@@ -293,7 +294,7 @@ require_once __DIR__ . '/../config/config.php';
     $ai_analysis_json = $ai_result['choices'][0]['message']['tool_calls'][0]['function']['arguments'] ?? null;
 
     if (!$ai_analysis_json) {
-        throw new Exception("Invalid GPT-5.1 response format or missing tool call. Full response: " . $response);
+        throw new Exception("Invalid GPT-5.2 response format or missing tool call. Full response: " . $response);
     }
     
     $input_tokens = $ai_result['usage']['prompt_tokens'] ?? 0;
@@ -303,7 +304,7 @@ require_once __DIR__ . '/../config/config.php';
     $cost_tracker = new CostTracker($pdo);
     $cost_data = $cost_tracker->trackUsage([
         'quote_id' => $quote_id,
-        'model_name' => 'gpt-5.1',
+        'model_name' => 'gpt-5.2',
         'provider' => 'openai',
         'input_tokens' => $input_tokens,
         'output_tokens' => $output_tokens,
@@ -338,8 +339,8 @@ require_once __DIR__ . '/../config/config.php';
         $ai_response = json_encode($parsed_analysis);
 
 $analysis_data_to_store = [
-        'model' => 'gpt-5.1',
-        'reasoning_effort' => 'high',
+        'model' => 'gpt-5.2',
+        'reasoning_effort' => 'xhigh',
         'analysis' => json_decode($ai_analysis_json, true),
         'cost' => $cost_data['total_cost'],
         'media_count' => count($media_files),
@@ -352,7 +353,7 @@ $analysis_data_to_store = [
 
     // Save with connection recovery for long processing
     $json_to_store = json_encode($analysis_data_to_store, JSON_PRETTY_PRINT);
-    error_log("GPT-5.1: Saving analysis for quote #{$quote_id}, JSON length: " . strlen($json_to_store));
+    error_log("GPT-5.2: Saving analysis for quote #{$quote_id}, JSON length: " . strlen($json_to_store));
     
     try {
         // Always get a fresh connection after long API call
@@ -365,15 +366,15 @@ $analysis_data_to_store = [
         $result = $stmt->execute([$json_to_store, $quote_id]);
         
         if (!$result) {
-            error_log("GPT-5.1: Save failed for quote #{$quote_id}: " . implode(', ', $stmt->errorInfo()));
+            error_log("GPT-5.2: Save failed for quote #{$quote_id}: " . implode(', ', $stmt->errorInfo()));
             throw new Exception("Database update failed: " . implode(', ', $stmt->errorInfo()));
         }
         
         $rows_affected = $stmt->rowCount();
-        error_log("GPT-5.1: Save successful for quote #{$quote_id}, rows affected: {$rows_affected}");
+        error_log("GPT-5.2: Save successful for quote #{$quote_id}, rows affected: {$rows_affected}");
         
     } catch (PDOException $e) {
-        error_log("GPT-5.1: PDO Exception for quote #{$quote_id}: " . $e->getMessage());
+        error_log("GPT-5.2: PDO Exception for quote #{$quote_id}: " . $e->getMessage());
         
         if (strpos($e->getMessage(), 'server has gone away') !== false) {
             // Reconnect and retry
@@ -392,8 +393,8 @@ $analysis_data_to_store = [
     // 9. SEND SUCCESS RESPONSE
     echo json_encode([
         'success' => true,
-        'model' => 'gpt-5.1',
-        'reasoning_effort' => 'high',
+        'model' => 'gpt-5.2',
+        'reasoning_effort' => 'xhigh',
         'quote_id' => $quote_id,
         'analysis' => $analysis_data_to_store,
         'cost_tracking' => $cost_data
@@ -403,7 +404,7 @@ $analysis_data_to_store = [
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'model' => 'gpt-5.1',
+        'model' => 'gpt-5.2',
         'error' => $e->getMessage(),
         'file' => $e->getFile(),
         'line' => $e->getLine(),
@@ -419,7 +420,7 @@ if (isset($analysis_data_to_store)) {
         // Fire-and-forget style; do not block response if it fails
         sendAdminNotification($quote_id);
     } catch (Throwable $notifyError) {
-        error_log('Admin notification after GPT-5.1 analysis failed: ' . $notifyError->getMessage());
+        error_log('Admin notification after GPT-5.2 analysis failed: ' . $notifyError->getMessage());
     }
 }
 ?>
