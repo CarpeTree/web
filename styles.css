@@ -28,8 +28,8 @@
   --glass-border: rgba(255, 255, 255, 0.28);
   --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
   
-  /* Pill Effect */
-  --pill-bg: rgba(255, 255, 255, 0.15);
+  /* Pill Effect (match header pill feel) */
+  --pill-bg: rgba(255, 255, 255, 0.18);
   --pill-border: rgba(255, 255, 255, 0.5);
   
   /* Header */
