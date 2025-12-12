@@ -880,89 +880,9 @@ footer a {
   }
 }
 
-/* Mobile menu toggle */
+/* Mobile navigation:
+   Keep pill navigation visible on all screens (no hamburger collapse). */
 .menu-toggle {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 21px;
-    position: absolute;
-    right: 20px;
-    top: 12px;
-    z-index: 1001;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  }
-  
-  .menu-toggle span {
-    display: block;
-    width: 30px;
-    height: 3px;
-    background: var(--forest);
-    border-radius: 3px;
-    transition: all 0.3s ease;
-  }
-  
-  .menu-toggle.active span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
-  }
-  
-  .menu-toggle.active span:nth-child(2) {
-    opacity: 0;
-  }
-  
-  .menu-toggle.active span:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
-  }
-  
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: fixed;
-    top: 80px;
-    left: 0;
-    right: 0;
-    width: 100vw;
-    background: var(--bg);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
-    padding: 0;
-    height: 0;
-    overflow: hidden;
-    transition: height 0.25s ease;
-  }
-  
-  .nav-links.active {
-    display: flex !important;
-    height: calc(100vh - 90px) !important;
-    padding: 20px 0 !important;
-    overflow-y: auto !important;
-  }
-  
-  .nav-links a {
-    width: 100%;
-    padding: 15px 20px;
-    border: none;
-    border-bottom: 1px solid rgba(44, 95, 45, 0.2);
-    text-align: left;
-    font-size: 16px;
-    margin: 0;
-    border-radius: 0;
-    color: var(--forest);
-    background: transparent;
-  }
-  
-  .nav-links a:hover {
-    background: rgba(44, 95, 45, 0.1);
-    transform: none;
-  }
+  display: none !important;
 }
 
