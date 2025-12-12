@@ -29,7 +29,8 @@
   --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
   
   /* Pill Effect */
-  --pill-bg: rgba(255, 255, 255, 0.15);
+  /* Header-style pills (used sitewide) */
+  --pill-bg: rgba(255, 255, 255, 0.18);
   --pill-border: rgba(255, 255, 255, 0.5);
   
   /* Header */
@@ -159,7 +160,7 @@ a:hover {
   text-decoration: none;
   padding: 5px 14px;
   border: 1.5px solid rgba(255, 255, 255, 0.5);
-  border-radius: 20px;
+  border-radius: 50px;
   transition: all 0.3s ease;
   font-weight: 500;
   font-size: 0.8em;
@@ -273,7 +274,7 @@ nav {
   color: white;
   padding: 7px 14px;
   border: 1.5px solid var(--pill-border);
-  border-radius: 20px;
+  border-radius: 50px;
   font-size: 0.78em;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -475,25 +476,25 @@ button:hover, .btn:hover {
 .cta-pill {
   padding: 12px 26px;
   font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.65);
-  color: var(--forest);
-  border-color: rgba(44, 95, 45, 0.35);
+  background: var(--pill-bg);
+  color: white;
+  border-color: var(--pill-border);
 }
 
 .cta-pill:hover {
-  background: var(--forest);
-  color: white;
-  border-color: var(--forest);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--forest);
+  border-color: white;
 }
 
 .dark .cta-pill {
-  background: rgba(255, 255, 255, 0.10);
+  background: var(--pill-bg);
   color: #f0f0e8;
   border-color: var(--pill-border);
 }
 
 .dark .cta-pill:hover {
-  background: rgba(240, 240, 232, 0.12);
+  background: rgba(255, 255, 255, 0.12);
   color: #f7f2e5;
   border-color: rgba(255, 255, 255, 0.35);
 }
