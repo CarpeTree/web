@@ -8,43 +8,7 @@
     <link rel="stylesheet" href="style.css?v=20251205">
     
     <style>
-      /* Ensure consistent glass pill styling and spacing */
-      .contact-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1010;
-        backdrop-filter: saturate(1.2) blur(12px);
-        -webkit-backdrop-filter: saturate(1.2) blur(12px);
-        background: rgba(44, 95, 45, 0.92);
-        padding: 6px 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-      }
-      .contact-header a {
-        color: white;
-        text-decoration: none;
-        padding: 5px 14px;
-        border: 1.5px solid rgba(255, 255, 255, 0.7);
-        border-radius: 20px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        font-size: 0.8em;
-        background: rgba(255, 255, 255, 0.1);
-      }
-      .contact-header a:hover {
-        background: rgba(255, 255, 255, 0.95);
-        color: var(--deep-forest-green);
-        border-color: white;
-      }
-      nav {
-        position: fixed;
-        top: 38px;
-        z-index: 1005;
-      }
+      /* Page-specific spacing only. Header/nav styles are global in style.css */
       .content {
         margin-top: 100px;
         padding: 20px;
@@ -53,21 +17,39 @@
 </head>
 <body>
   <div class="contact-header glass glass-header glass-dark">
-        <a href="tel:7786553741">778-655-3741</a> |
-        <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
-    </div>
+     <a href="tel:+17786553741">778-655-3741</a>
+     <a href="mailto:sapport@carpetree.com">sapport@carpetree.com</a>
+   </div>
 
   <nav class="glass glass-header glass-dark">
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="philosophy.html">Philosophy</a>
-                <a href="services.html">Services</a>
-                <a href="root-knowledge.html">Root Knowledge</a>
-                <a href="lets-talk.html">Let's Talk Trees</a>
-            </div>
+    <div class="nav-container">
+      <button class="menu-toggle" aria-label="Toggle navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="quote.html">Let's Talk Trees</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="#" id="servicesParent" aria-expanded="false">Services</a>
+        <div class="submenu" id="servicesSubmenu" aria-hidden="true">
+          <a href="services.html"><strong>All Services</strong></a>
+          <a href="services/assessments.html">Risk Assessments</a>
+          <a href="services/pruning.html">Pruning</a>
+          <a href="services/soil-health.html">Soil & Root Health</a>
+          <a href="services/planting.html">Tree Planting</a>
+          <a href="services/wildfire-risk-management.html">Wildfire Risk</a>
+          <a href="services/emergency.html">Storm & Fire Damage</a>
+          <a href="services/removal.html">Tree Removal</a>
+          <a href="services/milling.html">Milling</a>
+          <a href="services/wildlife-snags.html">Wildlife Snags</a>
+          <a href="services/animal-rescue.html">Cat & Drone Rescue</a>
+          <a href="services/canopy-science.html">Canopy Science</a>
+          <a href="services/treehouse-installation.html">Treehouse & Walkways</a>
         </div>
-    </nav>
+        <a href="root-knowledge.html">Root Knowledge</a>
+      </div>
+    </div>
+  </nav>
 
     <section class="content">
         <h2>Our Philosophy</h2>

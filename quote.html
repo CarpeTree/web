@@ -10,68 +10,8 @@
   <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v3.24.0/uppy.min.css">
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
-    /* LIQUID GLASS THEME - Quote Form - Consistent with Homepage */
-    
-    /* Contact header - TOP BAR */
-    .contact-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1010;
-      backdrop-filter: saturate(1.2) blur(12px);
-      -webkit-backdrop-filter: saturate(1.2) blur(12px);
-      background: rgba(44, 95, 45, 0.92);
-      padding: 6px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .contact-header a {
-      color: white;
-      text-decoration: none;
-      padding: 5px 14px;
-      border: 1.5px solid rgba(255, 255, 255, 0.7);
-      border-radius: 50px;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      font-size: 0.8em;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .contact-header a:hover {
-      background: rgba(255, 255, 255, 0.95);
-      color: var(--deep-forest-green);
-      border-color: white;
-    }
-    
-    /* Navigation - BELOW contact header */
-    nav {
-      position: fixed;
-      top: 38px;
-      z-index: 1005;
-      padding: 8px 0;
-    }
-    
-    /* GLASS PILL NAV LINKS */
-    .nav-links a {
-      background: rgba(255, 255, 255, 0.1) !important;
-      color: white !important;
-      padding: 7px 14px !important;
-      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-      border-radius: 50px !important;
-      font-size: 0.78em !important;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    }
-    
-    .nav-links a:hover {
-      background: rgba(255, 255, 255, 0.95) !important;
-      color: var(--deep-forest-green) !important;
-      border-color: white !important;
-    }
+    /* Quote page styling.
+       Header/nav/menu styling is standardized in style.css for consistency. */
     .quote-wizard {
       max-width: 800px;
       margin: 95px auto 30px;
@@ -468,7 +408,22 @@
         <a href="index.html">Home</a>
         <a href="quote.html">Let's Talk Trees</a>
         <a href="philosophy.html">Philosophy</a>
-        <a href="services.html">Services</a>
+        <a href="#" id="servicesParent" aria-expanded="false">Services</a>
+        <div class="submenu" id="servicesSubmenu" aria-hidden="true">
+          <a href="services.html"><strong>All Services</strong></a>
+          <a href="services/assessments.html">Risk Assessments</a>
+          <a href="services/pruning.html">Pruning</a>
+          <a href="services/soil-health.html">Soil & Root Health</a>
+          <a href="services/planting.html">Tree Planting</a>
+          <a href="services/wildfire-risk-management.html">Wildfire Risk</a>
+          <a href="services/emergency.html">Storm & Fire Damage</a>
+          <a href="services/removal.html">Tree Removal</a>
+          <a href="services/milling.html">Milling</a>
+          <a href="services/wildlife-snags.html">Wildlife Snags</a>
+          <a href="services/animal-rescue.html">Cat & Drone Rescue</a>
+          <a href="services/canopy-science.html">Canopy Science</a>
+          <a href="services/treehouse-installation.html">Treehouse & Walkways</a>
+        </div>
         <a href="root-knowledge.html">Root Knowledge</a>
       </div>
     </div>
