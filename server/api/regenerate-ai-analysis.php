@@ -8,18 +8,25 @@ header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
 
-// Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
-function require_admin_key() {
+// HARD GUARD: prevent public traffic from burning credits
+function require_admin_key_or_disable(): void {
     $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
-    if (!$expected) return;
-    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$expected) {
+        http_response_code(503);
+        echo json_encode([
+            'success' => false,
+            'message' => 'AI regeneration disabled until ADMIN_API_KEY is configured on the server.'
+        ]);
+        exit();
+    }
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? null;
     if (!$provided || !hash_equals($expected, $provided)) {
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit();
     }
 }
-require_admin_key();
+require_admin_key_or_disable();
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

@@ -22,18 +22,32 @@ function persist_gemini_analysis($pdo, $quoteId, array $normalized): void {
 
 header('Content-Type: application/json');
 
-// Admin API key guard (optional; enforced if ADMIN_API_KEY is set)
-function require_admin_key() {
+// HARD GUARD: prevent public traffic from burning Gemini credits
+function require_admin_key_or_disable(): void {
     $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
-    if (!$expected) return;
-    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$expected) {
+        http_response_code(503);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Gemini analysis disabled until ADMIN_API_KEY is configured on the server.'
+        ]);
+        exit;
+    }
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? null;
     if (!$provided || !hash_equals($expected, $provided)) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Unauthorized']);
         exit;
     }
 }
-require_admin_key();
+require_admin_key_or_disable();
+
+// Only allow POST from browser; CLI is allowed for ops
+if (php_sapi_name() !== 'cli' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
 
 // Accept JSON bodies as well as form/query
 $raw = file_get_contents('php://input');
@@ -380,13 +394,17 @@ try {
         }
     }
     
+    $maxOut = (int) (getenv('GEMINI_MAX_OUTPUT_TOKENS') ?: ($_ENV['GEMINI_MAX_OUTPUT_TOKENS'] ?? 8192));
+    if ($maxOut <= 0) $maxOut = 8192;
+    $maxOut = min($maxOut, 32768); // hard cap to avoid runaway bills
+
     $request_body = [
         'contents' => [ [ 'parts' => $parts ] ],
         'generationConfig' => [ 
             'temperature' => 0.2,
             'topK' => 40, 
             'topP' => 0.9,
-            'maxOutputTokens' => 65536
+            'maxOutputTokens' => $maxOut
         ]
     ];
     

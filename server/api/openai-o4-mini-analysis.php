@@ -26,18 +26,32 @@ header('Content-Type: application/json');
 ignore_user_abort(true);
 set_time_limit(600);
 
-// Admin API key guard (optional; only enforced if ADMIN_API_KEY is set)
-function require_admin_key() {
+// HARD GUARD: prevent public traffic from burning credits
+function require_admin_key_or_disable(): void {
     $expected = getenv('ADMIN_API_KEY') ?: ($_ENV['ADMIN_API_KEY'] ?? null);
-    if (!$expected) return;
-    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? ($_GET['admin_key'] ?? $_POST['admin_key'] ?? null);
+    if (!$expected) {
+        http_response_code(503);
+        echo json_encode([
+            'success' => false,
+            'error' => 'AI analysis disabled until ADMIN_API_KEY is configured on the server.'
+        ]);
+        exit;
+    }
+    $provided = $_SERVER['HTTP_X_ADMIN_API_KEY'] ?? null;
     if (!$provided || !hash_equals($expected, $provided)) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Unauthorized']);
         exit;
     }
 }
-require_admin_key();
+require_admin_key_or_disable();
+
+// Only allow POST from browser; CLI is allowed for ops
+if (php_sapi_name() !== 'cli' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
 
 // Simple per-session/IP rate limit: 3 requests per 10 minutes
 if (php_sapi_name() !== 'cli') {
