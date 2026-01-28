@@ -668,6 +668,12 @@ try {
         'mode' => 'live'
     ]);
     
+    // Trigger media migration to static storage after successful analysis
+    if (file_exists(__DIR__ . '/../utils/media_migrator.php')) {
+        require_once __DIR__ . '/../utils/media_migrator.php';
+        trigger_post_ai_migration($pdo, (int)$quote_id);
+    }
+    
 } catch (Throwable $e) {
     error_log('Gemini analysis error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'error' => $e->getMessage(), 'mode' => ai_mode()]);

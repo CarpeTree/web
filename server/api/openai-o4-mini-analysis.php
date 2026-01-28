@@ -456,5 +456,11 @@ if (isset($analysis_data_to_store)) {
     } catch (Throwable $notifyError) {
         error_log('Admin notification after GPT-5.2 analysis failed: ' . $notifyError->getMessage());
     }
+    
+    // Trigger media migration to static storage after successful analysis
+    if (file_exists(__DIR__ . '/../utils/media_migrator.php')) {
+        require_once __DIR__ . '/../utils/media_migrator.php';
+        trigger_post_ai_migration($pdo, (int)$quote_id);
+    }
 }
 ?>
